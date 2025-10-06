@@ -1,0 +1,13 @@
+[project]
+name = "bApp"
+dynamic = ["version"]
+readme = "README.md"
+authors = [
+    {name = "Philip Becker", email = "yummytea1@gmail.com"},
+]
+requires-python = ">= 3.10"
+
+[dependency-groups]
+dev = [
+    "ruff"
+]

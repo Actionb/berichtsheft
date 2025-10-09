@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block main %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Jahr</th>
+            <th>Woche</th>
+            <th>Zeitraum</th>
+            <th>Betriebliche Tätigkeit</th>
+            <th>Berufsschule</th>
+            <th>Geschrieben</th>
+            <th>Eingereicht bei</th>
+            <th>Unterschrieben</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in object_list %}
+        <tr>
+            <td>{{ obj.jahr }}</td>
+            <td>{{ obj.ausbildungswoche }}</td>
+            <td>{{ obj.datum_start }} - {{ obj.datum_ende }}</td>
+            <td>{{ obj.betrieb|linebreaksbr|truncatewords:50 }}</td>
+            <td>{{ obj.schule|linebreaksbr|truncatewords:50 }}</td>
+            <td>{{ obj.fertig }}</td>
+            <td>{{ obj.eingereicht_bei }}</td>
+            <td>{{ obj.unterschrieben }}</td>
+            <td>
+                <a href="{% url 'nachweis_change' obj.pk %}" class="btn btn-sm btn-primary">Bearbeiten</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock main %}

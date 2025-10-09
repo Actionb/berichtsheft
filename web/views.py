@@ -1,5 +1,6 @@
 from django import forms
 
+from django.urls import reverse_lazy
 from django.views.generic import UpdateView, ListView
 
 from web.models import Nachweis
@@ -19,6 +20,7 @@ class NachweisEditView(BaseViewMixin, UpdateView):
     template_name = "nachweis_edit.html"
     fields = forms.ALL_FIELDS
     title = "Nachweis Bearbeiten"
+    success_url = reverse_lazy("nachweis_list")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -27,7 +27,10 @@
             <td>{{ obj.eingereicht_bei }}</td>
             <td>{{ obj.unterschrieben }}</td>
             <td>
-                <a href="{% url 'nachweis_change' obj.pk %}" class="btn btn-sm btn-primary">Bearbeiten</a>
+                <div class="d-flex justify-content-between gap-2">
+                    <a href="{% url 'nachweis_change' obj.pk %}" class="btn btn-sm btn-primary">Bearbeiten</a>
+                    <a href="{% url 'nachweis_print' obj.pk %}" class="btn btn-sm btn-primary">Drucken</a>
+                </div>
             </td>
         </tr>
         {% endfor %}

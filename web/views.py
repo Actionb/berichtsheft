@@ -1,7 +1,7 @@
 from django import forms
 
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, ListView
+from django.views.generic import UpdateView, ListView, DetailView
 
 from web.models import Nachweis
 
@@ -35,3 +35,8 @@ class NachweisListView(BaseViewMixin, ListView):
     model = Nachweis
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"
+
+
+class NachweisPrintView(BaseViewMixin, DetailView):
+    model = Nachweis
+    template_name = "print.html"

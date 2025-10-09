@@ -15,7 +15,7 @@
                 <div class="col border-end">
                     <div class="d-flex justify-content-between">
                         <span>Nummer</span>
-                        <span id="nachweis-nummer">{{ obj.nummer }}</span>
+                        <span id="nachweis-nummer">{{ object.nummer }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Name</span>
@@ -25,17 +25,17 @@
                 <div class="col">
                     <div class="d-flex justify-content-between">
                         <span>Ausbildungsjahr</span>
-                        <span id="nachweis-jahr">{{ obj.jahr }}</span>
+                        <span id="nachweis-jahr">{{ object.jahr }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Ausbildungswoche</span>
-                        <span id="nachweis-woche">{{ obj.ausbildungswoche }}</span>
+                        <span id="nachweis-woche">{{ object.ausbildungswoche }}</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>vom</span>
-                        <span id="nachweis-datum-start">{{ obj.datum_start }}</span>
+                        <span id="nachweis-datum-start">{{ object.datum_start }}</span>
                         <span>bis</span>
-                        <span id="nachweis-datum-ende">{{ obj.datum_ende }}</span>
+                        <span id="nachweis-datum-ende">{{ object.datum_ende }}</span>
                     </div>
                 </div>
             </div>
@@ -44,13 +44,13 @@
             <div class="p-3">
                 <h4>Betriebliche Tätigkeit</h4>
                 <div id="nachweis-betrieblich">
-                    {{ obj.betrieb }}
+                    {{ object.betrieb|linebreaks }}
                 </div>
             </div>
             <div class="p-3 border-top">
                 <h4>Berufsschule (Unterrichtsthemen)</h4>
                 <div id="nachweis-schule">
-                    {{ obj.schule }}
+                    {{ object.schule|linebreaks }}
                 </div>
             </div>
         </div>

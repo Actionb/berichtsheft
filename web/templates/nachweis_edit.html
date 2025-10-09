@@ -3,6 +3,7 @@
 
 {% block main %}
 <form method="post" id="change-form">
+    {% csrf_token %}
     {% bootstrap_form form %}
     {% bootstrap_button button_type="submit" content="Speichern" %}
 </form>

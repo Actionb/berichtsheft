@@ -46,17 +46,17 @@ class Nachweis(models.Model):
     ausbildungswoche = models.PositiveSmallIntegerField(
         verbose_name="Ausbildungswoche", blank=False, null=False, default=ausbildungswoche_default
     )
-    jahr = models.PositiveSmallIntegerField(verbose_name="Jahr", blank=False, null=False)
+    jahr = models.PositiveSmallIntegerField(verbose_name="Jahr", blank=False, null=False, default=jahr_default)
     kalenderwoche = models.PositiveSmallIntegerField(
         verbose_name="Kalenderwoche", blank=False, null=False, default=kalenderwoche_default
     )
     datum_start = models.DateField(verbose_name="Vom", blank=False, null=False, default=datum_start_default)
-    datum_end = models.DateField(verbose_name="Bis", blank=False, null=False, default=datum_end_default)
+    datum_ende = models.DateField(verbose_name="Bis", blank=False, null=False, default=datum_end_default)
     abteilung = models.ForeignKey("Abteilung", on_delete=models.PROTECT)
 
     fertig = models.BooleanField(verbose_name="Fertig geschrieben", default=False)
     # TODO: eingereicht_bei: ForeignKey -> Person?
-    eingereicht_bei = models.CharField(verbose_name="Eingereicht bei", max_length=100, blank=False)
+    eingereicht_bei = models.CharField(verbose_name="Eingereicht bei", max_length=100, blank=True)
     unterschrieben = models.BooleanField(verbose_name="Unterschrieben?", default=False)
 
     class Meta:

@@ -9,7 +9,7 @@ class NachweisAdmin(admin.ModelAdmin):
         "jahr",
         "ausbildungswoche",
         "datum_start",
-        "datum_end",
+        "datum_ende",
         "abteilung",
         "fertig",
         "eingereicht_bei",

@@ -1,7 +1,21 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
 
+{% block breadcrumbs %}
+<nav class="container" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'nachweis_list' %}" class="link-underline link-underline-opacity-0" title="Zurück zur Nachweis Übersicht">
+                <i class="bi bi-house"></i> Übersicht
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Nachweis {% if add %}erstellen{% else %}bearbeiten{% endif %}</li>
+    </ol>
+</nav>
+{% endblock breadcrumbs %}
+
 {% block main %}
+<h1 class="mt-4">Nachweis {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
 <form method="post" id="change-form">
     {% csrf_token %}
     {% bootstrap_form form %}

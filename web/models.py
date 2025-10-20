@@ -1,5 +1,6 @@
+from datetime import date, datetime
+
 from django.db import models
-from datetime import datetime, date
 
 
 def _get_current_year():

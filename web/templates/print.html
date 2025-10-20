@@ -33,9 +33,9 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>vom</span>
-                        <span id="nachweis-datum-start">{{ object.datum_start }}</span>
+                        <span id="nachweis-datum-start">{{ object.datum_start | date:"d.m.Y" }}</span>
                         <span>bis</span>
-                        <span id="nachweis-datum-ende">{{ object.datum_ende }}</span>
+                        <span id="nachweis-datum-ende">{{ object.datum_ende | date:"d.m.Y" }}</span>
                     </div>
                 </div>
             </div>

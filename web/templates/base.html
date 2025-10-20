@@ -21,7 +21,7 @@
     </header> 
     {% endblock header %}
     {% block breadcrumbs %}{% endblock breadcrumbs %}
-    <main class="container">
+    <main class="{% block mainclass %}container{% endblock mainclass %}">
         {% block main %}{% endblock main %}
     </main>
 </body>

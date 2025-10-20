@@ -28,6 +28,7 @@
 </nav>
 {% endblock breadcrumbs %}
 
+{% block mainclass %}container border rounded{% endblock mainclass %}
 {% block main %}
 <h1 class="mt-4">Nachweis {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
 <form method="post" id="change-form">

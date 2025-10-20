@@ -1,7 +1,6 @@
-from django import forms
-
+from django.forms.models import ALL_FIELDS
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, ListView, DetailView
+from django.views.generic import DetailView, ListView, UpdateView
 
 from web.models import Nachweis
 
@@ -18,7 +17,7 @@ class BaseViewMixin:
 class NachweisEditView(BaseViewMixin, UpdateView):
     model = Nachweis
     template_name = "nachweis_edit.html"
-    fields = forms.ALL_FIELDS
+    fields = ALL_FIELDS
     title = "Nachweis Bearbeiten"
     success_url = reverse_lazy("nachweis_list")
 

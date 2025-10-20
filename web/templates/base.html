@@ -12,11 +12,16 @@
     {% endblock extrahead %}
 </head>
 <body>
-    {% block header %}{% endblock header %}
+    {% block header %}
+    <header class="bg-light py-3 mb-4 border-bottom">
+        <div class="container">
+            <h1 class="fw-light">{% block header_title %}bApp{% endblock header_title %}</h1>
+        </div>
+    </header> 
+    {% endblock header %}
+    {% block breadcrumbs %}{% endblock breadcrumbs %}
     <main class="container">
-        {% block main %}
-
-        {% endblock main %}
+        {% block main %}{% endblock main %}
     </main>
 </body>
-</html
+</html>

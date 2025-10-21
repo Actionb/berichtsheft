@@ -69,6 +69,7 @@ class Nachweis(models.Model):
     class Meta:
         verbose_name = "Nachweis"
         verbose_name_plural = "Nachweise"
+        ordering = ["ausbildungswoche"]
 
     def __str__(self):
         return f"Nachweis #{self.nummer}"
@@ -83,3 +84,4 @@ class Abteilung(models.Model):
     class Meta:
         verbose_name = "Abteilung"
         verbose_name_plural = "Abteilungen"
+        ordering = ["name"]

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ form.media }}
+<style>
+    input.form-control[type="number"], input.form-control[type="date"], input.form-control[type="text"] {
+        max-width: 200px;
+    }
+</style>
+{% endblock extrahead %}
+
+{% block breadcrumbs %}
+<nav class="container" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'nachweis_list' %}" class="link-underline link-underline-opacity-0" title="Zurück zur Nachweis Übersicht">
+                <i class="bi bi-house"></i> Übersicht
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</li>
+    </ol>
+</nav>
+{% endblock breadcrumbs %}
+
+{% block mainclass %}container border rounded{% endblock mainclass %}
+{% block main %}
+<h1 class="mt-4">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
+{% block form %}
+<form method="post" id="change-form" class="mb-5">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+
+    {% if is_popup %}
+    <input type="hidden" name="{{ is_popup_var }}" value="1">
+    {% endif %}
+    {% block submit_row %}
+    <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle">
+        {% bootstrap_button button_type="submit" content="Speichern" extra_classes="my-2" %}
+    </div>
+    {% endblock submit_row %}
+</form>
+{% endblock form %}
+{% endblock main %}

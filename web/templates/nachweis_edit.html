@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_form.html" %}
 {% load django_bootstrap5 %}
 
 {% block extrahead %}
@@ -8,29 +8,10 @@
         /* Disable page margins when printing */
         margin: 0mm;
     }
-
-    input.form-control[type="number"], input.form-control[type="date"], input.form-control[type="text"] {
-        max-width: 200px;
-    }
 </style>
 {% endblock extrahead %}
 
-{% block breadcrumbs %}
-<nav class="container" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'nachweis_list' %}" class="link-underline link-underline-opacity-0" title="Zurück zur Nachweis Übersicht">
-                <i class="bi bi-house"></i> Übersicht
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">Nachweis {% if add %}erstellen{% else %}bearbeiten{% endif %}</li>
-    </ol>
-</nav>
-{% endblock breadcrumbs %}
-
-{% block mainclass %}container border rounded{% endblock mainclass %}
-{% block main %}
-<h1 class="mt-4">Nachweis {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
+{% block form %}
 <form method="post" id="change-form" class="mb-5">
     {% csrf_token %}
     <fieldset class="px-3">
@@ -76,8 +57,7 @@
             {% bootstrap_field form.betrieb required_css_class="fw-semibold" %} 
             {% bootstrap_field form.schule required_css_class="fw-semibold" %} 
     </fieldset>
-    <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle">
-        {% bootstrap_button button_type="submit" content="Speichern" extra_classes="my-2" %}
-    </div>
+    
+    {% block submit_row %}{{ block.super }}{% endblock submit_row %}
 </form>
-{% endblock main %}
+{% endblock form %}

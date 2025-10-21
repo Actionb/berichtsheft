@@ -29,15 +29,20 @@
 <h1 class="mt-4">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
 {% block form %}
 <form method="post" id="change-form" class="mb-5">
-    {% csrf_token %}
-    {% bootstrap_form form %}
+    {% block csrf_token %}{% csrf_token %}{% endblock csrf_token %}
+    
+    {% block form_fields %}
+        {% bootstrap_form form %}
+    {% endblock form_fields %}
 
     {% if is_popup %}
     <input type="hidden" name="{{ is_popup_var }}" value="1">
     {% endif %}
     {% block submit_row %}
     <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle">
-        {% bootstrap_button button_type="submit" content="Speichern" extra_classes="my-2" %}
+        {% block submit_row_buttons %}
+            {% bootstrap_button button_type="submit" content="Speichern" extra_classes="my-2" %}
+        {% endblock submit_row_buttons %}
     </div>
     {% endblock submit_row %}
 </form>

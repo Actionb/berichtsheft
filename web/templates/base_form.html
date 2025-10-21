@@ -39,9 +39,9 @@
     <input type="hidden" name="{{ is_popup_var }}" value="1">
     {% endif %}
     {% block submit_row %}
-    <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle">
+    <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle py-1">
         {% block submit_row_buttons %}
-            {% bootstrap_button button_type="submit" content="Speichern" extra_classes="my-2" %}
+            {% bootstrap_button button_type="submit" content="Speichern" %}
         {% endblock submit_row_buttons %}
     </div>
     {% endblock submit_row %}

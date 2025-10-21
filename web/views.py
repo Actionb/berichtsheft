@@ -1,5 +1,6 @@
 from django import forms
-from django.urls import reverse_lazy
+from django.shortcuts import render
+from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView, UpdateView
 from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
@@ -68,6 +69,9 @@ class NachweisEditView(EditView):
             },
         )
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(preview_url=reverse("print_preview"), **kwargs)
+
 
 class NachweisListView(BaseViewMixin, ListView):
     model = Nachweis
@@ -85,3 +89,12 @@ class AbteilungEditView(PopupResponseMixin, EditView):
     template_name = "base_form.html"
     fields = forms.ALL_FIELDS
     success_url = reverse_lazy("nachweis_list")
+
+
+def print_preview(request):
+    """Preview the print layout for a Nachweis object."""
+    form = forms.modelform_factory(Nachweis, fields=forms.ALL_FIELDS)(data=request.GET.dict())
+    # Validate the form. Without this step, form.instance will be missing data
+    # for some fields.
+    form.is_valid()
+    return render(request, "print.html", {"object": form.instance})

@@ -1,63 +1,58 @@
 {% extends "base_form.html" %}
-{% load django_bootstrap5 %}
+{% load static django_bootstrap5 %}
 
 {% block extrahead %}
 {{ block.super }}
-<style>
-    @page {
-        /* Disable page margins when printing */
-        margin: 0mm;
-    }
-</style>
+<script src="{% static 'web/js/preview.js' %}"></script>
 {% endblock extrahead %}
 
-{% block form %}
-<form method="post" id="change-form" class="mb-5">
-    {% csrf_token %}
-    <fieldset class="px-3">
-        {# <legend>Nachweis Informationen</legend> #}
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col">
-                    {% bootstrap_field form.jahr required_css_class="fw-semibold" %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.kalenderwoche required_css_class="fw-semibold" %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.ausbildungswoche required_css_class="fw-semibold" %}
-                </div>
+{% block form_fields %}
+<fieldset class="px-3">
+    {# <legend>Nachweis Informationen</legend> #}
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                {% bootstrap_field form.jahr required_css_class="fw-semibold" %}
             </div>
-            <div class="row align-items-center">
-                <div class="col">
-                    {% bootstrap_field form.datum_start required_css_class="fw-semibold" %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.datum_ende required_css_class="fw-semibold" %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.abteilung required_css_class="fw-semibold" %}
-                </div>
+            <div class="col">
+                {% bootstrap_field form.kalenderwoche required_css_class="fw-semibold" %}
             </div>
-            <div class="row align-items-center">
-                <div class="col">
-                    {% bootstrap_field form.fertig checkbox_style="switch" %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.eingereicht_bei %}
-                </div>
-                <div class="col">
-                    {% bootstrap_field form.unterschrieben checkbox_style="switch" %}
-                </div>
+            <div class="col">
+                {% bootstrap_field form.ausbildungswoche required_css_class="fw-semibold" %}
             </div>
         </div>
-    </fieldset>
-    <hr>
-    <fieldset class="px-3">
-            {% bootstrap_field form.betrieb required_css_class="fw-semibold" %} 
-            {% bootstrap_field form.schule required_css_class="fw-semibold" %} 
-    </fieldset>
-    
-    {% block submit_row %}{{ block.super }}{% endblock submit_row %}
-</form>
-{% endblock form %}
+        <div class="row align-items-center">
+            <div class="col">
+                {% bootstrap_field form.datum_start required_css_class="fw-semibold" %}
+            </div>
+            <div class="col">
+                {% bootstrap_field form.datum_ende required_css_class="fw-semibold" %}
+            </div>
+            <div class="col">
+                {% bootstrap_field form.abteilung required_css_class="fw-semibold" %}
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col">
+                {% bootstrap_field form.fertig checkbox_style="switch" %}
+            </div>
+            <div class="col">
+                {% bootstrap_field form.eingereicht_bei %}
+            </div>
+            <div class="col">
+                {% bootstrap_field form.unterschrieben checkbox_style="switch" %}
+            </div>
+        </div>
+    </div>
+</fieldset>
+<hr>
+<fieldset class="px-3">
+        {% bootstrap_field form.betrieb required_css_class="fw-semibold" %} 
+        {% bootstrap_field form.schule required_css_class="fw-semibold" %} 
+</fieldset>
+{% endblock form_fields %}
+
+{% block submit_row_buttons %}
+    {{ block.super }}
+    <button type="button" class="btn btn-success-outline" id="preview" data-preview-url="{{ preview_url }}" title="Vorschau der PDF-/Druckansicht">Vorschau</button>
+{% endblock submit_row_buttons %}

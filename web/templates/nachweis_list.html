@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<!-- <script src="{% static 'web/js/hover.js' %}"></script> -->
+{% endblock extrahead %}
 
 {% block main %}
 <table class="table table-striped">
@@ -21,8 +27,8 @@
             <td>{{ obj.jahr }}</td>
             <td>{{ obj.ausbildungswoche }}</td>
             <td>{{ obj.datum_start }} - {{ obj.datum_ende }}</td>
-            <td>{{ obj.betrieb|linebreaksbr|truncatewords:50 }}</td>
-            <td>{{ obj.schule|linebreaksbr|truncatewords:50 }}</td>
+            <td data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="left" data-bs-content="{{ obj.betrieb }}">{{ obj.betrieb|linebreaksbr|truncatewords:10 }}</td>
+            <td data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="right" data-bs-content="{{ obj.schule }}">{{ obj.schule|linebreaksbr|truncatewords:10 }}</td>
             <td class="text-center{% if obj.fertig %} table-success{% else %} table-danger{% endif %}">
                 {% if obj.fertig %}
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-success feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -49,3 +55,13 @@
     </tbody>
 </table>
 {% endblock main %}
+
+{% block extrascript %}
+<script>
+    /* Initialize Bootstrap popovers */
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+    return new bootstrap.Popover(popoverTriggerEl)
+    })
+</script>
+{% endblock extrascript %}

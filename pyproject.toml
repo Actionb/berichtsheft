@@ -57,3 +57,10 @@ known-first-party = ["dbentry"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "bapp.settings"
+
+[tool.coverage.run]
+omit = [
+    "web/migrations/*",
+    "bapp/*",
+    "manage.py",
+]

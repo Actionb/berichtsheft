@@ -9,7 +9,21 @@ requires-python = ">= 3.10"
 
 [dependency-groups]
 dev = [
-    "ruff"
+    {include-group = "lint"}, {include-group = "test"}, {include-group = "docs"}
+]
+lint = [
+    "ruff",
+]
+test = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "pytest-django",
+    "pytest-xdist",
+    "factory-boy",
+]
+docs = [
+    "mkdocs",
 ]
 
 [tool.ruff]

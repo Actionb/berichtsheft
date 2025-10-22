@@ -53,3 +53,6 @@ max-doc-length = 88
 
 [tool.lint.isort]
 known-first-party = ["dbentry"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "bapp.settings"

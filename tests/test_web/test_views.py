@@ -1,0 +1,134 @@
+from datetime import date
+from unittest import mock
+
+import pytest
+from django.http import HttpResponse
+from django.urls import path, reverse
+
+from tests.model_factory import NachweisFactory
+from web import models as _models
+from web import views as _views
+
+
+def dummy_view(*_args, **_kwargs):
+    return HttpResponse("test")  # pragma: no cover
+
+
+urlpatterns = [path("test/print_preview", dummy_view, name="print_preview")]
+
+pytestmark = pytest.mark.urls(__name__)
+
+
+class TestBaseViewMixin:
+    def test_get_context_data(self, mock_super_method):
+        """Assert that the title is added to the context data."""
+        view = _views.BaseViewMixin()
+        view.title = "foo"
+        with mock_super_method(_views.BaseViewMixin.get_context_data, {}):
+            context = view.get_context_data()
+            assert context["title"] == "foo"
+
+
+class TestModelViewMixin:
+    @pytest.fixture
+    def opts(self):
+        return mock.Mock()
+
+    @pytest.fixture
+    def model(self, opts):
+        return mock.Mock(_meta=opts)
+
+    @pytest.fixture
+    def view_class(self, model):
+        return type("DummyView", (_views.ModelViewMixin,), {"model": model})
+
+    def test_get_context_data(self, mock_super_method, view_class, opts):
+        """Assert that the model options are added to the context data."""
+        view = view_class()
+        with mock_super_method(view.get_context_data, {}):
+            context = view.get_context_data()
+            assert context["opts"] == opts
+
+
+class TestEditView:
+    @pytest.fixture
+    def view_class(self):
+        return type("DummyView", (_views.EditView,), {"model": _models.Nachweis})
+
+    @pytest.fixture
+    def add_view(self, view_class):
+        return view_class(extra_context={"add": True})
+
+    @pytest.fixture
+    def edit_view(self, view_class, obj):
+        return view_class(extra_context={"add": False}, kwargs={"pk": obj.pk})
+
+    @pytest.fixture
+    def obj(self):
+        return NachweisFactory()
+
+    def test_init_add(self, add_view):
+        """Assert that init sets the add flag and title correctly when adding."""
+        assert add_view.add
+        assert add_view.title == f"{_models.Nachweis._meta.verbose_name} erstellen"
+
+    @pytest.mark.django_db
+    def test_init_edit(self, edit_view):
+        """Assert that init sets the add flag and title correctly when editing."""
+        assert not edit_view.add
+        assert edit_view.title == f"{_models.Nachweis._meta.verbose_name} bearbeiten"
+
+    def test_get_object_add(self, add_view):
+        """Assert that get_object returns None when adding."""
+        assert add_view.get_object() is None
+
+    @pytest.mark.django_db
+    def test_get_object_edit(self, edit_view, obj):
+        """Assert that get_object returns the expected object when editing."""
+        assert edit_view.get_object() == obj
+
+    def test_init_title(self, view_class):
+        """Assert that init does not overwrite a title set on the view class."""
+        view_class.title = "foo"
+        view = view_class(extra_context={"add": True})
+        assert view.title == "foo"
+
+
+class TestNachweisEditView:
+    @pytest.fixture
+    def view(self):
+        return _views.NachweisEditView(extra_context={"add": True})
+
+    @pytest.fixture
+    def form_fields(self, view):
+        form_class = view.get_form_class()
+        return form_class().fields
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize("field_name", ["datum_start", "datum_ende"])
+    def test_get_form_class_date_widgets(self, field_name, form_fields):
+        """Assert that the date widgets use the correct type and format."""
+        assert form_fields[field_name].widget.input_type == "date"
+        assert form_fields[field_name].widget.format == "%Y-%m-%d"
+
+    def test_get_context_data_print_preview(self, view, mock_super_method):
+        """Assert that the context data contains the URL for the print preview."""
+        with mock_super_method(view.get_context_data, {}):
+            context = view.get_context_data()
+            assert context["preview_url"] == "/test/print_preview"
+
+
+@pytest.mark.django_db
+def test_print_preview_form_object(rf):
+    """Assert that print_preview is called with the expected Nachweis object."""
+    data = {"betrieb": "foo", "jahr": 2025, "datum_start": "2025-10-22", "fertig": False}
+    request = rf.get(reverse("print_preview"), query_params=data)
+    with mock.patch("web.views.render") as mock_render:
+        _views.print_preview(request)
+        mock_render.assert_called()
+        _, kwargs = mock_render.call_args
+        request_obj = kwargs["context"]["object"]
+        assert request_obj.betrieb == data["betrieb"]
+        assert request_obj.jahr == data["jahr"]
+        assert request_obj.datum_start == date.fromisoformat(data["datum_start"])
+        assert request_obj.fertig == data["fertig"]

@@ -10,7 +10,7 @@ from web.models import Abteilung, Nachweis
 
 
 class AutocompleteView(BaseAutocompleteView):
-    def has_add_permission(self, request):
+    def has_add_permission(self, request):  # pragma: no cover
         return True
 
 
@@ -31,7 +31,9 @@ class ModelViewMixin:
         super().__init__(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(opts=self.opts, **kwargs)
+        context = super().get_context_data(**kwargs)
+        context["opts"] = self.opts
+        return context
 
 
 class EditView(ModelViewMixin, BaseViewMixin, UpdateView):
@@ -70,7 +72,9 @@ class NachweisEditView(EditView):
         )
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(preview_url=reverse("print_preview"), **kwargs)
+        context = super().get_context_data(**kwargs)
+        context["preview_url"] = reverse("print_preview")
+        return context
 
 
 class NachweisListView(BaseViewMixin, ListView):
@@ -97,4 +101,4 @@ def print_preview(request):
     # Validate the form. Without this step, form.instance will be missing data
     # for some fields.
     form.is_valid()
-    return render(request, "print.html", {"object": form.instance})
+    return render(request, template_name="print.html", context={"object": form.instance})

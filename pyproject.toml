@@ -21,6 +21,7 @@ test = [
     "pytest-django",
     "pytest-xdist",
     "factory-boy",
+    "beautifulsoup4",
 ]
 docs = [
     "mkdocs",

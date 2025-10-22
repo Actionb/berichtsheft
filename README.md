@@ -56,3 +56,11 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
+
+### Tests
+
+Tests mit coverage ausführen:
+
+```shell
+pytest --cov --cov-branch --cov-report=html
+```

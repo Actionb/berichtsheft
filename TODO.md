@@ -13,3 +13,4 @@
 - [ ] add a legend on nachweis list that explains the colors of the rows
 - [ ] pagination on nachweis list page
 - [x] show bericht/schule text when hovering over the column
+- [ ] User Handling

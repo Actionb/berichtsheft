@@ -53,7 +53,7 @@ convention = "google"
 max-doc-length = 88
 
 [tool.lint.isort]
-known-first-party = ["dbentry"]
+known-first-party = ["web", "bapp"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "bapp.settings"

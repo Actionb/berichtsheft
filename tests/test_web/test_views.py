@@ -133,29 +133,31 @@ class TestNachweisEditView:
             assert context["preview_url"] == "/test/print_preview"
 
     @pytest.mark.django_db
-    @pytest.mark.usefixtures("login_user")
-    @pytest.mark.parametrize("user_perms", [None, "add"])
-    def test_add_permission_required(self, client, user, add_permission, user_perms):
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            (("add", _models.Nachweis._meta), 200),
+        ],
+    )
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_add_permission_required(self, client, expected_code):
         """Assert that certain permissions are required to access the add view."""
-        if user_perms:
-            user = add_permission(user, user_perms, _models.Nachweis._meta)
-            expected_code = 200
-        else:
-            expected_code = 403
-
         assert client.get(reverse("nachweis_add")).status_code == expected_code
 
     @pytest.mark.django_db
-    @pytest.mark.usefixtures("login_user")
-    @pytest.mark.parametrize("user_perms", [None, "change"])
-    def test_change_permission_required(self, client, user, add_permission, user_perms, obj):
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            (("change", _models.Nachweis._meta), 200),
+        ],
+    )
+    def test_change_permission_required(self, client, expected_code, obj):
         """Assert that certain permissions are required to access the change view."""
-        if user_perms:
-            user = add_permission(user, user_perms, _models.Nachweis._meta)
-            expected_code = 200
-        else:
-            expected_code = 403
-
+        # if user_perms:
+        #     user = add_permission(user, user_perms, _models.Nachweis._meta)
         assert client.get(reverse("nachweis_change", kwargs={"pk": obj.pk})).status_code == expected_code
 
 

@@ -53,7 +53,7 @@ def username():
 
 
 @pytest.fixture
-def user(django_user_model, username):
+def create_user(django_user_model, username):
     """Create a user for testing."""
     return django_user_model.objects.create(username=username)
 
@@ -65,8 +65,8 @@ def login_user(client, user):
 
 
 @pytest.fixture
-def add_permission(reload_user):
-    """Add a permission to the test user."""
+def add_permission():
+    """Add a permission to the given user."""
 
     def inner(user, action, opts, reload=True):
         perm, _ = Permission.objects.get_or_create(
@@ -75,17 +75,25 @@ def add_permission(reload_user):
         )
         user.user_permissions.add(perm)
         if reload:
-            return reload_user(user)
+            return user._meta.model.objects.get(pk=user.pk)
         return user
 
     return inner
 
 
 @pytest.fixture
-def reload_user(django_user_model):
-    """Reload user from database and return it. This resets the permission cache."""
+def set_user_perms(create_user, user_perms, add_permission):
+    """Set permissions of the test user."""
+    if user_perms is None:
+        return
+    try:
+        action, opts = user_perms
+        add_permission(create_user, action, opts)
+    except ValueError:
+        raise Exception("`user_perms` must be a 2-tuple (<action>, <model>)")
 
-    def inner(user):
-        return django_user_model.objects.get(pk=user.pk)
 
-    return inner
+@pytest.fixture
+def user(create_user):
+    """Fetch user from database and return it. This resets the permission cache."""
+    return create_user._meta.model.objects.get(pk=create_user.pk)

@@ -14,7 +14,17 @@ def dummy_view(*_args, **_kwargs):
     return HttpResponse("test")  # pragma: no cover
 
 
-urlpatterns = [path("test/print_preview", dummy_view, name="print_preview")]
+urlpatterns = [
+    path("test/print_preview", dummy_view, name="print_preview"),
+    path("nachweis/add/", _views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
+    path(
+        "nachweis/<path:pk>/change/",
+        _views.NachweisEditView.as_view(extra_context={"add": False}),
+        name="nachweis_change",
+    ),
+    path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
+    path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
+]
 
 pytestmark = pytest.mark.urls(__name__)
 
@@ -104,6 +114,11 @@ class TestNachweisEditView:
         form_class = view.get_form_class()
         return form_class().fields
 
+    @pytest.fixture
+    def obj(self):
+        # TODO: move into conftest.py
+        return NachweisFactory()
+
     @pytest.mark.django_db
     @pytest.mark.parametrize("field_name", ["datum_start", "datum_ende"])
     def test_get_form_class_date_widgets(self, field_name, form_fields):
@@ -116,6 +131,32 @@ class TestNachweisEditView:
         with mock_super_method(view.get_context_data, {}):
             context = view.get_context_data()
             assert context["preview_url"] == "/test/print_preview"
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user")
+    @pytest.mark.parametrize("user_perms", [None, "add"])
+    def test_add_permission_required(self, client, user, add_permission, user_perms):
+        """Assert that certain permissions are required to access the add view."""
+        if user_perms:
+            user = add_permission(user, user_perms, _models.Nachweis._meta)
+            expected_code = 200
+        else:
+            expected_code = 403
+
+        assert client.get(reverse("nachweis_add")).status_code == expected_code
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user")
+    @pytest.mark.parametrize("user_perms", [None, "change"])
+    def test_change_permission_required(self, client, user, add_permission, user_perms, obj):
+        """Assert that certain permissions are required to access the change view."""
+        if user_perms:
+            user = add_permission(user, user_perms, _models.Nachweis._meta)
+            expected_code = 200
+        else:
+            expected_code = 403
+
+        assert client.get(reverse("nachweis_change", kwargs={"pk": obj.pk})).status_code == expected_code
 
 
 @pytest.mark.django_db

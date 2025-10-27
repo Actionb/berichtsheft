@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, ListView, UpdateView
@@ -7,6 +8,7 @@ from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
 
 from web.models import Abteilung, Nachweis
+from web.utils import perms
 
 
 class AutocompleteView(BaseAutocompleteView):
@@ -36,7 +38,7 @@ class ModelViewMixin:
         return context
 
 
-class EditView(ModelViewMixin, BaseViewMixin, UpdateView):
+class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add = self.extra_context["add"]
@@ -46,6 +48,18 @@ class EditView(ModelViewMixin, BaseViewMixin, UpdateView):
     def get_object(self, queryset=None):
         if not self.add:
             return super().get_object(queryset)
+
+    def has_permission(self):
+        if self.add:
+            perm_func = perms.has_add_permission
+        else:
+            perm_func = perms.has_change_permission
+        return perm_func(self.request.user, self.opts)
+
+    def get_permission_required(self):
+        if self.add:
+            return [perms.get_perm(self.opts, "add")]
+        return [perms.get_perm(self.opts, "change")]
 
 
 class NachweisEditView(EditView):
@@ -77,15 +91,17 @@ class NachweisEditView(EditView):
         return context
 
 
-class NachweisListView(BaseViewMixin, ListView):
+class NachweisListView(BaseViewMixin, PermissionRequiredMixin, ListView):
     model = Nachweis
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"
+    permission_required = perms.get_perm("change", Nachweis._meta)
 
 
-class NachweisPrintView(BaseViewMixin, DetailView):
+class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
     model = Nachweis
     template_name = "print.html"
+    permission_required = perms.get_perm("change", Nachweis._meta)
 
 
 class AbteilungEditView(PopupResponseMixin, EditView):

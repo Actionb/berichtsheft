@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 TEST_APPS = [
     "tests",
+    "tests.test_utils",
 ]
 
 ALWAYS_INSTALLED_APPS = [

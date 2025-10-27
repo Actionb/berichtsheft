@@ -24,6 +24,11 @@ urlpatterns = [
     ),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
     path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
+    # Templates require these for rendering:
+    path("login/", dummy_view, name="login"),
+    path("logout/", dummy_view, name="logout"),
+    path("password_change/", dummy_view, name="password_change"),
+    path("password_change/done/", dummy_view, name="password_change_done"),
 ]
 
 pytestmark = pytest.mark.urls(__name__)

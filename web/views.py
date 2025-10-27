@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -118,3 +119,14 @@ def print_preview(request):
     # for some fields.
     form.is_valid()
     return render(request, template_name="print.html", context={"object": form.instance})
+
+
+################################################################################
+# AUTH
+################################################################################
+
+
+class LoginView(BaseViewMixin, auth_views.LoginView):
+    template_name = "auth/login.html"
+    success_url = next_page = reverse_lazy("nachweis_list")
+    title = "Anmelden"

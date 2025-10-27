@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n django_bootstrap5 %}
+
+{% block main %}
+<div style="max-width: 350px;" class="mx-auto">
+    <h1>{{ title }}</h1>
+    {% block form %}
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% bootstrap_button button_type="submit" content="Weiter" %}
+    </form>
+    {% endblock form %}
+</div>
+{% endblock main %}

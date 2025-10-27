@@ -14,3 +14,5 @@
 - [ ] pagination on nachweis list page
 - [x] show bericht/schule text when hovering over the column
 - [ ] User Handling
+- [ ] calculate Ausbildungswoche from start of employment
+- [ ] print.html: take name from user data (user is required to enter their full name)

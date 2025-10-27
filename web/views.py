@@ -13,8 +13,8 @@ from web.utils import perms
 
 
 class AutocompleteView(BaseAutocompleteView):
-    def has_add_permission(self, request):  # pragma: no cover
-        return True
+    def has_add_permission(self, request):
+        return perms.has_add_permission(request.user, self.model._meta)
 
 
 class BaseViewMixin:

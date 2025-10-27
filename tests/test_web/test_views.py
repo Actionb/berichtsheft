@@ -34,6 +34,28 @@ urlpatterns = [
 pytestmark = pytest.mark.urls(__name__)
 
 
+class TestAutocompleteView:
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected",
+        [
+            (None, False),
+            (("add", _models.Nachweis._meta), True),
+        ],
+    )
+    def test_has_add_permission(self, rf, user, expected):
+        """
+        Assert that has_add_permission requires the user to have the
+        appropriate 'add' permission.
+        """
+        view = _views.AutocompleteView()
+        view.model = _models.Nachweis
+        request = rf.get("/")
+        request.user = user
+        assert view.has_add_permission(request) == expected
+
+
 class TestBaseViewMixin:
     def test_get_context_data(self, mock_super_method):
         """Assert that the title is added to the context data."""

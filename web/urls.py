@@ -1,9 +1,15 @@
+from django.contrib.auth.views import logout_then_login
 from django.urls import path
 
 from web import views
 
 urlpatterns = [
+    # Auth
     path("login/", views.LoginView.as_view(), name="login"),
+    path("logout/", logout_then_login, name="logout"),
+    path("password_change/", views.PasswordChangeView.as_view(), name="password_change"),
+    path("password_change/done/", views.PasswordChangeDoneView.as_view(), name="password_change_done"),
+    # Model views
     path("nachweis/add/", views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
     path(
         "nachweis/<path:pk>/change/",
@@ -18,6 +24,8 @@ urlpatterns = [
         views.AbteilungEditView.as_view(extra_context={"add": False}),
         name="abteilung_change",
     ),
+    # Autocomplete
     path("abteilung_ac/", views.AutocompleteView.as_view(), name="abteilung_ac"),
+    # Other
     path("preview/", views.print_preview, name="print_preview"),
 ]

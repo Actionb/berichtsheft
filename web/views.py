@@ -130,3 +130,14 @@ class LoginView(BaseViewMixin, auth_views.LoginView):
     template_name = "auth/login.html"
     success_url = next_page = reverse_lazy("nachweis_list")
     title = "Anmelden"
+
+
+class PasswordChangeView(BaseViewMixin, auth_views.PasswordChangeView):
+    template_name = "auth/auth_form.html"
+    success_url = reverse_lazy("password_change_done")
+    title = "Passwort ändern"
+
+
+class PasswordChangeDoneView(BaseViewMixin, auth_views.PasswordChangeDoneView):
+    template_name = "auth/password_change_done.html"
+    title = "Passwort geändert"

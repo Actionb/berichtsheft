@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const btn = document.getElementById("preview");
     btn.addEventListener("click", function () {
-        const form = document.querySelector("form");
+        const form = document.querySelector("#change-form");
         const data = new FormData(form);
         data.delete("csrfmiddlewaretoken");
         const queryString = new URLSearchParams(data).toString();

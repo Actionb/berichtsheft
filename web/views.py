@@ -61,8 +61,8 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
 
     def get_permission_required(self):
         if self.add:
-            return [perms.get_perm(self.opts, "add")]
-        return [perms.get_perm(self.opts, "change")]
+            return [perms.get_perm("add", self.opts)]
+        return [perms.get_perm("change", self.opts)]
 
 
 class NachweisEditView(EditView):

@@ -85,7 +85,17 @@ def add_permission():
 
 @pytest.fixture
 def set_user_perms(create_user, user_perms, add_permission):
-    """Set permissions of the test user."""
+    """
+    Set permissions of the test user.
+
+    Fixture `user_perms` provides a 2-tuple of (<action>, <model>). Use test
+    method parametrization to define the 2-tuple:
+
+        @pytest.mark.parametrize("user_perms", [("add", _models.Nachweis._meta)])
+        @pytest.mark.usefixtures("user_perms", "set_user_perms")
+        def test():
+            ...
+    """
     if user_perms is None:
         return
     try:

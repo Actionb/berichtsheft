@@ -90,8 +90,12 @@ class TestModelViewMixin:
 
 class TestEditView:
     @pytest.fixture
-    def view_class(self):
-        return type("DummyView", (_views.EditView,), {"model": _models.Nachweis})
+    def model(self):
+        return _models.Nachweis
+
+    @pytest.fixture
+    def view_class(self, model):
+        return type("DummyView", (_views.EditView,), {"model": model})
 
     @pytest.fixture
     def add_view(self, view_class):
@@ -105,16 +109,16 @@ class TestEditView:
     def obj(self):
         return NachweisFactory()
 
-    def test_init_add(self, add_view):
+    def test_init_add(self, add_view, model):
         """Assert that init sets the add flag and title correctly when adding."""
         assert add_view.add
-        assert add_view.title == f"{_models.Nachweis._meta.verbose_name} erstellen"
+        assert add_view.title == f"{model._meta.verbose_name} erstellen"
 
     @pytest.mark.django_db
-    def test_init_edit(self, edit_view):
+    def test_init_edit(self, edit_view, model):
         """Assert that init sets the add flag and title correctly when editing."""
         assert not edit_view.add
-        assert edit_view.title == f"{_models.Nachweis._meta.verbose_name} bearbeiten"
+        assert edit_view.title == f"{model._meta.verbose_name} bearbeiten"
 
     def test_get_object_add(self, add_view):
         """Assert that get_object returns None when adding."""
@@ -130,6 +134,43 @@ class TestEditView:
         view_class.title = "foo"
         view = view_class(extra_context={"add": True})
         assert view.title == "foo"
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_value",
+        [
+            (None, False),
+            (("add", _models.Nachweis._meta), True),
+        ],
+    )
+    def test_has_permission_add(self, add_view, expected_value, user):
+        """Assert that has_permission checks for 'add' permission when adding."""
+        add_view.request = mock.Mock(user=user)
+        assert add_view.has_permission() == expected_value
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_value",
+        [
+            (None, False),
+            (("change", _models.Nachweis._meta), True),
+        ],
+    )
+    def test_has_permission_change(self, edit_view, expected_value, user):
+        """Assert that has_permission checks for 'change' permission when editing."""
+        edit_view.request = mock.Mock(user=user)
+        assert edit_view.has_permission() == expected_value
+
+    def test_get_permission_required_add(self, add_view, model):
+        """Assert that get_permission_required returns the expected permission."""
+        assert add_view.get_permission_required() == [f"{model._meta.app_label}.add_{model._meta.model_name}"]
+
+    @pytest.mark.django_db
+    def test_get_permission_required_change(self, edit_view, model):
+        """Assert that get_permission_required returns the expected permission."""
+        assert edit_view.get_permission_required() == [f"{model._meta.app_label}.change_{model._meta.model_name}"]
 
 
 class TestNachweisEditView:
@@ -184,8 +225,6 @@ class TestNachweisEditView:
     )
     def test_change_permission_required(self, client, expected_code, obj):
         """Assert that certain permissions are required to access the change view."""
-        # if user_perms:
-        #     user = add_permission(user, user_perms, _models.Nachweis._meta)
         assert client.get(reverse("nachweis_change", kwargs={"pk": obj.pk})).status_code == expected_code
 
 

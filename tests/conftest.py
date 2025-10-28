@@ -6,6 +6,8 @@ from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
+from web import models as _models
+
 ################################################################################
 # MOCKS
 ################################################################################
@@ -30,7 +32,7 @@ def mock_super_method():
     """
 
     @contextlib.contextmanager
-    def inner(func, ret):
+    def inner(func, ret=None):
         module = func.__module__
         attr = func.__qualname__.rsplit(".", 1)[-1]
         with mock.patch(f"{module}.super") as super_mock:
@@ -97,3 +99,31 @@ def set_user_perms(create_user, user_perms, add_permission):
 def user(create_user):
     """Fetch user from database and return it. This resets the permission cache."""
     return create_user._meta.model.objects.get(pk=create_user.pk)
+
+
+@pytest.fixture(params=[_models.Abteilung, _models.Nachweis])
+def nachweis_model(request):
+    """The set of models required to manage work reports (Nachweise)."""
+    return request.param
+
+
+@pytest.fixture(params=["add", "change", "view", "delete"])
+def nachweis_actions(request):
+    """The set of actions required to manage work reports (Nachweise)."""
+    return request.param
+
+
+@pytest.fixture
+def nachweis_permission(nachweis_model, nachweis_actions):
+    """
+    The set of permissions that a user requires to effectively manage work
+    reports (Nachweise).
+
+    For instance, this includes permissions for CRUD'ing Nachweis objects.
+
+    Usage:
+        def test_permissions(nachweis_permission, user):
+            assert user.has_perm(nachweis_permission)
+    """
+    opts = nachweis_model._meta
+    return f"{opts.app_label}.{get_permission_codename(nachweis_actions, opts)}"

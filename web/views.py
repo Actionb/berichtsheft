@@ -1,9 +1,11 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
@@ -141,3 +143,16 @@ class PasswordChangeView(BaseViewMixin, auth_views.PasswordChangeView):
 class PasswordChangeDoneView(BaseViewMixin, auth_views.PasswordChangeDoneView):
     template_name = "auth/password_change_done.html"
     title = "Passwort geändert"
+
+
+class SignUpView(BaseViewMixin, CreateView):
+    model = get_user_model()
+    template_name = "auth/auth_form.html"
+    success_url = reverse_lazy("login")
+    title = "Registrieren"
+    form_class = UserCreationForm
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        perms.add_user_permissions(self.object)
+        return response

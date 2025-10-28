@@ -29,6 +29,7 @@ urlpatterns = [
     path("logout/", dummy_view, name="logout"),
     path("password_change/", dummy_view, name="password_change"),
     path("password_change/done/", dummy_view, name="password_change_done"),
+    path("signup/", _views.SignUpView.as_view(), name="signup"),
 ]
 
 pytestmark = pytest.mark.urls(__name__)
@@ -202,3 +203,22 @@ def test_print_preview_form_object(rf):
         assert request_obj.jahr == data["jahr"]
         assert request_obj.datum_start == date.fromisoformat(data["datum_start"])
         assert request_obj.fertig == data["fertig"]
+
+
+class TestSignUpView:
+    @pytest.fixture
+    def sign_up_user(self):
+        """Use SignUpView to create a new user and return it."""
+        form_data = {"username": "alice", "password1": "foobarbaz", "password2": "foobarbaz"}
+        view = _views.SignUpView()
+        form = view.get_form_class()(data=form_data)
+        view.form_valid(form)
+        return view.object
+
+    @pytest.mark.django_db
+    def test_form_valid_sets_permissions(self, sign_up_user, nachweis_permission):
+        """
+        Assert that, after successfully signing up, the user has the necessary
+        permissions to work with the app.
+        """
+        assert sign_up_user.has_perm(nachweis_permission)

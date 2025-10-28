@@ -9,6 +9,7 @@ urlpatterns = [
     path("logout/", logout_then_login, name="logout"),
     path("password_change/", views.PasswordChangeView.as_view(), name="password_change"),
     path("password_change/done/", views.PasswordChangeDoneView.as_view(), name="password_change_done"),
+    path("signup/", views.SignUpView.as_view(), name="signup"),
     # Model views
     path("nachweis/add/", views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
     path(

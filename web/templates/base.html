@@ -27,7 +27,7 @@
                     {% if user.is_authenticated %}
                         <li><span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span></li>
                         <li><hr class="dropdown-divider"></li>
-                        {% if user.is_staff and admin_url %}<li><a class="dropdown-item" href="{{ admin_url }}">Admin Seite</a></li>{% endif %}
+                        {% if user.is_staff %}<li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a></li>{% endif %}
                         {% if user.has_usable_password %}<li><a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a></li>{% endif %}
                         <li><form id="logout-form" method="post" action="{% url 'logout' %}">
                             {% csrf_token %}

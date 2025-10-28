@@ -78,7 +78,7 @@ def add_permission():
         user.user_permissions.add(perm)
         if reload:
             return user._meta.model.objects.get(pk=user.pk)
-        return user
+        return user  # pragma: no cover
 
     return inner
 
@@ -103,7 +103,7 @@ def set_user_perms(create_user, user_perms, add_permission):
     try:
         for action, model in user_perms:
             add_permission(create_user, action, model._meta)
-    except ValueError:
+    except ValueError:  # pragma: no cover
         raise Exception("`user_perms` must be a list of 2-tuple (<action>, <model>)")
 
 

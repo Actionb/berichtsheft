@@ -42,7 +42,7 @@ class TestAutocompleteView:
         "user_perms, expected",
         [
             (None, False),
-            (("add", _models.Nachweis._meta), True),
+            ([("add", _models.Nachweis)], True),
         ],
     )
     def test_has_add_permission(self, rf, user, expected):
@@ -141,7 +141,7 @@ class TestEditView:
         "user_perms, expected_value",
         [
             (None, False),
-            (("add", _models.Nachweis._meta), True),
+            ([("add", _models.Nachweis)], True),
         ],
     )
     def test_has_permission_add(self, add_view, expected_value, user):
@@ -155,7 +155,7 @@ class TestEditView:
         "user_perms, expected_value",
         [
             (None, False),
-            (("change", _models.Nachweis._meta), True),
+            ([("change", _models.Nachweis)], True),
         ],
     )
     def test_has_permission_change(self, edit_view, expected_value, user):
@@ -206,7 +206,7 @@ class TestNachweisEditView:
         "user_perms, expected_code",
         [
             (None, 403),  # expect 403 if no permissions
-            (("add", _models.Nachweis._meta), 200),
+            ([("add", _models.Nachweis)], 200),
         ],
     )
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
@@ -220,7 +220,7 @@ class TestNachweisEditView:
         "user_perms, expected_code",
         [
             (None, 403),  # expect 403 if no permissions
-            (("change", _models.Nachweis._meta), 200),
+            ([("change", _models.Nachweis)], 200),
         ],
     )
     def test_change_permission_required(self, client, expected_code, obj):

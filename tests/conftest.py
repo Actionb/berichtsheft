@@ -91,18 +91,20 @@ def set_user_perms(create_user, user_perms, add_permission):
     Fixture `user_perms` provides a 2-tuple of (<action>, <model>). Use test
     method parametrization to define the 2-tuple:
 
-        @pytest.mark.parametrize("user_perms", [("add", _models.Nachweis._meta)])
+        @pytest.mark.parametrize("user_perms", [("add", _models.Nachweis)])
         @pytest.mark.usefixtures("user_perms", "set_user_perms")
         def test():
             ...
+
+    Set `user_perms` to None to forgo adding permissions.
     """
     if user_perms is None:
         return
     try:
-        action, opts = user_perms
-        add_permission(create_user, action, opts)
+        for action, model in user_perms:
+            add_permission(create_user, action, model._meta)
     except ValueError:
-        raise Exception("`user_perms` must be a 2-tuple (<action>, <model>)")
+        raise Exception("`user_perms` must be a list of 2-tuple (<action>, <model>)")
 
 
 @pytest.fixture

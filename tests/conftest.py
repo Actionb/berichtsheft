@@ -113,7 +113,7 @@ def user(create_user):
     return create_user._meta.model.objects.get(pk=create_user.pk)
 
 
-@pytest.fixture(params=[_models.Abteilung, _models.Nachweis])
+@pytest.fixture(params=[_models.Nachweis])
 def nachweis_model(request):
     """The set of models required to manage work reports (Nachweise)."""
     return request.param

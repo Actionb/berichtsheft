@@ -125,3 +125,12 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
+
+# The name of the group with the permissions for Azubis
+AZUBI_GROUP_NAME = "Azubi"
+
+# A mapping of model names to the actions that an Azubi should be permitted to
+# perform on that model.
+AZUBI_PERMISSIONS = {
+    "Nachweis": ["add", "change", "delete", "view"],
+}

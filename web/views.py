@@ -154,5 +154,5 @@ class SignUpView(BaseViewMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        perms.add_user_permissions(self.object)
+        perms.add_azubi_permissions(self.object)
         return response

@@ -1,7 +1,7 @@
 import pytest
 
 from tests.test_utils.models import TestModel
-from web.utils.perms import add_user_permissions, has_add_permission, has_change_permission, has_delete_permission
+from web.utils.perms import add_azubi_permissions, has_add_permission, has_change_permission, has_delete_permission
 
 
 @pytest.fixture
@@ -30,11 +30,11 @@ def test_has_delete_permission(user, opts, add_permission):
 @pytest.fixture
 def user_with_permissions(create_user):
     """Create a user with the default permissions."""
-    add_user_permissions(create_user)
+    add_azubi_permissions(create_user)
     return create_user
 
 
 @pytest.mark.django_db
-def test_add_user_permissions(user_with_permissions, nachweis_permission):
-    """Assert that add_user_permissions adds the expected permissions."""
+def test_add_azubi_permissions(user_with_permissions, nachweis_permission):
+    """Assert that add_azubi_permissions adds the expected permissions."""
     assert user_with_permissions.has_perm(nachweis_permission)

@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -10,6 +9,7 @@ from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
 
+from web.forms import UserCreationForm
 from web.models import Abteilung, Nachweis
 from web.utils import perms
 

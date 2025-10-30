@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
 from web import models as _models
 
@@ -21,3 +22,6 @@ class NachweisAdmin(admin.ModelAdmin):
 @admin.register(_models.Abteilung)
 class AbteilungAdmin(admin.ModelAdmin):
     search_fields = ["name"]
+
+
+admin.site.register(_models.User, UserAdmin)

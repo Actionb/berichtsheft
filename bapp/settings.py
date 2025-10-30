@@ -134,3 +134,5 @@ AZUBI_GROUP_NAME = "Azubi"
 AZUBI_PERMISSIONS = {
     "Nachweis": ["add", "change", "delete", "view"],
 }
+
+AUTH_USER_MODEL = "web.User"

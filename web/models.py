@@ -1,6 +1,15 @@
 from datetime import date, datetime
 
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+
+class User(AbstractUser):
+    """
+    User model for the application.
+
+    (In case we need to add custom fields or methods in the future)
+    """
 
 
 def _get_current_year():

@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import ModelFormMixin
+from django.views.generic.list import MultipleObjectMixin
 from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
@@ -43,11 +45,28 @@ class ModelViewMixin:
         return context
 
 
-class FilterUserMixin:
-    """A mixin for a model view that only includes objects of the current user."""
+class FilterUserMixin(MultipleObjectMixin):
+    """A mixin for a list view that only includes objects of the current user."""
+
+    _user_attr = "user"
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(**{self._user_attr: self.request.user})
+
+
+class SaveUserMixin(ModelFormMixin):
+    """
+    A mixin for an object view that sets a user attribute on the object before
+    saving.
+    """
+
+    _user_attr = "user"
+
+    def form_valid(self, form):
+        # Add the current user to the form's instance which then becomes the
+        # view's object when super().form_valid is called.
+        setattr(form.instance, self._user_attr, self.request.user)
+        return super().form_valid(form)
 
 
 class RequireUserMixin(SingleObjectMixin):
@@ -89,7 +108,7 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
         return [perms.get_perm("change", self.opts)]
 
 
-class NachweisEditView(RequireUserMixin, EditView):
+class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
     model = Nachweis
     template_name = "nachweis_edit.html"
     fields = forms.ALL_FIELDS

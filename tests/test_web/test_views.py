@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from django.core.exceptions import PermissionDenied
+from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.urls import path, reverse
 
@@ -288,6 +289,19 @@ class TestNachweisEditView:
         nachweis = NachweisFactory(user=user)
         client.force_login(superuser)
         assert client.get(reverse("nachweis_change", kwargs={"pk": nachweis.pk})).status_code == 403
+
+    def test_view_object_saved_with_user(self, client, superuser):
+        """Assert that the view's object is saved with the current user."""
+        # Generate accurate form data from a temp object.
+        # Need a saved object otherwise the subfactories aren't run and no
+        # related objects are created:
+        obj = NachweisFactory()
+        data = model_to_dict(obj, exclude=["user_id", "id"])
+        obj.delete()  # delete the object again to have an empty table
+        client.force_login(superuser)
+        response = client.post(reverse("nachweis_add"), data=data, follow=True)
+        assert response.status_code == 200
+        assert _models.Nachweis.objects.get().user == superuser
 
 
 @pytest.mark.django_db

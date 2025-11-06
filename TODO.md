@@ -7,14 +7,21 @@
 - [ ] Druckansicht: besser mit Seitenumbrüchen umgehen. Z.B. die Überschrift des angebrochenen Abschnitts wiederholen
 - [x] `border` dunkler und deutlicher machen
 - [x] Zwischen Berufsschulthemen und Unterschriften ein wenig Platz einbauen?
-- [ ] Users
+- [x] Users
 - [ ] Von Druckansicht zurück zu Übersicht oder Änderungsseite wechseln (Links mit JS implementieren "hovern" lassen <- dürfen nicht in HTML auftauchen wegen Druck>)
 - [ ] Add a way to delete an Abteilung object (maybe from the edit popup page?)
 - [ ] add a legend on nachweis list that explains the colors of the rows
 - [ ] pagination on nachweis list page
 - [x] show bericht/schule text when hovering over the column
-- [ ] User Handling
+- [x] User Handling
 - [ ] calculate Ausbildungswoche from start of employment
 - [ ] print.html: take name from user data (user is required to enter their full name)
 - [ ] sign up form does not make it clear why it is invalid
 - [ ] miz-tomselect requires German text
+- [ ] FIXME: preview shows wrong "Nummer" - doesnt take nummer from the model object (because preview is generated from the pure form data on a new model instance!)
+- [ ] derive 'Kalenderwoche' from start date field
+- [ ] add Nummer field to edit form
+- [ ] Sign Up Form: require first name and surname
+- [ ] Allow users to edit their names (and other configs)
+- [ ] Add a custom error message to display when trying to access another user's objects
+- [ ] model defaults should use `Nachweis.objects.filter(user=request.user)`

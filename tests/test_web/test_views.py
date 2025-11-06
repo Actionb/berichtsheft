@@ -2,6 +2,7 @@ from datetime import date
 from unittest import mock
 
 import pytest
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import path, reverse
 
@@ -88,6 +89,52 @@ class TestModelViewMixin:
             assert context["opts"] == opts
 
 
+class TestFilterUserMixin:
+    @pytest.fixture
+    def view_class(self):
+        return type("DummyView", (_views.FilterUserMixin,), {"model": _models.Nachweis})
+
+    def test_get_queryset(self, mock_super_method, view_class, user):
+        """Assert that get_queryset filters by the current user."""
+        user_obj = NachweisFactory(user=user)
+        not_user_obj = NachweisFactory()
+        view = view_class()
+        view.request = mock.Mock(user=user)
+        with mock_super_method(view.get_queryset, _models.Nachweis.objects.all()):
+            queryset = view.get_queryset()
+            assert user_obj in queryset
+            assert not_user_obj not in queryset
+
+
+class TestRequireUserMixin:
+    @pytest.fixture
+    def view_class(self):
+        return type("DummyView", (_views.RequireUserMixin,), {"model": _models.Nachweis})
+
+    def test_get_object_raises_permission_denied(self, mock_super_method, user, superuser, view_class):
+        """
+        Assert that get_object raises PermissionDenied if the current user is
+        not the owner of the object.
+        """
+        obj = NachweisFactory(user=superuser)
+        view = view_class()
+        view.request = mock.Mock(user=user)
+        with mock_super_method(view.get_object, obj):
+            with pytest.raises(PermissionDenied):
+                view.get_object()
+
+    def test_get_object_returns_user_object(self, mock_super_method, user, view_class):
+        """
+        Assert that get_object returns the object if the current user is the
+        owner of the object.
+        """
+        obj = NachweisFactory(user=user)
+        view = view_class()
+        view.request = mock.Mock(user=user)
+        with mock_super_method(view.get_object, obj):
+            assert view.get_object() == obj
+
+
 class TestEditView:
     @pytest.fixture
     def model(self):
@@ -106,8 +153,8 @@ class TestEditView:
         return view_class(extra_context={"add": False}, kwargs={"pk": obj.pk})
 
     @pytest.fixture
-    def obj(self):
-        return NachweisFactory()
+    def obj(self, user):
+        return NachweisFactory(user=user)
 
     def test_init_add(self, add_view, model):
         """Assert that init sets the add flag and title correctly when adding."""
@@ -125,8 +172,10 @@ class TestEditView:
         assert add_view.get_object() is None
 
     @pytest.mark.django_db
-    def test_get_object_edit(self, edit_view, obj):
+    def test_get_object_edit(self, rf, user, edit_view, obj):
         """Assert that get_object returns the expected object when editing."""
+        edit_view.request = rf.get("/")
+        edit_view.request.user = user
         assert edit_view.get_object() == obj
 
     def test_init_title(self, view_class):
@@ -175,18 +224,18 @@ class TestEditView:
 
 class TestNachweisEditView:
     @pytest.fixture
-    def view(self):
+    def add_view(self):
         return _views.NachweisEditView(extra_context={"add": True})
 
     @pytest.fixture
-    def form_fields(self, view):
-        form_class = view.get_form_class()
+    def form_fields(self, add_view):
+        form_class = add_view.get_form_class()
         return form_class().fields
 
     @pytest.fixture
-    def obj(self):
+    def obj(self, user):
         # TODO: move into conftest.py
-        return NachweisFactory()
+        return NachweisFactory(user=user)
 
     @pytest.mark.django_db
     @pytest.mark.parametrize("field_name", ["datum_start", "datum_ende"])
@@ -195,10 +244,10 @@ class TestNachweisEditView:
         assert form_fields[field_name].widget.input_type == "date"
         assert form_fields[field_name].widget.format == "%Y-%m-%d"
 
-    def test_get_context_data_print_preview(self, view, mock_super_method):
+    def test_get_context_data_print_preview(self, add_view, mock_super_method):
         """Assert that the context data contains the URL for the print preview."""
-        with mock_super_method(view.get_context_data, {}):
-            context = view.get_context_data()
+        with mock_super_method(add_view.get_context_data, {}):
+            context = add_view.get_context_data()
             assert context["preview_url"] == "/test/print_preview"
 
     @pytest.mark.django_db
@@ -226,6 +275,19 @@ class TestNachweisEditView:
     def test_change_permission_required(self, client, expected_code, obj):
         """Assert that certain permissions are required to access the change view."""
         assert client.get(reverse("nachweis_change", kwargs={"pk": obj.pk})).status_code == expected_code
+
+    @pytest.mark.django_db
+    def test_can_edit_own_nachweise(self, client, superuser):
+        """Assert that a user can edit their own Nachweise."""
+        nachweis = NachweisFactory(user=superuser)
+        client.force_login(superuser)
+        assert client.get(reverse("nachweis_change", kwargs={"pk": nachweis.pk})).status_code == 200
+
+    def test_can_not_edit_other_users_nachweise(self, client, superuser, user):
+        """Assert that a user can not edit Nachweise that do not belong to them."""
+        nachweis = NachweisFactory(user=user)
+        client.force_login(superuser)
+        assert client.get(reverse("nachweis_change", kwargs={"pk": nachweis.pk})).status_code == 403
 
 
 @pytest.mark.django_db
@@ -277,3 +339,14 @@ class TestNachweisListView:
         """Assert that certain permissions are required to access the list view."""
         assert client.get(reverse("nachweis_list")).status_code == expected_code
 
+    @pytest.mark.django_db
+    def test_only_lists_user_nachweise(self, rf, user, superuser):
+        """Assert that only Nachweis objects belonging to the user are listed."""
+        nachweis_1 = NachweisFactory(user=superuser)
+        nachweis_2 = NachweisFactory(user=user)  # belongs to a different user
+        view = _views.NachweisListView()
+        view.request = rf.get(reverse("nachweis_list"))
+        view.request.user = superuser
+        queryset = view.get_queryset()
+        assert nachweis_1 in queryset
+        assert nachweis_2 not in queryset

@@ -2,9 +2,11 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic.detail import SingleObjectMixin
 from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
@@ -41,6 +43,28 @@ class ModelViewMixin:
         return context
 
 
+class FilterUserMixin:
+    """A mixin for a model view that only includes objects of the current user."""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+
+class RequireUserMixin(SingleObjectMixin):
+    """
+    A mixin for an object view that raises PermissionDenied if the current user
+    is not the owner of the object.
+    """
+
+    _user_attr = "user"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj and getattr(obj, self._user_attr) != self.request.user:
+            raise PermissionDenied
+        return obj
+
+
 class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,7 +89,7 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
         return [perms.get_perm("change", self.opts)]
 
 
-class NachweisEditView(EditView):
+class NachweisEditView(RequireUserMixin, EditView):
     model = Nachweis
     template_name = "nachweis_edit.html"
     fields = forms.ALL_FIELDS
@@ -94,7 +118,7 @@ class NachweisEditView(EditView):
         return context
 
 
-class NachweisListView(BaseViewMixin, PermissionRequiredMixin, ListView):
+class NachweisListView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):
     model = Nachweis
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"

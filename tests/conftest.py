@@ -108,9 +108,25 @@ def set_user_perms(create_user, user_perms, add_permission):
 
 
 @pytest.fixture
-def user(create_user):
-    """Fetch user from database and return it. This resets the permission cache."""
-    return create_user._meta.model.objects.get(pk=create_user.pk)
+def user(create_user, reload_user):
+    """Return the test user. Reload from the database to reset permission cache."""
+    return reload_user(create_user)
+
+
+@pytest.fixture
+def superuser(django_user_model):
+    """Create a superuser."""
+    return django_user_model.objects.create(username="admin", is_superuser=True)
+
+
+@pytest.fixture
+def reload_user(django_user_model):
+    """Re-fetch the given user from the database to reset the permission cache."""
+
+    def inner(user):
+        return django_user_model.objects.get(pk=user.pk)
+
+    return inner
 
 
 @pytest.fixture(params=[_models.Nachweis])

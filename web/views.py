@@ -98,7 +98,7 @@ class NachweisListView(BaseViewMixin, PermissionRequiredMixin, ListView):
     model = Nachweis
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"
-    permission_required = perms.get_perm("change", Nachweis._meta)
+    permission_required = perms.get_perm("view", Nachweis._meta)
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):

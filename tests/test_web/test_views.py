@@ -261,3 +261,19 @@ class TestSignUpView:
         permissions to work with the app.
         """
         assert sign_up_user.has_perm(nachweis_permission)
+
+
+class TestNachweisListView:
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            ([("view", _models.Nachweis)], 200),
+        ],
+    )
+    def test_view_permission_required(self, client, expected_code):
+        """Assert that certain permissions are required to access the list view."""
+        assert client.get(reverse("nachweis_list")).status_code == expected_code
+

@@ -61,12 +61,6 @@ def create_user(django_user_model, username):
 
 
 @pytest.fixture
-def login_user(client, user):
-    """Login the test user."""
-    client.force_login(user)
-
-
-@pytest.fixture
 def add_permission():
     """Add a permission to the given user."""
 
@@ -117,6 +111,18 @@ def user(create_user, reload_user):
 def superuser(django_user_model):
     """Create a superuser."""
     return django_user_model.objects.create(username="admin", is_superuser=True)
+
+
+@pytest.fixture
+def login_user(client, user):
+    """Login the test user."""
+    client.force_login(user)
+
+
+@pytest.fixture
+def login_superuser(client, superuser):
+    """Login the test superuser."""
+    client.force_login(superuser)
 
 
 @pytest.fixture

@@ -3,11 +3,10 @@ from unittest import mock
 
 import pytest
 from django.core.exceptions import PermissionDenied
-from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.urls import path, reverse
 
-from tests.model_factory import NachweisFactory
+from tests.model_factory import AbteilungFactory, NachweisFactory
 from web import models as _models
 from web import views as _views
 
@@ -229,14 +228,82 @@ class TestNachweisEditView:
         return _views.NachweisEditView(extra_context={"add": True})
 
     @pytest.fixture
+    def edit_view(self, obj):
+        return _views.NachweisEditView(extra_context={"add": False}, kwargs={"pk": obj.pk})
+
+    @pytest.fixture
+    def add_url(self):
+        def inner():
+            return reverse("nachweis_add")
+
+        return inner
+
+    @pytest.fixture
+    def edit_url(self):
+        def inner(obj):
+            return reverse("nachweis_change", kwargs={"pk": obj.pk})
+
+        return inner
+
+    @pytest.fixture
+    def form_data(self, superuser):
+        abteilung = AbteilungFactory()
+        return {
+            "betrieb": "Testbetrieb",
+            "schule": "Testschule",
+            "nummer": 42,
+            "ausbildungswoche": 1,
+            "jahr": 2023,
+            "kalenderwoche": 32,
+            "datum_start": "2023-01-01",
+            "datum_ende": "2023-12-31",
+            "abteilung": abteilung.pk,
+            "user": superuser.pk,
+        }
+
+    @pytest.fixture
     def form_fields(self, add_view):
         form_class = add_view.get_form_class()
         return form_class().fields
 
+    @pytest.mark.django_db
     @pytest.fixture
     def obj(self, user):
         # TODO: move into conftest.py
         return NachweisFactory(user=user)
+
+    @pytest.mark.usefixtures("login_superuser")
+    def test_add_get(self, client, add_url):
+        """Assert that the superuser can request the page with the add form."""
+        response = client.get(add_url())
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("login_superuser")
+    def test_add_post(self, client, add_url, form_data):
+        """Assert that the superuser can create a new Nachweis with the add form."""
+        assert not _models.Nachweis.objects.exists()
+        response = client.post(add_url(), data=form_data, follow=True)
+        assert response.status_code == 200
+        assert _models.Nachweis.objects.filter(betrieb=form_data["betrieb"]).exists()
+
+    @pytest.mark.usefixtures("login_superuser")
+    def test_edit_get(self, client, edit_url, superuser):
+        """Assert that the superuser can request the page with the edit form."""
+        obj = NachweisFactory(user=superuser)
+        response = client.get(edit_url(obj))
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("login_superuser")
+    def test_edit_post(self, client, edit_url, form_data, superuser):
+        """
+        Assert that the superuser can edit an existing Nachweis with the edit
+        form.
+        """
+        obj = NachweisFactory(user=superuser)
+        response = client.post(edit_url(obj), data=form_data, follow=True)
+        assert response.status_code == 200
+        obj.refresh_from_db()
+        assert obj.betrieb == form_data["betrieb"]
 
     @pytest.mark.django_db
     @pytest.mark.parametrize("field_name", ["datum_start", "datum_ende"])
@@ -260,9 +327,9 @@ class TestNachweisEditView:
         ],
     )
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
-    def test_add_permission_required(self, client, expected_code):
+    def test_add_permission_required(self, client, expected_code, add_url):
         """Assert that certain permissions are required to access the add view."""
-        assert client.get(reverse("nachweis_add")).status_code == expected_code
+        assert client.get(add_url()).status_code == expected_code
 
     @pytest.mark.django_db
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
@@ -273,33 +340,20 @@ class TestNachweisEditView:
             ([("change", _models.Nachweis)], 200),
         ],
     )
-    def test_change_permission_required(self, client, expected_code, obj):
+    def test_change_permission_required(self, client, expected_code, obj, edit_url):
         """Assert that certain permissions are required to access the change view."""
-        assert client.get(reverse("nachweis_change", kwargs={"pk": obj.pk})).status_code == expected_code
+        assert client.get(edit_url(obj)).status_code == expected_code
 
-    @pytest.mark.django_db
-    def test_can_edit_own_nachweise(self, client, superuser):
-        """Assert that a user can edit their own Nachweise."""
-        nachweis = NachweisFactory(user=superuser)
-        client.force_login(superuser)
-        assert client.get(reverse("nachweis_change", kwargs={"pk": nachweis.pk})).status_code == 200
-
-    def test_can_not_edit_other_users_nachweise(self, client, superuser, user):
+    def test_can_not_edit_other_users_nachweise(self, client, superuser, edit_url, obj):
         """Assert that a user can not edit Nachweise that do not belong to them."""
-        nachweis = NachweisFactory(user=user)
         client.force_login(superuser)
-        assert client.get(reverse("nachweis_change", kwargs={"pk": nachweis.pk})).status_code == 403
+        assert client.get(edit_url(obj)).status_code == 403
 
-    def test_view_object_saved_with_user(self, client, superuser):
+    @pytest.mark.usefixtures("login_superuser")
+    def test_view_object_saved_with_user(self, client, superuser, form_data, add_url):
         """Assert that the view's object is saved with the current user."""
-        # Generate accurate form data from a temp object.
-        # Need a saved object otherwise the subfactories aren't run and no
-        # related objects are created:
-        obj = NachweisFactory()
-        data = model_to_dict(obj, exclude=["user_id", "id"])
-        obj.delete()  # delete the object again to have an empty table
-        client.force_login(superuser)
-        response = client.post(reverse("nachweis_add"), data=data, follow=True)
+        del form_data["user"]
+        response = client.post(add_url(), data=form_data, follow=True)
         assert response.status_code == 200
         assert _models.Nachweis.objects.get().user == superuser
 

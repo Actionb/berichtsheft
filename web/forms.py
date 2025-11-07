@@ -10,7 +10,7 @@ class UserCreationForm(BaseUserCreationForm):
 
     class Meta(BaseUserCreationForm.Meta):
         model = get_user_model()
-        fields = BaseUserCreationForm.Meta.fields + ("start_date",)
+        fields = ["username", "first_name", "last_name", "start_date", "password1", "password2"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -22,3 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("bapp/", include("web.urls")),
 ]
+
+handler403 = "web.views.handler403"

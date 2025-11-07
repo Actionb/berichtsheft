@@ -85,7 +85,9 @@ class RequireUserMixin(SingleObjectMixin):
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
         if obj and getattr(obj, self._user_attr) != self.request.user:
-            raise PermissionDenied
+            raise PermissionDenied(
+                "Sie haben nicht die Berechtigung, dieses Objekt anzusehen. Sie sind nicht Besitzer dieses Objektes."
+            )
         return obj
 
 
@@ -194,6 +196,18 @@ def print_preview(request):
     form.is_valid()
     form.instance.user = request.user
     return render(request, template_name="print.html", context={"object": form.instance})
+
+
+def handler403(request, exception=None):
+    message = "Sie haben nicht die Berechtigung, dieses Objekt anzusehen."
+    if isinstance(exception, PermissionDenied) and exception.args:
+        message = exception.args[0]
+    return render(
+        request,
+        template_name="base.html",
+        context={"content": message},
+        status=403,
+    )
 
 
 ################################################################################

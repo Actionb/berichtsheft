@@ -564,3 +564,26 @@ class TestUserProfileView:
         initial_data = view.get_initial()
         assert initial_data["first_name"] == user.first_name
         assert initial_data["last_name"] == user.last_name
+
+
+class TestHandler403:
+    @pytest.mark.parametrize(
+        "exception, expected",
+        [
+            (None, "Sie haben nicht die Berechtigung, dieses Objekt anzusehen."),
+            (PermissionDenied, "Sie haben nicht die Berechtigung, dieses Objekt anzusehen."),
+            (PermissionDenied(), "Sie haben nicht die Berechtigung, dieses Objekt anzusehen."),
+            (PermissionDenied("Foo"), "Foo"),
+        ],
+    )
+    def test_uses_exception_message(self, rf, exception, expected):
+        """
+        Assert that the handler view passes any existing exception message as
+        template context.
+        """
+        request = rf.get("/")
+        with mock.patch("web.views.render") as mock_render:
+            _views.handler403(request, exception)
+            mock_render.assert_called()
+            _args, kwargs = mock_render.call_args
+            assert kwargs["context"]["content"] == expected

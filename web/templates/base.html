@@ -50,7 +50,7 @@
     {% endblock header %}
     {% block breadcrumbs %}{% endblock breadcrumbs %}
     <main class="{% block mainclass %}container{% endblock mainclass %}">
-        {% block main %}{% endblock main %}
+        {% block main %}{{ content }}{% endblock main %}
     </main>
 
     {% block extrascript %}{% endblock extrascript %}

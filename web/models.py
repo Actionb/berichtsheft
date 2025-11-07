@@ -1,5 +1,3 @@
-from datetime import date, datetime
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -10,46 +8,6 @@ class User(AbstractUser):
 
     (In case we need to add custom fields or methods in the future)
     """
-
-
-def _get_current_year():
-    """Gebe das aktuelle Jahr zurück."""
-    return datetime.now().year
-
-
-def _get_current_week():
-    """Gebe die aktuelle Kalenderwoche zurück."""
-    return datetime.now().isocalendar()[1]
-
-
-def ausbildungswoche_default():
-    """Erzeuge einen Standardwert für das Feld 'ausbildungswoche'."""
-    return Nachweis.objects.count() + 1
-
-
-def jahr_default():
-    """Erzeuge einen Standardwert für das Feld 'jahr'."""
-    return _get_current_year()
-
-
-def datum_start_default():
-    """Erzeuge einen Standardwert für das Feld 'datum_start'."""
-    return str(date.fromisocalendar(_get_current_year(), _get_current_week(), 1))
-
-
-def datum_ende_default():
-    """Erzeuge einen Standardwert für das Feld 'datum_ende'."""
-    return str(date.fromisocalendar(_get_current_year(), _get_current_week(), 5))
-
-
-def kalenderwoche_default():
-    """Erzeuge einen Standardwert für das Feld 'kalenderwoche'."""
-    return _get_current_week()
-
-
-def nummer_default():
-    """Erzeuge einen Standardwert für das Feld 'nummer'."""
-    return Nachweis.objects.count() + 1
 
 
 class Nachweis(models.Model):

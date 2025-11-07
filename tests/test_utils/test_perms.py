@@ -1,12 +1,12 @@
 import pytest
 
-from tests.test_utils.models import TestModel
+from tests.test_utils.models import PermsTestModel
 from web.utils.perms import add_azubi_permissions, has_add_permission, has_change_permission, has_delete_permission
 
 
 @pytest.fixture
 def opts():
-    return TestModel._meta
+    return PermsTestModel._meta
 
 
 def test_has_add_permission(user, opts, add_permission):

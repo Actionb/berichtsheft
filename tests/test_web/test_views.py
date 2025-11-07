@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from unittest import mock
 
 import pytest
@@ -266,7 +266,6 @@ class TestNachweisEditView:
         form_class = add_view.get_form_class()
         return form_class().fields
 
-    @pytest.mark.django_db
     @pytest.fixture
     def obj(self, user):
         # TODO: move into conftest.py
@@ -356,6 +355,29 @@ class TestNachweisEditView:
         response = client.post(add_url(), data=form_data, follow=True)
         assert response.status_code == 200
         assert _models.Nachweis.objects.get().user == superuser
+
+    @pytest.mark.parametrize(
+        "field, expected",
+        [
+            ("jahr", datetime.now().year),
+            ("kalenderwoche", datetime.now().isocalendar()[1]),
+            ("datum_start", str(date.fromisocalendar(datetime.now().year, datetime.now().isocalendar()[1], 1))),
+            ("datum_ende", str(date.fromisocalendar(datetime.now().year, datetime.now().isocalendar()[1], 5))),
+        ],
+    )
+    def test_form_initial(self, rf, user, add_view, field, expected):
+        """Assert that the view provides sensible initial data for the form."""
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        initial_data = add_view.get_initial()
+        assert initial_data[field] == expected
+
+    def test_form_initial_nummer(self, rf, user, add_view, obj):
+        """Assert that the initial value of 'nummer' is as expected."""
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        initial_data = add_view.get_initial()
+        assert initial_data["nummer"] == obj.nummer + 1
 
 
 @pytest.mark.django_db

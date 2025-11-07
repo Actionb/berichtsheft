@@ -53,21 +53,17 @@ def nummer_default():
 
 
 class Nachweis(models.Model):
-    """Die verschiedenen Nachweise des Benutzers."""
+    """Die verschiedenen Nachweise der Benutzer."""
 
     betrieb = models.TextField(verbose_name="Betriebliche Tätigkeiten")
     schule = models.TextField(verbose_name="Berufsschule")
 
-    nummer = models.PositiveSmallIntegerField(verbose_name="Nummer", null=False, editable=False, default=nummer_default)
-    ausbildungswoche = models.PositiveSmallIntegerField(
-        verbose_name="Ausbildungswoche", blank=False, null=False, default=ausbildungswoche_default
-    )
-    jahr = models.PositiveSmallIntegerField(verbose_name="Jahr", blank=False, null=False, default=jahr_default)
-    kalenderwoche = models.PositiveSmallIntegerField(
-        verbose_name="Kalenderwoche", blank=False, null=False, default=kalenderwoche_default
-    )
-    datum_start = models.DateField(verbose_name="Vom", blank=False, null=False, default=datum_start_default)
-    datum_ende = models.DateField(verbose_name="Bis", blank=False, null=False, default=datum_ende_default)
+    nummer = models.PositiveSmallIntegerField(verbose_name="Nummer", null=False)
+    ausbildungswoche = models.PositiveSmallIntegerField(verbose_name="Ausbildungswoche", blank=False, null=False)
+    jahr = models.PositiveSmallIntegerField(verbose_name="Jahr", blank=False, null=False)
+    kalenderwoche = models.PositiveSmallIntegerField(verbose_name="Kalenderwoche", blank=False, null=False)
+    datum_start = models.DateField(verbose_name="Vom", blank=False, null=False)
+    datum_ende = models.DateField(verbose_name="Bis", blank=False, null=False)
     abteilung = models.ForeignKey("Abteilung", on_delete=models.PROTECT)
 
     fertig = models.BooleanField(verbose_name="Fertig geschrieben", default=False)

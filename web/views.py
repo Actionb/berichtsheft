@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
@@ -135,6 +137,21 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
         context = super().get_context_data(**kwargs)
         context["preview_url"] = reverse("print_preview")
         return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        now = datetime.now()
+        last = Nachweis.objects.filter(user=self.request.user).last()
+        initial.update(
+            {
+                "jahr": now.year,
+                "kalenderwoche": now.isocalendar()[1],
+                "datum_start": str(date.fromisocalendar(now.year, now.isocalendar()[1], 1)),
+                "datum_ende": str(date.fromisocalendar(now.year, now.isocalendar()[1], 5)),
+                "nummer": last.nummer + 1 if last else 1,
+            }
+        )
+        return initial
 
 
 class NachweisListView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):

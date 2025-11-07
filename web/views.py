@@ -15,8 +15,8 @@ from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
 
-from web.forms import UserCreationForm
-from web.models import Abteilung, Nachweis
+from web import forms as _forms
+from web import models as _models
 from web.utils import perms
 
 
@@ -27,10 +27,12 @@ class AutocompleteView(BaseAutocompleteView):
 
 class BaseViewMixin:
     title: str = ""
+    submit_button_text = "Weiter"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = self.title
+        context["submit_button_text"] = self.submit_button_text
         return context
 
 
@@ -111,20 +113,20 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
 
 
 class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
-    model = Nachweis
+    model = _models.Nachweis
     template_name = "nachweis_edit.html"
     fields = forms.ALL_FIELDS
     success_url = reverse_lazy("nachweis_list")
 
     def get_form_class(self):
         return forms.modelform_factory(
-            Nachweis,
+            _models.Nachweis,
             fields=self.fields,
             widgets={
                 "datum_start": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
                 "datum_ende": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
                 "abteilung": MIZSelect(
-                    Abteilung,
+                    _models.Abteilung,
                     url="abteilung_ac",
                     add_url="abteilung_add",
                     edit_url="abteilung_change",
@@ -141,7 +143,7 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
     def get_initial(self):
         initial = super().get_initial()
         now = datetime.now()
-        last = Nachweis.objects.filter(user=self.request.user).last()
+        last = _models.Nachweis.objects.filter(user=self.request.user).last()
         initial.update(
             {
                 "jahr": now.year,
@@ -155,20 +157,20 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
 
 
 class NachweisListView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):
-    model = Nachweis
+    model = _models.Nachweis
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"
-    permission_required = perms.get_perm("view", Nachweis._meta)
+    permission_required = perms.get_perm("view", _models.Nachweis._meta)
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
-    model = Nachweis
+    model = _models.Nachweis
     template_name = "print.html"
-    permission_required = perms.get_perm("change", Nachweis._meta)
+    permission_required = perms.get_perm("change", _models.Nachweis._meta)
 
 
 class AbteilungEditView(PopupResponseMixin, EditView):
-    model = Abteilung
+    model = _models.Abteilung
     template_name = "base_form.html"
     fields = forms.ALL_FIELDS
     success_url = reverse_lazy("nachweis_list")
@@ -176,7 +178,7 @@ class AbteilungEditView(PopupResponseMixin, EditView):
 
 def print_preview(request):
     """Preview the print layout for a Nachweis object."""
-    form = forms.modelform_factory(Nachweis, fields=forms.ALL_FIELDS)(data=request.GET.dict())
+    form = forms.modelform_factory(_models.Nachweis, fields=forms.ALL_FIELDS)(data=request.GET.dict())
     # Validate the form. Without this step, form.instance will be missing data
     # for some fields.
     form.is_valid()
@@ -210,9 +212,27 @@ class SignUpView(BaseViewMixin, CreateView):
     template_name = "auth/auth_form.html"
     success_url = reverse_lazy("login")
     title = "Registrieren"
-    form_class = UserCreationForm
+    form_class = _forms.UserCreationForm
 
     def form_valid(self, form):
         response = super().form_valid(form)
         perms.add_azubi_permissions(self.object)
         return response
+
+
+class UserProfileView(BaseViewMixin, UpdateView):
+    model = _models.UserProfile
+    template_name = "auth/auth_form.html"
+    success_url = reverse_lazy("user_profile")
+    title = "Benutzerprofil bearbeiten"
+    form_class = _forms.UserProfileForm
+    submit_button_text = "Aktualisieren"
+
+    def get_object(self, queryset=None):
+        return _models.UserProfile.objects.get_or_create(user=self.request.user)[0]
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["first_name"] = self.request.user.first_name
+        initial["last_name"] = self.request.user.last_name
+        return initial

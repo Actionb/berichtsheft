@@ -414,6 +414,11 @@ class TestSignUpView:
         """
         assert sign_up_user.has_perm(nachweis_permission)
 
+    @pytest.mark.django_db
+    def test_creates_user_profile(self, sign_up_user):
+        """Assert that a user profile is created for the new user."""
+        assert _models.UserProfile.objects.filter(user=sign_up_user).exists()
+
 
 class TestNachweisListView:
     @pytest.mark.django_db
@@ -440,3 +445,39 @@ class TestNachweisListView:
         queryset = view.get_queryset()
         assert nachweis_1 in queryset
         assert nachweis_2 not in queryset
+
+
+class TestUserProfileView:
+    @pytest.fixture
+    def user(self, create_user):
+        return create_user(first_name="Alice", last_name="Testman", add_profile=True)
+
+    @pytest.mark.usefixtures("login_user")
+    def test_get_object(self, rf, user):
+        """Assert that get_object returns the UserProfile of the current user."""
+        view = _views.UserProfileView()
+        view.request = rf.get("/")
+        view.request.user = user
+        assert view.get_object() == user.profile
+
+    @pytest.mark.usefixtures("login_user")
+    def test_get_object_creates_profile(self, rf, user):
+        """
+        Assert that get_object creates a profile if the current user does not
+        already have one.
+        """
+        user.profile.delete()
+        user.refresh_from_db()
+        view = _views.UserProfileView()
+        view.request = rf.get("/")
+        view.request.user = user
+        assert view.get_object() == user.profile
+
+    def test_get_initial(self, rf, user):
+        """Assert that get_initial includes the user's first and last name."""
+        view = _views.UserProfileView()
+        view.request = rf.get("/")
+        view.request.user = user
+        initial_data = view.get_initial()
+        assert initial_data["first_name"] == user.first_name
+        assert initial_data["last_name"] == user.last_name

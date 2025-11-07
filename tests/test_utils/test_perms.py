@@ -30,8 +30,9 @@ def test_has_delete_permission(user, opts, add_permission):
 @pytest.fixture
 def user_with_permissions(create_user):
     """Create a user with the default permissions."""
-    add_azubi_permissions(create_user)
-    return create_user
+    user = create_user()
+    add_azubi_permissions(user)
+    return user
 
 
 @pytest.mark.django_db

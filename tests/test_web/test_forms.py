@@ -47,3 +47,41 @@ class TestUserCreationForm:
         assert form.is_valid(), form.errors
         form.save(commit=False)
         assert not _models.UserProfile.objects.exists()
+
+
+class TestUserProfileForm:
+    @pytest.fixture
+    def form_data(self):
+        return {
+            "start_date": "2024-01-01",
+            "first_name": "Alice",
+            "last_name": "Testman",
+        }
+
+    @pytest.fixture
+    def user(self, create_user):
+        return create_user(first_name="Bob", last_name="Builder")
+
+    @pytest.mark.django_db
+    def test_save_updates_user(self, user, form_data):
+        """Assert that saving the form updates the user's first and last name."""
+        form = _forms.UserProfileForm(instance=user.profile, data=form_data)
+        assert form.is_valid(), form.errors
+        form.save(commit=True)
+        user.refresh_from_db()
+        assert user.first_name == "Alice"
+        assert user.last_name == "Testman"
+
+    @pytest.mark.django_db
+    def test_save_not_updates_user_commit_false(self, user, form_data):
+        """
+        Assert that saving the form with commit=False does not update the user's
+        first and last name.
+        """
+        first_name, last_name = user.first_name, user.last_name
+        form = _forms.UserProfileForm(instance=user.profile, data=form_data)
+        assert form.is_valid(), form.errors
+        form.save(commit=False)
+        user.refresh_from_db()
+        assert user.first_name == first_name
+        assert user.last_name == last_name

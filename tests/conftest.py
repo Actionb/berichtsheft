@@ -49,15 +49,26 @@ def mock_super_method():
 
 
 @pytest.fixture
-def username():
-    """Default username for tests. Overwrite via test parametrization."""
-    return "testuser"
+def create_user(django_user_model, add_user_profile):
+    """Create a user for testing."""
+
+    def inner(username="testuser", add_profile=True, **kwargs):
+        user = django_user_model.objects.create(username=username, **kwargs)
+        if add_profile:
+            add_user_profile(user)
+        return user
+
+    return inner
 
 
 @pytest.fixture
-def create_user(django_user_model, username):
-    """Create a user for testing."""
-    return django_user_model.objects.create(username=username)
+def add_user_profile():
+    """Add a user profile to the given user."""
+
+    def inner(user):
+        return _models.UserProfile.objects.create(user=user)
+
+    return inner
 
 
 @pytest.fixture
@@ -78,7 +89,7 @@ def add_permission():
 
 
 @pytest.fixture
-def set_user_perms(create_user, user_perms, add_permission):
+def set_user_perms(user, user_perms, add_permission):
     """
     Set permissions of the test user.
 
@@ -96,7 +107,7 @@ def set_user_perms(create_user, user_perms, add_permission):
         return
     try:
         for action, model in user_perms:
-            add_permission(create_user, action, model._meta)
+            add_permission(user, action, model._meta)
     except ValueError:  # pragma: no cover
         raise Exception("`user_perms` must be a list of 2-tuple (<action>, <model>)")
 
@@ -104,13 +115,13 @@ def set_user_perms(create_user, user_perms, add_permission):
 @pytest.fixture
 def user(create_user, reload_user):
     """Return the test user. Reload from the database to reset permission cache."""
-    return reload_user(create_user)
+    return reload_user(create_user())
 
 
 @pytest.fixture
-def superuser(django_user_model):
+def superuser(create_user):
     """Create a superuser."""
-    return django_user_model.objects.create(username="admin", is_superuser=True)
+    return create_user(username="admin", is_superuser=True)
 
 
 @pytest.fixture

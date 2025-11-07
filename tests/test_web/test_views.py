@@ -379,6 +379,39 @@ class TestNachweisEditView:
         initial_data = add_view.get_initial()
         assert initial_data["nummer"] == obj.nummer + 1
 
+    def test_form_initial_ausbildungswoche(self, rf, user, add_view):
+        """Assert that the initial value of 'ausbildungswoche' is as expected."""
+        user.profile.start_date = date(year=2025, month=8, day=1)
+        user.profile.save()
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        with mock.patch("web.views.date") as m:
+            m.today.return_value = date(year=2027, month=1, day=1)
+            initial_data = add_view.get_initial()
+            assert initial_data["ausbildungswoche"] == 75
+
+    def test_form_initial_ausbildungswoche_start_date_not_set(self, rf, user, add_view):
+        """
+        Assert that no initial value for 'ausbildungswoche' is provided if no
+        start_date is set in the profile.
+        """
+        user.profile.start_datum = None
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        initial_data = add_view.get_initial()
+        assert "ausbildungswoche" not in initial_data
+
+    def test_form_initial_ausbildungswoche_no_user_profile(self, rf, user, add_view):
+        """
+        Assert that no initial value for 'ausbildungswoche' is provided if the
+        user has no profile.
+        """
+        _models.UserProfile.objects.filter(user=user).delete()
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        initial_data = add_view.get_initial()
+        assert "ausbildungswoche" not in initial_data
+
 
 @pytest.mark.django_db
 def test_print_preview_form_object(rf):

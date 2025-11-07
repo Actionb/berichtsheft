@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 
 from django import forms
 from django.contrib.auth import get_user_model
@@ -18,6 +18,7 @@ from mizdb_tomselect.widgets import MIZSelect
 from web import forms as _forms
 from web import models as _models
 from web.utils import perms
+from web.utils.date import count_week_numbers
 
 
 class AutocompleteView(BaseAutocompleteView):
@@ -142,7 +143,7 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
 
     def get_initial(self):
         initial = super().get_initial()
-        now = datetime.now()
+        now = date.today()
         last = _models.Nachweis.objects.filter(user=self.request.user).last()
         initial.update(
             {
@@ -153,6 +154,12 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
                 "nummer": last.nummer + 1 if last else 1,
             }
         )
+        try:
+            start_date = self.request.user.profile.start_date
+        except _models.User.profile.RelatedObjectDoesNotExist:
+            start_date = None
+        if start_date:
+            initial["ausbildungswoche"] = count_week_numbers(start_date, now)
         return initial
 
 

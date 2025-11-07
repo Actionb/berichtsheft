@@ -31,6 +31,7 @@ urlpatterns = [
     path("password_change/", dummy_view, name="password_change"),
     path("password_change/done/", dummy_view, name="password_change_done"),
     path("signup/", _views.SignUpView.as_view(), name="signup"),
+    path("profile/", dummy_view, name="user_profile"),
 ]
 
 pytestmark = pytest.mark.urls(__name__)

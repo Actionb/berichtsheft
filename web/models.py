@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -8,6 +9,20 @@ class User(AbstractUser):
 
     (In case we need to add custom fields or methods in the future)
     """
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile", unique=True)
+    start_date = models.DateField(
+        verbose_name="Startdatum",
+        blank=True,
+        null=True,
+        help_text="Startdatum der Ausbildung. Wird benötigt für die Errechnung von Datumsangaben der Nachweise.",
+    )
+
+    class Meta:
+        verbose_name = "Benutzerprofil"
+        verbose_name_plural = "Benutzerprofile"
 
 
 class Nachweis(models.Model):

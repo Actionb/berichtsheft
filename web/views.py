@@ -143,23 +143,24 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
 
     def get_initial(self):
         initial = super().get_initial()
-        now = date.today()
-        last = _models.Nachweis.objects.filter(user=self.request.user).last()
-        initial.update(
-            {
-                "jahr": now.year,
-                "kalenderwoche": now.isocalendar()[1],
-                "datum_start": str(date.fromisocalendar(now.year, now.isocalendar()[1], 1)),
-                "datum_ende": str(date.fromisocalendar(now.year, now.isocalendar()[1], 5)),
-                "nummer": last.nummer + 1 if last else 1,
-            }
-        )
-        try:
-            start_date = self.request.user.profile.start_date
-        except _models.User.profile.RelatedObjectDoesNotExist:
-            start_date = None
-        if start_date:
-            initial["ausbildungswoche"] = count_week_numbers(start_date, now)
+        if self.add:
+            now = date.today()
+            last = _models.Nachweis.objects.filter(user=self.request.user).last()
+            initial.update(
+                {
+                    "jahr": now.year,
+                    "kalenderwoche": now.isocalendar()[1],
+                    "datum_start": str(date.fromisocalendar(now.year, now.isocalendar()[1], 1)),
+                    "datum_ende": str(date.fromisocalendar(now.year, now.isocalendar()[1], 5)),
+                    "nummer": last.nummer + 1 if last else 1,
+                }
+            )
+            try:
+                start_date = self.request.user.profile.start_date
+            except _models.User.profile.RelatedObjectDoesNotExist:
+                start_date = None
+            if start_date:
+                initial["ausbildungswoche"] = count_week_numbers(start_date, now)
         return initial
 
 

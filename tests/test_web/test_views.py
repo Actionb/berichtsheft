@@ -413,6 +413,10 @@ class TestNachweisEditView:
         initial_data = add_view.get_initial()
         assert "ausbildungswoche" not in initial_data
 
+    def test_form_initial_edit_no_initial(self, edit_view):
+        """Assert that the view does not provide initial data when editing."""
+        assert not edit_view.get_initial()
+
 
 @pytest.mark.django_db
 def test_print_preview_form_object(rf):

@@ -28,3 +28,4 @@
 - [ ] sign up form: required fields need to be highlighted/bold
 - [ ] how to create UserProfiles for users created via `manage.py createsuperuser`
 - [ ] add user messages when saving stuff
+- [x] FIXME: form initials overwrite pre-existing data when editing nachweise!

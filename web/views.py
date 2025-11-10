@@ -1,7 +1,7 @@
 from datetime import date
 
 from django import forms
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
@@ -218,13 +218,14 @@ class PasswordChangeDoneView(BaseViewMixin, auth_views.PasswordChangeDoneView):
 class SignUpView(BaseViewMixin, CreateView):
     model = get_user_model()
     template_name = "auth/auth_form.html"
-    success_url = reverse_lazy("login")
+    success_url = reverse_lazy("nachweis_list")
     title = "Registrieren"
     form_class = _forms.UserCreationForm
 
     def form_valid(self, form):
         response = super().form_valid(form)
         perms.add_azubi_permissions(self.object)
+        login(self.request, self.object)
         return response
 
 

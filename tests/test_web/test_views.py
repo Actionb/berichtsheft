@@ -2,6 +2,7 @@ from datetime import date, datetime
 from unittest import mock
 
 import pytest
+from django.contrib.auth import SESSION_KEY
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import path, reverse
@@ -436,13 +437,18 @@ def test_print_preview_form_object(rf):
 
 class TestSignUpView:
     @pytest.fixture
-    def sign_up_user(self):
+    def signup_data(self):
+        return {"username": "alice", "password1": "foobarbaz", "password2": "foobarbaz"}
+
+    @pytest.fixture
+    def sign_up(self, client, signup_data):
+        """Use SignUpView to create a new user."""
+        return client.post(reverse("signup"), data=signup_data)
+
+    @pytest.fixture
+    def sign_up_user(self, sign_up):
         """Use SignUpView to create a new user and return it."""
-        form_data = {"username": "alice", "password1": "foobarbaz", "password2": "foobarbaz"}
-        view = _views.SignUpView()
-        form = view.get_form_class()(data=form_data)
-        view.form_valid(form)
-        return view.object
+        return sign_up.wsgi_request.user
 
     @pytest.mark.django_db
     def test_form_valid_sets_permissions(self, sign_up_user, nachweis_permission):
@@ -456,6 +462,17 @@ class TestSignUpView:
     def test_creates_user_profile(self, sign_up_user):
         """Assert that a user profile is created for the new user."""
         assert _models.UserProfile.objects.filter(user=sign_up_user).exists()
+
+    @pytest.mark.django_db
+    def test_redirects_to_nachweis_list(self, sign_up):
+        """Assert that the user is redirected to the nachweis list after signing up."""
+        assert sign_up.status_code == 302
+        assert sign_up.url == reverse("nachweis_list")
+
+    @pytest.mark.django_db
+    def test_signed_up_user_has_session_key(self, client, sign_up_user):
+        """Assert that the user has a session key after signing up."""
+        assert client.session[SESSION_KEY] == str(sign_up_user.pk)
 
 
 class TestNachweisListView:

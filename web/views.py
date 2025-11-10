@@ -161,6 +161,8 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
                 start_date = None
             if start_date:
                 initial["ausbildungswoche"] = count_week_numbers(start_date, now)
+            # Update initial data with GET parameters:
+            initial.update(self.request.GET.dict())
         return initial
 
 

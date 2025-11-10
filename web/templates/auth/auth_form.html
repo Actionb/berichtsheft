@@ -7,7 +7,7 @@
     {% block form %}
     <form method="post">
         {% csrf_token %}
-        {% bootstrap_form form %}
+        {% bootstrap_form form required_css_class="fw-semibold" %}
         {% bootstrap_button button_type="submit" content=submit_button_text|default:"Weiter" %}
     </form>
     {% endblock form %}

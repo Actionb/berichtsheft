@@ -25,7 +25,7 @@
 - [ ] Add a custom error message to display when trying to access another user's objects
 - [x] model defaults should use `Nachweis.objects.filter(user=request.user)`
 - [ ] Make Nachweis.kalenderwoche non editable (`editable=False`); it should be derived from the start date (maybe even remove the field altogether and just compute its value when needed?)
-- [ ] sign up form: required fields need to be highlighted/bold
-- [ ] how to create UserProfiles for users created via `manage.py createsuperuser`
+- [x] sign up form: required fields need to be highlighted/bold
+- [x] how to create UserProfiles for users created via `manage.py createsuperuser`
 - [ ] add user messages when saving stuff
 - [x] FIXME: form initials overwrite pre-existing data when editing nachweise!

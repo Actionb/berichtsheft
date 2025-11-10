@@ -15,30 +15,35 @@
 <body>
     {% block header %}
     <header class="bg-light py-3 mb-4 border-bottom">
-        <div class="container d-flex justify-content-between">
+        <div class="container d-flex justify-content-between align-items-center">
             <h1 class="fw-light">{% block header_title %}bApp{% endblock header_title %}</h1>
             {% block account %}
+            {% if user.is_authenticated %}
             <div id="user-account" class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary p-2 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Benutzerkonto">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     <span class="nav-text">{% if user.is_authenticated %}{{ user.get_username }}{% else %}Anmelden{% endif %}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    {% if user.is_authenticated %}
                         <li><span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'user_profile' %}">Benutzerprofil</a></li>
                         {% if user.is_staff %}<li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a></li>{% endif %}
                         {% if user.has_usable_password %}<li><a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a></li>{% endif %}
-                        <li><form id="logout-form" method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button class="dropdown-item" type="submit">Abmelden</button>
-                        </form></li>
-                    {% else %}
-                        <li><a class="dropdown-item" href="{% url 'login' %}">Anmelden</a></li>
-                    {% endif %}
+                        <li>
+                            <form id="logout-form" method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button class="dropdown-item" type="submit">Abmelden</button>
+                            </form>
+                        </li>
                 </ul>
             </div>
+            {% else %}
+                <div>
+                    <a class="btn btn-outline-primary" href="{% url 'signup' %}">Registrieren</a>
+                    <a class="btn btn-outline-primary" href="{% url 'login' %}">Anmelden</a>
+                </div>
+            {% endif %}
             {% endblock account %}
         </div>
     </header> 

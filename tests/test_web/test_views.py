@@ -419,20 +419,48 @@ class TestNachweisEditView:
         assert not edit_view.get_initial()
 
 
-@pytest.mark.django_db
-def test_print_preview_form_object(rf):
-    """Assert that print_preview is called with the expected Nachweis object."""
-    data = {"betrieb": "foo", "jahr": 2025, "datum_start": "2025-10-22", "fertig": False}
-    request = rf.get(reverse("print_preview"), query_params=data)
-    with mock.patch("web.views.render") as mock_render:
-        _views.print_preview(request)
-        mock_render.assert_called()
+class TestPrintPreview:
+    @pytest.fixture
+    def request_data(self):
+        return {"betrieb": "foo", "jahr": 2025, "datum_start": "2025-10-22", "fertig": False}
+
+    @pytest.fixture
+    def preview_url(self):
+        return reverse("print_preview")
+
+    @pytest.fixture
+    def mock_render(self):
+        with mock.patch("web.views.render") as mock_render:
+            yield mock_render
+
+    @pytest.fixture
+    def preview_request(self, rf, request_data, preview_url, user):
+        request = rf.get(preview_url, query_params=request_data)
+        request.user = user
+        return request
+
+    @pytest.fixture
+    def preview_object(self, preview_request, mock_render):
+        """Return the 'object' context item of the preview request."""
+        _views.print_preview(preview_request)
         _, kwargs = mock_render.call_args
-        request_obj = kwargs["context"]["object"]
-        assert request_obj.betrieb == data["betrieb"]
-        assert request_obj.jahr == data["jahr"]
-        assert request_obj.datum_start == date.fromisoformat(data["datum_start"])
-        assert request_obj.fertig == data["fertig"]
+        return kwargs["context"]["object"]
+
+    @pytest.mark.django_db
+    def test_print_preview_form_object(self, preview_object, request_data):
+        """
+        Assert that the preview is rendered with the expected 'object' context
+        item.
+        """
+        assert preview_object.betrieb == request_data["betrieb"]
+        assert preview_object.jahr == request_data["jahr"]
+        assert preview_object.datum_start == date.fromisoformat(request_data["datum_start"])
+        assert preview_object.fertig == request_data["fertig"]
+
+    @pytest.mark.django_db
+    def test_print_preview_adds_user(self, preview_object, user):
+        """Assert that the print_preview object includes the current user."""
+        assert preview_object.user == user
 
 
 class TestSignUpView:

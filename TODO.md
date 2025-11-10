@@ -15,13 +15,13 @@
 - [x] show bericht/schule text when hovering over the column
 - [x] User Handling
 - [x] calculate Ausbildungswoche from start of employment
-- [ ] print.html: take name from user data (user is required to enter their full name)
+- [x] print.html: take name from user data (user is required to enter their full name)
 - [ ] sign up form does not make it clear why it is invalid
 - [ ] miz-tomselect requires German text
 - [ ] FIXME: preview shows wrong "Nummer" - doesnt take nummer from the model object (because preview is generated from the pure form data on a new model instance!)
 - [x] add Nummer field to edit form
 - [x] Sign Up Form: require first name and surname
-- [ ] Allow users to edit their names (and other configs)
+- [x] Allow users to edit their names (and other configs)
 - [ ] Add a custom error message to display when trying to access another user's objects
 - [x] model defaults should use `Nachweis.objects.filter(user=request.user)`
 - [ ] Make Nachweis.kalenderwoche non editable (`editable=False`); it should be derived from the start date (maybe even remove the field altogether and just compute its value when needed?)
@@ -29,3 +29,5 @@
 - [x] how to create UserProfiles for users created via `manage.py createsuperuser`
 - [ ] add user messages when saving stuff
 - [x] FIXME: form initials overwrite pre-existing data when editing nachweise!
+- [ ] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
+- [ ] Nachweis.nummer should be unique

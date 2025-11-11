@@ -22,7 +22,7 @@
 - [x] add Nummer field to edit form
 - [x] Sign Up Form: require first name and surname
 - [x] Allow users to edit their names (and other configs)
-- [ ] Add a custom error message to display when trying to access another user's objects
+- [x] Add a custom error message to display when trying to access another user's objects
 - [x] model defaults should use `Nachweis.objects.filter(user=request.user)`
 - [ ] Make Nachweis.kalenderwoche non editable (`editable=False`); it should be derived from the start date (maybe even remove the field altogether and just compute its value when needed?)
 - [x] sign up form: required fields need to be highlighted/bold

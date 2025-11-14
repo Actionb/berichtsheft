@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django_softdelete.models import SoftDeleteModel
 
 
 class User(AbstractUser):
@@ -25,7 +26,7 @@ class UserProfile(models.Model):
         verbose_name_plural = "Benutzerprofile"
 
 
-class Nachweis(models.Model):
+class Nachweis(SoftDeleteModel):
     """Die verschiedenen Nachweise der Benutzer."""
 
     betrieb = models.TextField(verbose_name="Betriebliche Tätigkeiten")
@@ -54,7 +55,7 @@ class Nachweis(models.Model):
         return f"Nachweis #{self.nummer}"
 
 
-class Abteilung(models.Model):
+class Abteilung(SoftDeleteModel):
     name = models.CharField(verbose_name="Abteilungsname", blank=False)
 
     def __str__(self):

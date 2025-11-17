@@ -25,9 +25,9 @@
 </nav>
 {% endblock breadcrumbs %}
 
-{% block mainclass %}container border rounded{% endblock mainclass %}
 {% block main %}
-<h1 class="mt-4">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
+<div class="border rounded">
+    <h1 class="m-2">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
 {% block form %}
 <form method="post" id="change-form" class="mb-5">
     {% block csrf_token %}{% csrf_token %}{% endblock csrf_token %}
@@ -41,6 +41,7 @@
     {% endif %}
 </form>
 {% endblock form %}
+</div>
 
 {% block submit_row %}
 <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle py-1">

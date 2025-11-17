@@ -18,6 +18,7 @@ def dummy_view(*_args, **_kwargs):
 
 urlpatterns = [
     path("test/print_preview", dummy_view, name="print_preview"),
+    path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
     path("nachweis/add/", _views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
     path(
         "nachweis/<path:pk>/change/",
@@ -27,7 +28,7 @@ urlpatterns = [
     path("nachweis/<path:pk>/delete/", _views.delete_nachweis, name="nachweis_delete"),
     path("abteilung/<path:pk>/delete/", _views.delete_abteilung, name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
-    path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
+    path("<str:model_name>/<int:pk>/hard_delete/", _views.hard_delete, name="hard_delete"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
     path("logout/", dummy_view, name="logout"),
@@ -688,3 +689,66 @@ class TestDeleteNachweisView:
         response = client.get(delete_url)
         assert response.status_code == 405
 
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("model", [_models.Nachweis, _models.Abteilung])
+class TestHardDelete:
+    @pytest.fixture
+    def delete_object(self):
+        """Whether the test object should already be deleted."""
+        return True
+
+    @pytest.fixture
+    def obj(self, user, model, delete_object):
+        if model == _models.Nachweis:
+            obj = NachweisFactory(user=user)
+        elif model == _models.Abteilung:
+            obj = AbteilungFactory(user=user)
+        else:
+            raise Exception("No factory for model:", model)
+        if delete_object:
+            obj.delete()
+        return obj
+
+    @pytest.fixture
+    def hard_delete_url(self, obj, model):
+        return reverse("hard_delete", kwargs={"model_name": model._meta.model_name, "pk": obj.pk})
+
+    @pytest.fixture
+    def set_user_perms(self, user, add_permission, model):
+        add_permission(user, "delete", model._meta)
+
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test_can_hard_delete(self, client, obj, hard_delete_url):
+        """Assert that the object is removed permanently from the database."""
+        response = client.post(hard_delete_url)
+        assert response.status_code == 200
+        assert not _models.Nachweis.global_objects.filter(pk=obj.pk).exists()
+
+    @pytest.mark.usefixtures("login_user")
+    def test_requires_permission(self, client, hard_delete_url):
+        """Assert that hard deletion requries delete permission."""
+        response = client.post(hard_delete_url)
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("set_user_perms", "login_superuser")
+    def test_cannot_delete_others(self, client, hard_delete_url):
+        """Assert that a user cannot delete objects of another user."""
+        response = client.post(hard_delete_url)
+        assert response.status_code == 403
+
+    @pytest.mark.parametrize("delete_object", [False])
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test_can_only_hard_delete_deleted_objects(self, client, hard_delete_url):
+        """
+        Assert that only objects that have been soft-deleted can be
+        hard-deleted.
+        """
+        response = client.post(hard_delete_url)
+        assert response.status_code == 404
+
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test_requires_post(self, client, hard_delete_url):
+        """Assert that deletion requires a POST request."""
+        response = client.get(hard_delete_url)
+        assert response.status_code == 405

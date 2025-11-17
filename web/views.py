@@ -1,6 +1,8 @@
 from datetime import date
 
 from django import forms
+from django.apps import apps
+from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -230,6 +232,11 @@ def handler403(request, exception=None):
     )
 
 
+################################################################################
+# DELETE VIEWS & RECYCLE BIN
+################################################################################
+
+
 def _delete(request, pk, opts):
     """Soft-delete a model instance when the user passes permission checks."""
     if request.method.lower() != "post":
@@ -251,6 +258,29 @@ def delete_nachweis(request, pk):
 def delete_abteilung(request, pk):
     """Delete an Abteilung instance."""
     return _delete(request, pk, _models.Abteilung._meta)
+
+
+def hard_delete(request, model_name, pk):
+    """
+    Hard-delete a model instance.
+
+    Called from the trash can page with an AJAX request.
+
+    Requires that the user has permissions and that the instance has already
+    been soft-deleted.
+    """
+    if request.method.lower() != "post":
+        return HttpResponseNotAllowed(["post"])
+    model = apps.get_model("web", model_name)
+    opts = model._meta
+    if not perms.has_delete_permission(request.user, opts):
+        raise PermissionDenied
+    obj = get_object_or_404(model.deleted_objects, pk=pk)
+    if obj.user != request.user:
+        raise PermissionDenied
+    obj.hard_delete()
+    messages.success(request, f"{opts.verbose_name} '{obj}' erfolgreich gelöscht.")
+    return HttpResponse()
 
 
 ################################################################################

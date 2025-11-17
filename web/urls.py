@@ -34,4 +34,5 @@ urlpatterns = [
     path("abteilung_ac/", views.AbteilungAutocompleteView.as_view(), name="abteilung_ac"),
     # Other
     path("preview/", views.print_preview, name="print_preview"),
+    path("<str:model_name>/<int:pk>/hard_delete/", views.hard_delete, name="hard_delete"),
 ]

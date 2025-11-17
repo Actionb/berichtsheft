@@ -60,6 +60,19 @@ class TestAutocompleteView:
         assert view.has_add_permission(request) == expected
 
 
+class TestAbteilungAutocompleteView:
+    @pytest.mark.usefixtures("login_superuser")
+    def test_create_object_user(self, rf, superuser):
+        """Assert that the created object is associated with the current user."""
+        view = _views.AbteilungAutocompleteView()
+        view.model = _models.Abteilung
+        view.create_field = "name"
+        view.request = rf.get("/")
+        view.request.user = superuser
+        obj = view.create_object(data={"name": "Foo"})
+        assert obj.user == superuser
+
+
 class TestBaseViewMixin:
     def test_get_context_data(self, mock_super_method):
         """Assert that the title is added to the context data."""

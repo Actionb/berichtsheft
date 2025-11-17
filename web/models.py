@@ -57,6 +57,7 @@ class Nachweis(SoftDeleteModel):
 
 class Abteilung(SoftDeleteModel):
     name = models.CharField(verbose_name="Abteilungsname", blank=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE, editable=False, verbose_name="Benutzer")
 
     def __str__(self):
         return self.name

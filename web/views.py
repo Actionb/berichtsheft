@@ -26,6 +26,12 @@ class AutocompleteView(BaseAutocompleteView):
         return perms.has_add_permission(request.user, self.model._meta)
 
 
+class AbteilungAutocompleteView(AutocompleteView):
+    def create_object(self, data):
+        """Create a new object with the given data."""
+        return self.model.objects.create(**{self.create_field: data[self.create_field], "user": self.request.user})
+
+
 class BaseViewMixin:
     title: str = ""
     submit_button_text = "Weiter"

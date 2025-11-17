@@ -27,7 +27,7 @@ urlpatterns = [
         name="abteilung_change",
     ),
     # Autocomplete
-    path("abteilung_ac/", views.AutocompleteView.as_view(), name="abteilung_ac"),
+    path("abteilung_ac/", views.AbteilungAutocompleteView.as_view(), name="abteilung_ac"),
     # Other
     path("preview/", views.print_preview, name="print_preview"),
 ]

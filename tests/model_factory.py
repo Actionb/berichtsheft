@@ -19,6 +19,7 @@ class AbteilungFactory(factory.django.DjangoModelFactory):
         model = _models.Abteilung
 
     name = factory.Faker("company")
+    user = factory.SubFactory(UserFactory)
 
 
 class NachweisFactory(factory.django.DjangoModelFactory):

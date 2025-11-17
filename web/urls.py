@@ -3,6 +3,8 @@ from django.urls import path
 
 from web import views
 
+# TODO: use <int:> converter instead of <path:> for URLs
+
 urlpatterns = [
     # Auth
     path("login/", views.LoginView.as_view(), name="login"),
@@ -18,6 +20,7 @@ urlpatterns = [
         views.NachweisEditView.as_view(extra_context={"add": False}),
         name="nachweis_change",
     ),
+    path("nachweis/<path:pk>/delete/", views.delete_nachweis, name="nachweis_delete"),
     path("nachweis/<path:pk>/print/", views.NachweisPrintView.as_view(), name="nachweis_print"),
     path("nachweis/", views.NachweisListView.as_view(), name="nachweis_list"),
     path("abteilung/add/", views.AbteilungEditView.as_view(extra_context={"add": True}), name="abteilung_add"),
@@ -26,6 +29,7 @@ urlpatterns = [
         views.AbteilungEditView.as_view(extra_context={"add": False}),
         name="abteilung_change",
     ),
+    path("abteilung/<path:pk>/delete/", views.delete_abteilung, name="abteilung_delete"),
     # Autocomplete
     path("abteilung_ac/", views.AbteilungAutocompleteView.as_view(), name="abteilung_ac"),
     # Other

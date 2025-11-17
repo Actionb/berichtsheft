@@ -5,7 +5,8 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
@@ -98,6 +99,8 @@ class RequireUserMixin(SingleObjectMixin):
 
 
 class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateView):
+    delete_url_name = ""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add = self.extra_context["add"]
@@ -120,12 +123,22 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
             return [perms.get_perm("add", self.opts)]
         return [perms.get_perm("change", self.opts)]
 
+    def get_delete_url(self):
+        return reverse(self.delete_url_name, kwargs=self.kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.add and perms.has_delete_permission(self.request.user, self.opts):
+            context["delete_url"] = self.get_delete_url()
+        return context
+
 
 class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
     model = _models.Nachweis
     template_name = "nachweis_edit.html"
     fields = forms.ALL_FIELDS
     success_url = reverse_lazy("nachweis_list")
+    delete_url_name = "nachweis_delete"
 
     def get_form_class(self):
         return forms.modelform_factory(
@@ -190,8 +203,9 @@ class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
 class AbteilungEditView(PopupResponseMixin, EditView):
     model = _models.Abteilung
     template_name = "base_form.html"
-    fields = forms.ALL_FIELDS
+    fields = ["name"]
     success_url = reverse_lazy("nachweis_list")
+    delete_url_name = "abteilung_delete"
 
 
 def print_preview(request):
@@ -214,6 +228,29 @@ def handler403(request, exception=None):
         context={"content": message},
         status=403,
     )
+
+
+def _delete(request, pk, opts):
+    """Soft-delete a model instance when the user passes permission checks."""
+    if request.method.lower() != "post":
+        return HttpResponseNotAllowed(["post"])
+    if not perms.has_delete_permission(request.user, opts):
+        raise PermissionDenied
+    obj = get_object_or_404(opts.model.global_objects, pk=pk)
+    if obj.user != request.user:
+        raise PermissionDenied
+    obj.delete()
+    return redirect(reverse("nachweis_list"))
+
+
+def delete_nachweis(request, pk):
+    """Delete a Nachweis instance."""
+    return _delete(request, pk, _models.Nachweis._meta)
+
+
+def delete_abteilung(request, pk):
+    """Delete an Abteilung instance."""
+    return _delete(request, pk, _models.Abteilung._meta)
 
 
 ################################################################################

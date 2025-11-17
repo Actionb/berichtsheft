@@ -24,6 +24,8 @@ urlpatterns = [
         _views.NachweisEditView.as_view(extra_context={"add": False}),
         name="nachweis_change",
     ),
+    path("nachweis/<path:pk>/delete/", _views.delete_nachweis, name="nachweis_delete"),
+    path("abteilung/<path:pk>/delete/", _views.delete_abteilung, name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
     path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
     # Templates require these for rendering:
@@ -235,6 +237,41 @@ class TestEditView:
     def test_get_permission_required_change(self, edit_view, model):
         """Assert that get_permission_required returns the expected permission."""
         assert edit_view.get_permission_required() == [f"{model._meta.app_label}.change_{model._meta.model_name}"]
+
+    @mock.patch("web.views.perms.has_delete_permission", mock.Mock(return_value=True))
+    def test_get_context_data_delete_url(self, edit_view, mock_super_method, rf, user):
+        """
+        Assert that get_context_data includes calls get_delete_url if the user
+        has the required permissions and the view is an edit view.
+        """
+        edit_view.request = mock.Mock(user=None)
+        with mock_super_method(edit_view.get_context_data, {}):
+            with mock.patch.object(edit_view, "get_delete_url") as delete_url_mock:
+                edit_view.get_context_data()
+                delete_url_mock.assert_called()
+
+    @mock.patch("web.views.perms.has_delete_permission", mock.Mock(return_value=True))
+    def test_get_context_data_delete_url_add(self, add_view, mock_super_method):
+        """
+        Assert get_context_data does not call get_delete_url if the view is an
+        add view.
+        """
+        with mock_super_method(add_view.get_context_data, {}):
+            with mock.patch.object(add_view, "get_delete_url") as delete_url_mock:
+                add_view.get_context_data()
+                delete_url_mock.assert_not_called()
+
+    @mock.patch("web.views.perms.has_delete_permission", mock.Mock(return_value=False))
+    def test_get_context_data_delete_url_no_perms(self, edit_view, mock_super_method):
+        """
+        Assert that get_context_data does not call get_delete_url if the user
+        does not have the required permissions.
+        """
+        edit_view.request = mock.Mock(user=None)
+        with mock_super_method(edit_view.get_context_data, {}):
+            with mock.patch.object(edit_view, "get_delete_url") as delete_url_mock:
+                edit_view.get_context_data()
+                delete_url_mock.assert_not_called()
 
 
 class TestNachweisEditView:
@@ -600,3 +637,54 @@ class TestHandler403:
             mock_render.assert_called()
             _args, kwargs = mock_render.call_args
             assert kwargs["context"]["content"] == expected
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("model", [_models.Nachweis, _models.Abteilung])
+class TestDeleteNachweisView:
+    @pytest.fixture
+    def obj(self, user, model):
+        if model == _models.Nachweis:
+            return NachweisFactory(user=user)
+        elif model == _models.Abteilung:
+            return AbteilungFactory(user=user)
+
+    @pytest.fixture
+    def delete_url(self, obj, model):
+        url_name = ""
+        if model == _models.Nachweis:
+            url_name = "nachweis_delete"
+        elif model == _models.Abteilung:
+            url_name = "abteilung_delete"
+        return reverse(url_name, kwargs={"pk": obj.pk})
+
+    @pytest.fixture
+    def set_user_perms(self, user, add_permission, model):
+        add_permission(user, "delete", model._meta)
+
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test_can_delete(self, client, obj, delete_url):
+        """Assert that a user can delete their own objects."""
+        response = client.post(delete_url)
+        assert response.status_code == 302
+        assert not _models.Nachweis.objects.filter(pk=obj.pk).exists()
+        assert response.url == reverse("nachweis_list")
+
+    @pytest.mark.usefixtures("set_user_perms", "login_superuser")
+    def test_cannot_delete_others(self, client, delete_url):
+        """Assert that a user cannot delete the objects of other users."""
+        response = client.post(delete_url)
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("login_user")
+    def test_delete_requires_permission(self, client, delete_url):
+        """Assert that only users with delete permission can delete."""
+        response = client.post(delete_url)
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test_requires_post(self, client, delete_url):
+        """Assert that deletion requires a POST request."""
+        response = client.get(delete_url)
+        assert response.status_code == 405
+

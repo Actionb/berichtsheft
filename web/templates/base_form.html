@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load django_bootstrap5 %}
+{% load static django_bootstrap5 %}
 
 {% block extrahead %}
 {{ block.super }}
@@ -9,6 +9,7 @@
         max-width: 200px;
     }
 </style>
+<script src="{% static 'web/js/delete.js' %}"></script>
 {% endblock extrahead %}
 
 {% block breadcrumbs %}
@@ -38,13 +39,21 @@
     {% if is_popup %}
     <input type="hidden" name="{{ is_popup_var }}" value="1">
     {% endif %}
-    {% block submit_row %}
-    <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle py-1">
-        {% block submit_row_buttons %}
-            {% bootstrap_button button_type="submit" content="Speichern" %}
-        {% endblock submit_row_buttons %}
-    </div>
-    {% endblock submit_row %}
 </form>
 {% endblock form %}
+
+{% block submit_row %}
+<div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle py-1">
+    {% block submit_row_buttons %}
+        {% bootstrap_button button_type="submit" content="Speichern" form="change-form" %}
+        {% if delete_url %}
+            <form method="post" action="{{ delete_url }}">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-danger" id="delete-btn" value="Löschen">
+            </form>
+        {% endif %}
+        {% endblock submit_row_buttons %}
+</div>
+{% endblock submit_row %}
+
 {% endblock main %}

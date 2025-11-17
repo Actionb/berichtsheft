@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Django Devserver",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "manage.py",
             "console": "integratedTerminal",
-            "args": "${command:pickArgs}"
+            "args": "runserver --noreload"
         }
     ]
 }

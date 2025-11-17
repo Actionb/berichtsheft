@@ -96,7 +96,7 @@ def set_user_perms(user, user_perms, add_permission):
     Fixture `user_perms` provides a 2-tuple of (<action>, <model>). Use test
     method parametrization to define the 2-tuple:
 
-        @pytest.mark.parametrize("user_perms", [("add", _models.Nachweis)])
+        @pytest.mark.parametrize("user_perms", [[("add", _models.Nachweis)]])
         @pytest.mark.usefixtures("user_perms", "set_user_perms")
         def test():
             ...

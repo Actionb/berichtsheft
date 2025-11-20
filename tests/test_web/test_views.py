@@ -28,6 +28,7 @@ urlpatterns = [
     path("nachweis/<path:pk>/delete/", _views.delete_nachweis, name="nachweis_delete"),
     path("abteilung/<path:pk>/delete/", _views.delete_abteilung, name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
+    path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.hard_delete, name="hard_delete"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
@@ -752,3 +753,47 @@ class TestHardDelete:
         """Assert that deletion requires a POST request."""
         response = client.get(hard_delete_url)
         assert response.status_code == 405
+
+
+class TestRestoreObject:
+    @pytest.fixture
+    def obj(self, user):
+        return NachweisFactory(user=user)
+
+    @pytest.fixture
+    def delete_obj(self, obj):
+        obj.delete()
+
+    @pytest.fixture
+    def restore_url(self, obj):
+        return reverse("restore_object", kwargs={"model_name": obj._meta.model_name, "pk": obj.pk})
+
+    @pytest.fixture
+    def restore_response(self, client, restore_url):
+        """Request to restore the test object and return the response."""
+        return client.get(restore_url)
+
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
+    def test(self, client, restore_url, obj):
+        """Assert that restore_object restores the expected object."""
+        response = client.get(restore_url)
+        obj.refresh_from_db()
+        assert response.status_code == 200
+        assert not obj.is_deleted
+
+    @pytest.mark.usefixtures("login_superuser", "delete_obj")
+    def test_user_can_only_restore_own(self, client, restore_url):
+        """Assert that user can only restore their own objects."""
+        assert client.get(restore_url).status_code == 403
+
+    @pytest.mark.usefixtures("login_user", "delete_obj")
+    def test_requires_permissions(self, client, restore_url):
+        """Assert that restoring requires the user to have certain permissions."""
+        assert client.get(restore_url).status_code == 403
+
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_can_only_restore_deleted_objects(self, client, restore_url):
+        """Assert that only soft-deleted objects can be restored."""
+        assert client.get(restore_url).status_code == 404

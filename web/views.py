@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
@@ -102,6 +102,7 @@ class RequireUserMixin(SingleObjectMixin):
 
 class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateView):
     delete_url_name = ""
+    restore_url_name = "restore_object"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,10 +129,16 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
     def get_delete_url(self):
         return reverse(self.delete_url_name, kwargs=self.kwargs)
 
+    def get_restore_url(self):
+        kwargs = {"model_name": self.opts.model_name, **self.kwargs}
+        return reverse(self.restore_url_name, kwargs=kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["add"] = self.add
         if not self.add and perms.has_delete_permission(self.request.user, self.opts):
             context["delete_url"] = self.get_delete_url()
+            context["restore_url"] = self.get_restore_url()
         return context
 
 
@@ -281,6 +288,20 @@ def hard_delete(request, model_name, pk):
     obj.hard_delete()
     messages.success(request, f"{opts.verbose_name} '{obj}' erfolgreich gelöscht.")
     return HttpResponse()
+
+
+def restore_object(request, model_name, pk):
+    """Restore the model instance with the given pk."""
+    model = apps.get_model("web", model_name)
+    obj = get_object_or_404(model.deleted_objects, pk=pk)
+
+    if obj.user != request.user or not perms.has_delete_permission(request.user, obj._meta):
+        raise PermissionDenied
+
+    obj.restore(strict=False)
+    message = f"{obj._meta.verbose_name} '{obj}' wiederhergestellt!"
+    messages.success(request, message)
+    return JsonResponse(data={"message": message})
 
 
 ################################################################################

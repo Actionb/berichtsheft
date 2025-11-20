@@ -824,23 +824,31 @@ class TestRestoreObject:
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
     def test(self, client, restore_url, obj):
         """Assert that restore_object restores the expected object."""
-        response = client.get(restore_url)
+        response = client.post(restore_url)
         obj.refresh_from_db()
         assert response.status_code == 200
         assert not obj.is_deleted
 
     @pytest.mark.usefixtures("login_superuser", "delete_obj")
-    def test_user_can_only_restore_own(self, client, restore_url):
-        """Assert that user can only restore their own objects."""
-        assert client.get(restore_url).status_code == 403
+    def test_user_restore_others(self, client, restore_url):
+        """Assert that a user cannot restore objects of another user."""
+        assert client.post(restore_url).status_code == 403
 
-    @pytest.mark.usefixtures("login_user", "delete_obj")
+    @pytest.mark.parametrize("user_perms", [[None]])
+    @pytest.mark.usefixtures("login_user", "delete_obj", "user_perms")
     def test_requires_permissions(self, client, restore_url):
         """Assert that restoring requires the user to have certain permissions."""
-        assert client.get(restore_url).status_code == 403
+        assert client.post(restore_url).status_code == 403
 
     @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
     def test_can_only_restore_deleted_objects(self, client, restore_url):
         """Assert that only soft-deleted objects can be restored."""
-        assert client.get(restore_url).status_code == 404
+        assert client.post(restore_url).status_code == 404
+
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
+    def test_get_not_allowed(self, client, restore_url):
+        """Assert that GET requests are not allowed."""
+        response = client.get(restore_url)
+        assert response.status_code == 405

@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import ModelFormMixin
@@ -325,6 +326,7 @@ class PapierkorbView(BaseViewMixin, ListView):
         return ctx
 
 
+@require_POST
 def restore_object(request, model_name, pk):
     """Restore the model instance with the given pk."""
     model = apps.get_model("web", model_name)

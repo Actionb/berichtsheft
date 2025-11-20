@@ -38,3 +38,5 @@
 - [ ] Adjust margin/padding on Abteilung change form
 - [x] Add 'view object' button to Papierkorb items
 - [ ] Customize 404 view
+- [ ] allow user to delete their account
+- [ ] auto-delete account after a time of inactivity (6 months?)

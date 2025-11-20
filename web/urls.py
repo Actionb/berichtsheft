@@ -20,7 +20,7 @@ urlpatterns = [
         views.NachweisEditView.as_view(extra_context={"add": False}),
         name="nachweis_change",
     ),
-    path("nachweis/<path:pk>/delete/", views.delete_nachweis, name="nachweis_delete"),
+    path("nachweis/<path:pk>/delete/", views.NachweisDeleteView.as_view(), name="nachweis_delete"),
     path("nachweis/<path:pk>/print/", views.NachweisPrintView.as_view(), name="nachweis_print"),
     path("nachweis/", views.NachweisListView.as_view(), name="nachweis_list"),
     path("abteilung/add/", views.AbteilungEditView.as_view(extra_context={"add": True}), name="abteilung_add"),
@@ -29,12 +29,12 @@ urlpatterns = [
         views.AbteilungEditView.as_view(extra_context={"add": False}),
         name="abteilung_change",
     ),
-    path("abteilung/<path:pk>/delete/", views.delete_abteilung, name="abteilung_delete"),
+    path("abteilung/<path:pk>/delete/", views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
     # Autocomplete
     path("abteilung_ac/", views.AbteilungAutocompleteView.as_view(), name="abteilung_ac"),
     # Other
     path("preview/", views.print_preview, name="print_preview"),
     path("trash/", views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", views.restore_object, name="restore_object"),
-    path("<str:model_name>/<int:pk>/hard_delete/", views.hard_delete, name="hard_delete"),
+    path("<str:model_name>/<int:pk>/hard_delete/", views.HardDeleteView.as_view(), name="hard_delete"),
 ]

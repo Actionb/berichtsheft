@@ -7,10 +7,10 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import ModelFormMixin
 from django.views.generic.list import MultipleObjectMixin
@@ -252,50 +252,60 @@ def handler403(request, exception=None):
 ################################################################################
 
 
-def _delete(request, pk, opts):
-    """Soft-delete a model instance when the user passes permission checks."""
-    if request.method.lower() != "post":
-        return HttpResponseNotAllowed(["post"])
-    if not perms.has_delete_permission(request.user, opts):
-        raise PermissionDenied
-    obj = get_object_or_404(opts.model.global_objects, pk=pk)
-    if obj.user != request.user:
-        raise PermissionDenied
-    obj.delete()
-    return redirect(reverse("nachweis_list"))
+class DeleteView(SingleObjectMixin, View):
+    """View for deleting objects via POST request."""
+
+    success_url = None
+    http_method_names = ["post"]  # only allow POST requests
+
+    def delete_object(self, obj):
+        """Delete the given object."""
+        obj.delete()
+
+    def delete_response(self, request, **kwargs):
+        """Create a response after a succesful deletion."""
+        return redirect(str(self.success_url))
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not perms.can_delete(request.user, obj):
+            raise PermissionDenied
+        self.delete_object(obj)
+        messages.success(request, f"{obj._meta.verbose_name} '{obj}' erfolgreich gelöscht.")
+        return self.delete_response(request)
 
 
-def delete_nachweis(request, pk):
-    """Delete a Nachweis instance."""
-    return _delete(request, pk, _models.Nachweis._meta)
+class NachweisDeleteView(DeleteView):
+    model = _models.Nachweis
+    success_url = reverse_lazy("nachweis_list")
 
 
-def delete_abteilung(request, pk):
-    """Delete an Abteilung instance."""
-    return _delete(request, pk, _models.Abteilung._meta)
+class AbteilungDeleteView(DeleteView):
+    model = _models.Abteilung
+    success_url = reverse_lazy("nachweis_list")  # TODO: set to abteilung_list
 
 
-def hard_delete(request, model_name, pk):
+class HardDeleteView(DeleteView):
     """
     Hard-delete a model instance.
 
     Called from the trash can page with an AJAX request.
 
-    Requires that the user has permissions and that the instance has already
-    been soft-deleted.
+    Requires that the user has permissions and that the instance has been
+    soft-deleted.
     """
-    if request.method.lower() != "post":
-        return HttpResponseNotAllowed(["post"])
-    model = apps.get_model("web", model_name)
-    opts = model._meta
-    if not perms.has_delete_permission(request.user, opts):
-        raise PermissionDenied
-    obj = get_object_or_404(model.deleted_objects, pk=pk)
-    if obj.user != request.user:
-        raise PermissionDenied
-    obj.hard_delete()
-    messages.success(request, f"{opts.verbose_name} '{obj}' erfolgreich gelöscht.")
-    return HttpResponse()
+
+    def delete_object(self, obj):
+        obj.hard_delete()
+
+    def delete_response(self, request, **kwargs):
+        return HttpResponse()
+
+    def get_object(self):
+        """Return the object to be deleted."""
+        model = apps.get_model("web", self.kwargs["model_name"])
+        # Use deleted_objects to only look in the soft-deleted objects:
+        return get_object_or_404(model.deleted_objects, pk=self.kwargs.get("pk"))
 
 
 class PapierkorbView(BaseViewMixin, ListView):

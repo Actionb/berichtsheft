@@ -25,12 +25,12 @@ urlpatterns = [
         _views.NachweisEditView.as_view(extra_context={"add": False}),
         name="nachweis_change",
     ),
-    path("nachweis/<path:pk>/delete/", _views.delete_nachweis, name="nachweis_delete"),
-    path("abteilung/<path:pk>/delete/", _views.delete_abteilung, name="abteilung_delete"),
+    path("nachweis/<path:pk>/delete/", _views.NachweisDeleteView.as_view(), name="nachweis_delete"),
+    path("abteilung/<path:pk>/delete/", _views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
     path("trash/", _views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
-    path("<str:model_name>/<int:pk>/hard_delete/", _views.hard_delete, name="hard_delete"),
+    path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
     path("logout/", dummy_view, name="logout"),
@@ -692,22 +692,25 @@ class TestDeleteNachweisView:
         assert response.url == reverse("nachweis_list")
 
     @pytest.mark.usefixtures("set_user_perms", "login_superuser")
-    def test_cannot_delete_others(self, client, delete_url):
+    def test_cannot_delete_others(self, client, delete_url, obj):
         """Assert that a user cannot delete the objects of other users."""
         response = client.post(delete_url)
         assert response.status_code == 403
+        obj.refresh_from_db()
 
     @pytest.mark.usefixtures("login_user")
-    def test_delete_requires_permission(self, client, delete_url):
+    def test_delete_requires_permission(self, client, delete_url, obj):
         """Assert that only users with delete permission can delete."""
         response = client.post(delete_url)
         assert response.status_code == 403
+        obj.refresh_from_db()
 
     @pytest.mark.usefixtures("set_user_perms", "login_user")
-    def test_requires_post(self, client, delete_url):
-        """Assert that deletion requires a POST request."""
+    def test_requires_post(self, client, delete_url, obj):
+        """Assert that GET requests are not allowed."""
         response = client.get(delete_url)
         assert response.status_code == 405
+        obj.refresh_from_db()
 
 
 @pytest.mark.django_db
@@ -746,32 +749,36 @@ class TestHardDelete:
         assert not _models.Nachweis.global_objects.filter(pk=obj.pk).exists()
 
     @pytest.mark.usefixtures("login_user")
-    def test_requires_permission(self, client, hard_delete_url):
-        """Assert that hard deletion requries delete permission."""
+    def test_requires_permission(self, client, hard_delete_url, obj):
+        """Assert that hard deletion requires delete permission."""
         response = client.post(hard_delete_url)
         assert response.status_code == 403
+        obj.refresh_from_db()
 
     @pytest.mark.usefixtures("set_user_perms", "login_superuser")
-    def test_cannot_delete_others(self, client, hard_delete_url):
+    def test_cannot_delete_others(self, client, hard_delete_url, obj):
         """Assert that a user cannot delete objects of another user."""
         response = client.post(hard_delete_url)
         assert response.status_code == 403
+        obj.refresh_from_db()
 
     @pytest.mark.parametrize("delete_object", [False])
     @pytest.mark.usefixtures("set_user_perms", "login_user")
-    def test_can_only_hard_delete_deleted_objects(self, client, hard_delete_url):
+    def test_can_only_hard_delete_deleted_objects(self, client, hard_delete_url, obj):
         """
         Assert that only objects that have been soft-deleted can be
         hard-deleted.
         """
         response = client.post(hard_delete_url)
         assert response.status_code == 404
+        obj.refresh_from_db()
 
     @pytest.mark.usefixtures("set_user_perms", "login_user")
-    def test_requires_post(self, client, hard_delete_url):
-        """Assert that deletion requires a POST request."""
+    def test_get_not_allowed(self, client, hard_delete_url, obj):
+        """Assert that GET requests are not allowed."""
         response = client.get(hard_delete_url)
         assert response.status_code == 405
+        obj.refresh_from_db()
 
 
 class TestPapierkorbView:

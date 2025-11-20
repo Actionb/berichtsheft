@@ -38,7 +38,7 @@ class Nachweis(SoftDeleteModel):
     kalenderwoche = models.PositiveSmallIntegerField(verbose_name="Kalenderwoche", blank=False, null=False)
     datum_start = models.DateField(verbose_name="Vom", blank=False, null=False)
     datum_ende = models.DateField(verbose_name="Bis", blank=False, null=False)
-    abteilung = models.ForeignKey("Abteilung", on_delete=models.PROTECT)
+    abteilung = models.ForeignKey("Abteilung", on_delete=models.SET_NULL, blank=True, null=True)
 
     fertig = models.BooleanField(verbose_name="Fertig geschrieben", default=False)
     # TODO: eingereicht_bei: ForeignKey -> Person?

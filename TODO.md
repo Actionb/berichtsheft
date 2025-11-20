@@ -32,7 +32,9 @@
 - [ ] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
 - [ ] Nachweis.nummer should be unique
 - [ ] use <int:> converter instead of <path:> for URLs
-- [ ] FIXME: Abteilung edit form has SoftDelete fields
-- [ ] Let `Nachweis.abteilung` be null -> no cascade when deleting Abteilung 
+- [x] FIXME: Abteilung edit form has SoftDelete fields
+- [x] Let `Nachweis.abteilung` be null -> no cascade when deleting Abteilung 
 - [x] Add hard-delete button to trashcan
 - [ ] Adjust margin/padding on Abteilung change form
+- [ ] Add 'view object' button to Papierkorb items
+- [ ] Customize 404 view

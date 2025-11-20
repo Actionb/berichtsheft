@@ -19,8 +19,16 @@ function getCookie(name) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const deleteAllButton = document.getElementById("delete-all")
+    if (deleteAllButton) {
+        deleteAllButton.addEventListener("click", (event) => {
+            if (!confirm("Sind Sie sicher, dass Sie alle Objekte löschen möchten?")) {
+                event.preventDefault()
+            }
+        })
+    }
+
     const deleteButtons = document.querySelectorAll(".delete-btn")
-    
     deleteButtons.forEach(button => {
         button.addEventListener("click", (event) => {
             event.preventDefault()

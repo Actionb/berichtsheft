@@ -327,6 +327,22 @@ class PapierkorbView(BaseViewMixin, ListView):
 
 
 @require_POST
+def empty_trash(request):
+    """Empty the recycle bin of the current user."""
+    deleted_objects = collect_deleted_objects(request.user)
+
+    # Check that the user has delete permission for every deleted object:
+    for qs in deleted_objects:
+        if not perms.has_delete_permission(request.user, qs.model._meta):
+            raise PermissionDenied
+
+    for qs in deleted_objects:
+        qs.hard_delete()
+    messages.success(request, "Papierkorb geleert!")
+    return redirect("nachweis_list")
+
+
+@require_POST
 def restore_object(request, model_name, pk):
     """Restore the model instance with the given pk."""
     model = apps.get_model("web", model_name)

@@ -32,6 +32,7 @@ urlpatterns = [
     path("trash/", _views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
+    path("trash/empty/", _views.empty_trash, name="empty_trash"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
     path("logout/", dummy_view, name="logout"),
@@ -852,3 +853,51 @@ class TestRestoreObject:
         """Assert that GET requests are not allowed."""
         response = client.get(restore_url)
         assert response.status_code == 405
+
+
+class TestEmptyTrashView:
+    @pytest.fixture
+    def obj(self, user):
+        return NachweisFactory(user=user)
+
+    @pytest.fixture
+    def delete_obj(self, obj):
+        obj.delete()
+
+    @pytest.fixture
+    def empty_url(self):
+        return reverse("empty_trash")
+
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
+    def test_deletes_all(self, client, empty_url, obj):
+        """Assert that the view hard-deletes all soft-deleted objects."""
+        response = client.post(empty_url)
+        assert not _models.Nachweis.deleted_objects.exists()
+        assert response.status_code == 302
+        assert response.url == reverse("nachweis_list")
+
+    @pytest.mark.usefixtures("login_superuser", "delete_obj")
+    def test_cannot_delete_others(self, client, empty_url, obj):
+        """
+        Assert that the view does not touch the soft-deleted objects of another
+        user.
+        """
+        client.post(empty_url)
+        obj.refresh_from_db()
+
+    @pytest.mark.parametrize("user_perms", [None])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
+    def test_requires_permissions(self, client, empty_url, obj):
+        """Assert that the view requires delete permissions."""
+        response = client.post(empty_url)
+        assert response.status_code == 403
+        obj.refresh_from_db()
+
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
+    def test_requires_post(self, client, empty_url, obj):
+        """Assert that the view requires a POST request."""
+        response = client.get(empty_url)
+        assert response.status_code == 405
+        obj.refresh_from_db()

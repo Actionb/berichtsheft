@@ -37,4 +37,5 @@ urlpatterns = [
     path("trash/", views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", views.HardDeleteView.as_view(), name="hard_delete"),
+    path("trash/empty/", views.empty_trash, name="empty_trash"),
 ]

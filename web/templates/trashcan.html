@@ -9,7 +9,15 @@
 {% endblock extrahead %}
 
 {% block main %}
-<h1>Papierkorb</h1>
+<div class="d-flex justify-content-between">
+    <h1>Papierkorb</h1>
+    {% if trash_count > 0 %}
+    <form method="post" id="delete-all-form" action="{% url 'empty_trash' %}">
+        {% csrf_token %}
+        <button type="submit" id="delete-all" class="btn btn-outline-danger m-2 delete-all">Papierkorb leeren</button>
+    </form>
+    {% endif %}
+</div>
 {% if trash_count > 0 %}
 {% for model_opts, deleted_queryset in deleted_objects %}
     {% if deleted_queryset.exists %}

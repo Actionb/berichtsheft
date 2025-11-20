@@ -10,6 +10,7 @@
     }
 </style>
 <script src="{% static 'web/js/delete.js' %}"></script>
+<script src="{% static 'web/js/restore.js' %}"></script>
 {% endblock extrahead %}
 
 {% block breadcrumbs %}
@@ -28,30 +29,41 @@
 {% block main %}
 <div class="border rounded">
     <h1 class="m-2">{{ opts.verbose_name }} {% if add %}erstellen{% else %}bearbeiten{% endif %}</h1>
-{% block form %}
-<form method="post" id="change-form" class="mb-5">
-    {% block csrf_token %}{% csrf_token %}{% endblock csrf_token %}
+    {% block form %}
+    <form method="post" id="change-form" class="mb-5">
+        {% block csrf_token %}{% csrf_token %}{% endblock csrf_token %}
     
-    {% block form_fields %}
-        {% bootstrap_form form %}
-    {% endblock form_fields %}
-
-    {% if is_popup %}
-    <input type="hidden" name="{{ is_popup_var }}" value="1">
-    {% endif %}
-</form>
-{% endblock form %}
+        {% block form_fields %}
+            {% bootstrap_form form %}
+        {% endblock form_fields %}
+    
+        {% if is_popup %}
+        <input type="hidden" name="{{ is_popup_var }}" value="1">
+        {% endif %}
+    </form>
+    {% endblock form %}
 </div>
 
 {% block submit_row %}
 <div id="submit-row" class="d-flex justify-content-center gap-3 fixed-bottom bg-primary-subtle py-1">
     {% block submit_row_buttons %}
         {% bootstrap_button button_type="submit" content="Speichern" form="change-form" %}
-        {% if delete_url %}
-            <form method="post" action="{{ delete_url }}">
-                {% csrf_token %}
-                <input type="submit" class="btn btn-danger" id="delete-btn" value="Löschen">
-            </form>
+        {% if not add %}
+            {% if object.is_deleted and restore_url %}
+                <a href="{{ restore_url }}" class="btn btn-success restore-btn">Wiederherstellen</a>
+                {% comment %}
+                <form method="post" action="{{ restore_url }}">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-success restore-btn" value="Wiederherstellen">
+                </form>
+                {% endcomment %}
+            {% endif %}
+            {% if not object.is_deleted and delete_url %}
+                <form method="post" action="{{ delete_url }}">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-danger" id="delete-btn" value="Löschen">
+                </form>
+            {% endif %}
         {% endif %}
         {% endblock submit_row_buttons %}
 </div>

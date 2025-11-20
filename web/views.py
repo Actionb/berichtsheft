@@ -148,6 +148,7 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
     fields = forms.ALL_FIELDS
     success_url = reverse_lazy("nachweis_list")
     delete_url_name = "nachweis_delete"
+    queryset = _models.Nachweis.global_objects
 
     def get_form_class(self):
         return forms.modelform_factory(
@@ -215,6 +216,7 @@ class AbteilungEditView(PopupResponseMixin, EditView):
     fields = ["name"]
     success_url = reverse_lazy("nachweis_list")
     delete_url_name = "abteilung_delete"
+    queryset = _models.Abteilung.global_objects
 
 
 def print_preview(request):

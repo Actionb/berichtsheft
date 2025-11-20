@@ -36,5 +36,5 @@
 - [x] Let `Nachweis.abteilung` be null -> no cascade when deleting Abteilung 
 - [x] Add hard-delete button to trashcan
 - [ ] Adjust margin/padding on Abteilung change form
-- [ ] Add 'view object' button to Papierkorb items
+- [x] Add 'view object' button to Papierkorb items
 - [ ] Customize 404 view

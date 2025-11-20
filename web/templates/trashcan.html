@@ -22,7 +22,10 @@
                     <div class="d-flex justify-content-between">
                         <span class="card-text">{{ obj }}</span>
                         <div>
-                            <a href="{% url 'restore_object' model_opts.model_name obj.pk %}" class="btn btn-primary restore-btn">Wiederherstellen</a>
+                            {% with change_url_name=model_opts.model_name|add:"_change" %}
+                            <a href="{% url change_url_name obj.pk %}" class="btn btn-outline-primary" target="_blank">Anzeigen</a>
+                            {% endwith %}
+                            <a href="{% url 'restore_object' model_opts.model_name obj.pk %}" class="btn btn-outline-success restore-btn">Wiederherstellen</a>
                             <a href="{% url 'hard_delete' model_opts.model_name obj.pk %}" class="btn btn-danger delete-btn ms-5">Löschen</a>
                         </div>
                     </div>

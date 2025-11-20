@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from django.contrib.auth import SESSION_KEY
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import path, reverse
@@ -98,12 +99,20 @@ class TestBaseViewMixin:
                 assert context["submit_button_text"] == "bar"
                 assert context["trash_count"] == 42
 
-    @pytest.mark.usefixtures("mock_collect")
-    def test_get_trash_count(self, user, deleted_objects):
+    @pytest.mark.usefixtures("mock_collect", "login_user")
+    def test_get_trash_count(self, rf, deleted_objects, user):
         """Assert that get_trash_count counts the number of deleted objects."""
         view = _views.BaseViewMixin()
-        view.request = mock.Mock(user=user)
+        view.request = rf.get("/")
+        view.request.user = user
         assert view.get_trash_count() == deleted_objects[0]
+
+    def test_get_trash_count_unauthenticated_user(self, rf):
+        """Assert that get_trash_count returns 0 if the user is not authenticated."""
+        view = _views.BaseViewMixin()
+        view.request = rf.get("/")
+        view.request.user = AnonymousUser()
+        assert view.get_trash_count() == 0
 
 
 class TestModelViewMixin:

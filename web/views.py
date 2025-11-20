@@ -42,6 +42,8 @@ class BaseViewMixin:
 
     def get_trash_count(self):
         """Return the number of items in the trash can for the current user."""
+        if not self.request.user.is_authenticated:
+            return 0
         return sum(qs.count() for qs in collect_deleted_objects(self.request.user))
 
     def get_context_data(self, **kwargs):

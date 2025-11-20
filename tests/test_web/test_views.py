@@ -798,14 +798,45 @@ class TestPapierkorbView:
         response = client.get(reverse("trash"))
         assert response.status_code == 200
 
-    def test_get_context_data_deleted_objects(self, mock_super_method, deleted_objects):
-        """Assert that get_context_data adds the deleted_objects item."""
+    @pytest.mark.django_db
+    def test_get_deleted_objects(self):
+        """Assert that get_deleted_objects returns the expected items."""
+        obj = NachweisFactory()
+        obj.delete()
         view = _views.PapierkorbView()
-        with mock_super_method(view.get_context_data, {}):
-            with mock.patch.object(view, "get_queryset") as mock_get_queryset:
-                mock_get_queryset.return_value = deleted_objects[1]
-                ctx = view.get_context_data()
-                assert ctx["deleted_objects"] == [(qs.model._meta, qs) for qs in deleted_objects[1]]
+        with mock.patch.object(view, "get_queryset") as mock_get_queryset:
+            mock_get_queryset.return_value = [_models.Nachweis.deleted_objects]
+            with mock.patch.object(view, "get_obj_info", new=mock.Mock(return_value=[("foo", "bar")])):
+                deleted_objects = view.get_deleted_objects()
+                assert len(deleted_objects) == 1
+                assert len(deleted_objects[0]) == 3
+                opts, count, object_info = deleted_objects[0]
+                assert opts == _models.Nachweis._meta
+                assert count == _models.Nachweis.deleted_objects.count()
+                assert object_info == [(obj, [("foo", "bar")])]
+
+    @pytest.mark.django_db
+    def test_get_obj_info_nachweis(self):
+        """
+        Assert that get_obj_info returns the expected data for a Nachweis
+        object.
+        """
+        obj = NachweisFactory(
+            nummer=42,
+            datum_start=date(2025, 11, 17),
+            datum_ende=date(2025, 11, 21),
+            betrieb="Heute habe ich Tests geschrieben für die Anwendung, die ich im Rahmen des aktuellen Ausbildungsabschnittes entwickele.",
+            schule="(Keine Schule - Ferien)",
+            fertig=True,
+            unterschrieben=False,
+        )
+        view = _views.PapierkorbView()
+        assert view.get_obj_info(obj) == [
+            ("Nummer", 42),
+            ("Datum", "17. Nov 2025 - 21. Nov 2025"),
+            ("Aktivität", "Heute habe ich Tests geschrieben für die Anwendung, die ich ..."),
+            ("Unterschrieben", "❌"),
+        ]
 
 
 class TestRestoreObject:

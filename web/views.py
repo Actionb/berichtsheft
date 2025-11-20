@@ -320,9 +320,45 @@ class PapierkorbView(BaseViewMixin, ListView):
     def get_queryset(self):
         return collect_deleted_objects(self.request.user)
 
+    def get_deleted_objects(self):
+        """Return a list of deleted objects, plus additional info."""
+        deleted_objects = []
+        for qs in self.get_queryset():
+            objects = []
+            for obj in qs.all():
+                objects.append((obj, self.get_obj_info(obj)))
+            if objects:
+                deleted_objects.append((qs.model._meta, qs.count(), objects))
+        return deleted_objects
+
+    def get_obj_info(self, obj):
+        """
+        Return some info for the overview about the given object.
+
+        The info consists of a list of 2-tuples: [(<header>, <value>)].
+        """
+        match obj:
+            case _models.Nachweis():
+                betrieb_split = obj.betrieb.split(" ")
+                betrieb = " ".join(betrieb_split[:10])
+                if len(betrieb_split) > 10:
+                    betrieb += " ..."
+                if obj.datum_ende and obj.datum_ende != obj.datum_start:
+                    datum = f"{obj.datum_start.strftime('%d. %b %Y')} - {obj.datum_ende.strftime('%d. %b %Y')}"
+                else:  # pragma: no cover
+                    datum = obj.datum_start.strftime("%d. %b %Y")
+                return [
+                    ("Nummer", obj.nummer),
+                    ("Datum", datum),
+                    ("Aktivität", betrieb),
+                    ("Unterschrieben", "✅" if obj.unterschrieben else "❌"),
+                ]
+            case _:  # pragma: no cover
+                return []
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["deleted_objects"] = [(qs.model._meta, qs) for qs in self.get_queryset()]
+        ctx["deleted_objects"] = self.get_deleted_objects()
         return ctx
 
 

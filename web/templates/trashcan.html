@@ -19,16 +19,14 @@
     {% endif %}
 </div>
 {% if trash_count > 0 %}
-{% for model_opts, deleted_queryset in deleted_objects %}
-    {% if deleted_queryset.exists %}
+{% for model_opts, count, deleted_queryset in deleted_objects %}
     <div class="model-deleted-objects p-2">
-        <h2>{{ model_opts.verbose_name }}: <span class="model-count">{{ deleted_queryset.count }}</span></h2>
-        {% for obj in deleted_queryset %}
+        <h2>{{ model_opts.verbose_name }}: <span class="model-count">{{ count }}</span></h2>
+        {% for obj, info in deleted_queryset %}
             <div class="card mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">{{ model_opts.verbose_name }}</h5>
                     <div class="d-flex justify-content-between">
-                        <span class="card-text">{{ obj }}</span>
+                        <h5 class="card-title my-auto">{{ obj }}</h5>
                         <div>
                             {% with change_url_name=model_opts.model_name|add:"_change" %}
                             <a href="{% url change_url_name obj.pk %}" class="btn btn-outline-primary" target="_blank">Anzeigen</a>
@@ -37,11 +35,17 @@
                             <a href="{% url 'hard_delete' model_opts.model_name obj.pk %}" class="btn btn-danger delete-btn ms-5">Löschen</a>
                         </div>
                     </div>
+                    {% if info %}
+                    {% for header, value in info %}
+                        <div>
+                            <strong>{{ header }}:</strong> {{ value }}
+                        </div>
+                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
     </div>
-    {% endif %}
 {% endfor %}
 {% else %}
     <p class="p-2">Der Papierkorb ist leer.</p>

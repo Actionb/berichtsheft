@@ -13,8 +13,16 @@
 <script src="{% static 'web/js/restore.js' %}"></script>
 {% endblock extrahead %}
 
+{% block alerts %}
+{% if object.is_deleted %}
+    <div class="alert alert-warning text-center" role="alert">
+        Dieses Objekt wurde gelöscht und befindet sich im Papierkorb.
+    </div>
+{% endif %}
+{% endblock alerts %}
+
 {% block breadcrumbs %}
-<nav class="container" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+<nav class="container my-3" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="{% url 'nachweis_list' %}" class="link-underline link-underline-opacity-0" title="Zurück zur Nachweis Übersicht">

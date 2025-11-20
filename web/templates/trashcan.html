@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'web/js/restore.js' %}"></script>
+<script src="{% static 'web/js/hard_delete.js' %}"></script>
+{% endblock extrahead %}
+
+{% block main %}
+<h1>Papierkorb</h1>
+{% if trash_count > 0 %}
+{% for model_opts, deleted_queryset in deleted_objects %}
+    {% if deleted_queryset.exists %}
+    <div class="model-deleted-objects p-2">
+        <h2>{{ model_opts.verbose_name }}: <span class="model-count">{{ deleted_queryset.count }}</span></h2>
+        {% for obj in deleted_queryset %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ model_opts.verbose_name }}</h5>
+                    <div class="d-flex justify-content-between">
+                        <span class="card-text">{{ obj }}</span>
+                        <div>
+                            <a href="{% url 'restore_object' model_opts.model_name obj.pk %}" class="btn btn-primary restore-btn">Wiederherstellen</a>
+                            <a href="{% url 'hard_delete' model_opts.model_name obj.pk %}" class="btn btn-danger delete-btn ms-5">Löschen</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endfor %}
+{% else %}
+    <p class="p-2">Der Papierkorb ist leer.</p>
+{% endif %}
+{% endblock main %}

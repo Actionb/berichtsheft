@@ -22,6 +22,7 @@ from web import forms as _forms
 from web import models as _models
 from web.utils import perms
 from web.utils.date import count_week_numbers
+from web.utils.models import collect_deleted_objects
 
 
 class AutocompleteView(BaseAutocompleteView):
@@ -290,6 +291,21 @@ def hard_delete(request, model_name, pk):
     obj.hard_delete()
     messages.success(request, f"{opts.verbose_name} '{obj}' erfolgreich gelöscht.")
     return HttpResponse()
+
+
+class PapierkorbView(BaseViewMixin, ListView):
+    """Recycle bin from which the user can hard-delete objects or restore them."""
+
+    template_name = "trashcan.html"
+    title = "Papierkorb"
+
+    def get_queryset(self):
+        return collect_deleted_objects(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["deleted_objects"] = [(qs.model._meta, qs) for qs in self.get_queryset()]
+        return ctx
 
 
 def restore_object(request, model_name, pk):

@@ -8,6 +8,8 @@ from django.contrib.contenttypes.models import ContentType
 
 from web import models as _models
 
+from . import model_factory as _factories
+
 ################################################################################
 # MOCKS
 ################################################################################
@@ -172,3 +174,32 @@ def nachweis_permission(nachweis_model, nachweis_actions):
     """
     opts = nachweis_model._meta
     return f"{opts.app_label}.{get_permission_codename(nachweis_actions, opts)}"
+
+
+################################################################################
+# TEST DATA FIXTURES
+################################################################################
+
+
+@pytest.fixture
+def objects_to_delete(user):
+    """Create the objects to be deleted."""
+    objs = []
+    for _ in range(3):
+        objs.append(_factories.NachweisFactory(user=user))
+        objs.append(_factories.AbteilungFactory(user=user))
+    return objs
+
+
+@pytest.fixture
+def deleted_objects(objects_to_delete):
+    """
+    Delete some objects and return the count of deleted objects and a list
+    of deleted_objects querysets for the different models.
+    """
+    for obj in objects_to_delete:
+        obj.delete()
+    return (
+        len(objects_to_delete),
+        [_models.Nachweis.deleted_objects, _models.Abteilung.deleted_objects],
+    )

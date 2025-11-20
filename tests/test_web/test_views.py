@@ -28,6 +28,7 @@ urlpatterns = [
     path("nachweis/<path:pk>/delete/", _views.delete_nachweis, name="nachweis_delete"),
     path("abteilung/<path:pk>/delete/", _views.delete_abteilung, name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
+    path("trash/", _views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.hard_delete, name="hard_delete"),
     # Templates require these for rendering:
@@ -753,6 +754,23 @@ class TestHardDelete:
         """Assert that deletion requires a POST request."""
         response = client.get(hard_delete_url)
         assert response.status_code == 405
+
+
+class TestPapierkorbView:
+    @pytest.mark.usefixtures("login_user")
+    def test(self, client):
+        """Assert that the view can be accessed."""
+        response = client.get(reverse("trash"))
+        assert response.status_code == 200
+
+    def test_get_context_data_deleted_objects(self, mock_super_method, deleted_objects):
+        """Assert that get_context_data adds the deleted_objects item."""
+        view = _views.PapierkorbView()
+        with mock_super_method(view.get_context_data, {}):
+            with mock.patch.object(view, "get_queryset") as mock_get_queryset:
+                mock_get_queryset.return_value = deleted_objects[1]
+                ctx = view.get_context_data()
+                assert ctx["deleted_objects"] == [(qs.model._meta, qs) for qs in deleted_objects[1]]
 
 
 class TestRestoreObject:

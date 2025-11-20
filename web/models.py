@@ -49,7 +49,7 @@ class Nachweis(SoftDeleteModel):
     class Meta:
         verbose_name = "Nachweis"
         verbose_name_plural = "Nachweise"
-        ordering = ["ausbildungswoche"]
+        ordering = ["-ausbildungswoche"]
 
     def __str__(self):
         return f"Nachweis #{self.nummer}"

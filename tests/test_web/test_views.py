@@ -820,11 +820,6 @@ class TestRestoreObject:
     def restore_url(self, obj):
         return reverse("restore_object", kwargs={"model_name": obj._meta.model_name, "pk": obj.pk})
 
-    @pytest.fixture
-    def restore_response(self, client, restore_url):
-        """Request to restore the test object and return the response."""
-        return client.get(restore_url)
-
     @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms", "delete_obj")
     def test(self, client, restore_url, obj):

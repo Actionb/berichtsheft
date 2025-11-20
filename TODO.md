@@ -40,3 +40,6 @@
 - [ ] Customize 404 view
 - [ ] allow user to delete their account
 - [ ] auto-delete account after a time of inactivity (6 months?)
+- [ ] support other Nachweis intervals besides weekly (daily, monthly, free)
+- [ ] add a dashboard / start page
+- [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview

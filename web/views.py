@@ -40,10 +40,15 @@ class BaseViewMixin:
     title: str = ""
     submit_button_text = "Weiter"
 
+    def get_trash_count(self):
+        """Return the number of items in the trash can for the current user."""
+        return sum(qs.count() for qs in collect_deleted_objects(self.request.user))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = self.title
         context["submit_button_text"] = self.submit_button_text
+        context["trash_count"] = self.get_trash_count()
         return context
 
 

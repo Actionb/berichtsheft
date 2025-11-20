@@ -79,13 +79,31 @@ class TestAbteilungAutocompleteView:
 
 
 class TestBaseViewMixin:
+    @pytest.fixture
+    def mock_collect(self, deleted_objects):
+        """Mock the collect_deleted_objects function."""
+        with mock.patch("web.views.collect_deleted_objects") as m:
+            querysets = deleted_objects[1]
+            m.return_value = [(qs.model, qs) for qs in querysets]
+
     def test_get_context_data(self, mock_super_method):
-        """Assert that the title is added to the context data."""
+        """Assert that the expected items are added to the context data."""
         view = _views.BaseViewMixin()
         view.title = "foo"
+        view.submit_button_text = "bar"
         with mock_super_method(_views.BaseViewMixin.get_context_data, {}):
-            context = view.get_context_data()
-            assert context["title"] == "foo"
+            with mock.patch.object(view, "get_trash_count", new=mock.Mock(return_value=42)):
+                context = view.get_context_data()
+                assert context["title"] == "foo"
+                assert context["submit_button_text"] == "bar"
+                assert context["trash_count"] == 42
+
+    @pytest.mark.usefixtures("mock_collect")
+    def test_get_trash_count(self, user, deleted_objects):
+        """Assert that get_trash_count counts the number of deleted objects."""
+        view = _views.BaseViewMixin()
+        view.request = mock.Mock(user=user)
+        assert view.get_trash_count() == deleted_objects[0]
 
 
 class TestModelViewMixin:

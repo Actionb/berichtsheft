@@ -1,28 +1,38 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block extrahead %}
+<style>
+    .data-row {
+        max-height: 113px;
+    }
+</style>
+{% endblock extrahead %}
+
+{% block mainclass %}container-fluid px-5{% endblock mainclass %}
 
 {% block main %}
+<h1>Nachweis Liste</h1>
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Jahr</th>
-            <th>Woche</th>
-            <th>Zeitraum</th>
-            <th>Betriebliche Tätigkeit</th>
-            <th>Berufsschule</th>
-            <th>Geschrieben</th>
-            <th>Eingereicht bei</th>
-            <th>Unterschrieben</th>
-            <th>Aktionen</th>
+            <th class="sticky-top z-2">Jahr</th>
+            <th class="sticky-top z-2">Woche</th>
+            <th class="sticky-top z-2">Zeitraum</th>
+            <th class="sticky-top z-2">Betriebliche Tätigkeit</th>
+            <th class="sticky-top z-2">Berufsschule</th>
+            <th class="sticky-top z-2">Fertig Geschrieben</th>
+            <th class="sticky-top z-2">Eingereicht bei</th>
+            <th class="sticky-top z-2">Unter-<br>schrieben</th>
+            <th class="sticky-top z-2">Aktionen</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in object_list %}
-        <tr {% if not obj.unterschrieben %}class="table-warning"{% endif %}>
+        <tr {% if not obj.unterschrieben %}class="table-warning data-row"{% endif %}>
             <td class="td-jahr">{{ obj.jahr }}</td>
             <td class="td-ausbildungswoche">{{ obj.ausbildungswoche }}</td>
-            <td class="td-zeitraum">{{ obj.datum_start }} - {{ obj.datum_ende }}</td>
-            <td class="td-betrieb" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="left" data-bs-content="{{ obj.betrieb }}">{{ obj.betrieb|linebreaksbr|truncatewords:10 }}</td>
+            <td class="td-zeitraum"><span class="text-nowrap">{{ obj.datum_start }}</span><br><span class="text-nowrap"> {{ obj.datum_ende }}</span></td>
+            <td class="td-betrieb" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="right" data-bs-content="{{ obj.betrieb }}">{{ obj.betrieb|linebreaksbr|truncatewords:30 }}</td>
             <td class="td-schule" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="right" data-bs-content="{{ obj.schule }}">{{ obj.schule|linebreaksbr|truncatewords:10 }}</td>
             <td class="td-fertig text-center{% if obj.fertig %} table-success{% else %} table-danger{% endif %}">
                 {% if obj.fertig %}
@@ -40,23 +50,41 @@
                 {% endif %}
             </td>
             <td>
-                <div class="d-flex justify-content-between gap-2">
-                    <a href="{% url 'nachweis_change' obj.pk %}" class="btn btn-sm btn-primary">Bearbeiten</a>
-                    <a href="{% url 'nachweis_print' obj.pk %}" class="btn btn-sm btn-primary">Drucken</a>
-                </div>
+                <div class="my-2"><a href="{% url 'nachweis_change' obj.pk %}" class="btn btn-sm btn-primary w-100">Bearbeiten</a></div>
+                <div class="my-2"><a href="{% url 'nachweis_print' obj.pk %}" class="btn btn-sm btn-primary w-100">Drucken</a></div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-{% block add_button %}
-<div class="position-sticky start-0 bottom-0 ps-3 pb-3">
+
+{% block sticky-bottom %}
+<div class="d-flex justify-content-between position-sticky start-0 bottom-0 p-3 border rounded bg-light">
     <a href="{% url 'nachweis_add' %}" class="btn btn-success">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         <span>Nachweis hinzufügen</span>
     </a>
+
+    <div class="pagination-container">
+    <nav aria-label="Search results pages" class="d-flex align-items-center">
+        <span class="me-3">Seitenauswahl:</span>
+        <ul class="pagination mb-0">
+            {% for i in page_range %}
+            {% if i == page_obj.number %}
+                {% with is_current=True %}
+                <li class="page-item"><a class="page-link disabled" href="#">{{i}}</a></li>
+                {% endwith %}
+            {% elif i == "…" %}
+                <li class="page-item"><span class="page-link disabled">…</span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+    </div>
 </div>
-{% endblock add_button %}
+{% endblock sticky-bottom %}
 {% endblock main %}
 
 {% block extrascript %}

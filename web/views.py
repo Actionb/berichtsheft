@@ -211,6 +211,13 @@ class NachweisListView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, 
     template_name = "nachweis_list.html"
     title = "Nachweis Liste"
     permission_required = perms.get_perm("view", _models.Nachweis._meta)
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        paginator = ctx["paginator"]
+        ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
+        return ctx
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):

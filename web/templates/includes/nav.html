@@ -38,13 +38,7 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
         </svg>
-        <span class="nav-text">
-            {% if user.is_authenticated %}
-                {{ user.get_username }}
-            {% else %}
-                Anmelden
-            {% endif %}
-        </span>
+        <span class="nav-text">{{ user.get_username }}</span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
         <li>

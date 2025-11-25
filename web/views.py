@@ -109,6 +109,22 @@ class RequireUserMixin(SingleObjectMixin):
         return obj
 
 
+class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):
+    paginate_by = 10
+
+    def get_permission_required(self):
+        if self.permission_required is None:
+            # Require 'view' permission for this model by default:
+            return [perms.get_perm("view", self.model._meta)]
+        return super().get_permission_required()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        paginator = ctx["paginator"]
+        ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
+        return ctx
+
+
 class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateView):
     delete_url_name = ""
     restore_url_name = "restore_object"
@@ -206,18 +222,10 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
         return initial
 
 
-class NachweisListView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):
+class NachweisListView(ChangelistView):
     model = _models.Nachweis
     template_name = "nachweis_list.html"
-    title = "Nachweis Liste"
-    permission_required = perms.get_perm("view", _models.Nachweis._meta)
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        paginator = ctx["paginator"]
-        ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
-        return ctx
+    title = "Meine Nachweise"
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):

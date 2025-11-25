@@ -29,7 +29,11 @@
                 {% csrf_token %}
             {% endblock csrf_token %}
             {% block form_fields %}
-                {% bootstrap_form form required_css_class="fw-semibold" %}
+                <div class="container">
+                    {% for field in form %}
+                        {% bootstrap_field field required_css_class="fw-semibold" %}
+                    {% endfor %}
+                </div>
             {% endblock form_fields %}
             {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
         </form>

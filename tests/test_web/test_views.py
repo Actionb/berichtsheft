@@ -183,6 +183,47 @@ class TestRequireUserMixin:
             assert view.get_object() == obj
 
 
+class TestChangelistView:
+    @pytest.fixture
+    def view(self, view_class):
+        return view_class()
+
+    @pytest.fixture
+    def view_class(self):
+        return type("DummyView", (_views.ChangelistView,), {"model": _models.Nachweis})
+
+    @pytest.mark.parametrize(
+        "permission_required, expected",
+        [
+            (None, ("web.view_nachweis",)),
+            ("foo.bar", ("foo.bar",)),
+        ],
+    )
+    def test_get_permission_required_defaults_view(self, view, permission_required, expected):
+        """
+        Assert that get_permission_required uses the 'view' permission if
+        'permission_required' is None.
+        """
+        view.permission_required = permission_required
+        assert view.get_permission_required() == expected
+
+    def test_get_result_rows(self):
+        """Assert that get_result_rows returns the expected results."""
+        assert False
+
+    def test_get_result_headers(self):
+        """Assert that get_result_headers returns the expected headers."""
+        assert False
+
+    def test_get_context_data_adds_pagination(self):
+        """Assert get_context_data adds context items for the pagination."""
+        assert False
+
+    def test_get_context_data_adds_results(self):
+        """Assert that get_context_data adds context items for the results."""
+        assert False
+
+
 class TestEditView:
     @pytest.fixture
     def model(self):

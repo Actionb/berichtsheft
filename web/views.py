@@ -74,6 +74,8 @@ class FilterUserMixin(MultipleObjectMixin):
     _user_attr = "user"
 
     def get_queryset(self):
+        # TODO: should this be implemented as a queryset manager?
+        # -> model.user_objects.all()
         return super().get_queryset().filter(**{self._user_attr: self.request.user})
 
 

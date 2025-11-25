@@ -111,7 +111,7 @@ class RequireUserMixin(SingleObjectMixin):
         return obj
 
 
-class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ListView):
+class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, ListView):
     paginate_by = 10
 
     def get_permission_required(self):

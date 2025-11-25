@@ -3,12 +3,13 @@
         <a class="nav-link" href=""><i class="bi bi-house"></i> Dashboard</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'nachweis_list' %}" title="Meine Nachweise"><i class="bi bi-file-earmark-text"></i> Nachweise</a>
+        <a class="nav-link"
+           href="{% url 'nachweis_list' %}"
+           title="Meine Nachweise"><i class="bi bi-file-earmark-text"></i> Nachweise</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="" title="Meine Abteilungen"><i class="bi bi-diagram-2"></i>
-            Abteilungen</a>
-    </li>
+        <a class="nav-link" href="" title="Meine Abteilungen">
+            <i class="bi bi-diagram-2"></i> Abteilungen</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{% url 'trash' %}">
@@ -18,24 +19,53 @@
         </a>
     </li>
 </ul>
-
 <div id="user-account" class="btn-group ms-auto" role="group">
-    <button type="button" class="btn btn-outline-primary p-2 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Benutzerkonto">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-            class="feather feather-user">
+    <button type="button"
+            class="btn btn-outline-primary p-2 dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="Benutzerkonto">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="24"
+             height="24"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.5"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             class="feather feather-user">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
         </svg>
-        <span class="nav-text">{% if user.is_authenticated %}{{ user.get_username }}{% else %}Anmelden{% endif %}</span>
+        <span class="nav-text">
+            {% if user.is_authenticated %}
+                {{ user.get_username }}
+            {% else %}
+                Anmelden
+            {% endif %}
+        </span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span></li>
+        <li>
+            <span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span>
+        </li>
         <li>
             <hr class="dropdown-divider">
         </li>
-        <li><a class="dropdown-item" href="{% url 'user_profile' %}">Benutzerprofil</a></li>
-        {% if user.is_staff %}<li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a></li>{% endif %}
-        {% if user.has_usable_password %}<li><a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a></li>{% endif %}
+        <li>
+            <a class="dropdown-item" href="{% url 'user_profile' %}">Benutzerprofil</a>
+        </li>
+        {% if user.is_staff %}
+            <li>
+                <a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a>
+            </li>
+        {% endif %}
+        {% if user.has_usable_password %}
+            <li>
+                <a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a>
+            </li>
+        {% endif %}
         <li>
             <form id="logout-form" method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
@@ -43,5 +73,4 @@
             </form>
         </li>
     </ul>
-</div>
 </div>

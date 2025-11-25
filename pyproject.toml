@@ -65,3 +65,7 @@ omit = [
     "bapp/*",
     "manage.py",
 ]
+
+[tool.djlint]
+max_line_length=200
+ignore="H021,H030,H031"

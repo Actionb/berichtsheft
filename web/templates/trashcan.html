@@ -1,53 +1,58 @@
 {% extends "base.html" %}
-
 {% load static %}
-
 {% block extrahead %}
-{{ block.super }}
-<script src="{% static 'web/js/restore.js' %}"></script>
-<script src="{% static 'web/js/recycle_bin.js' %}"></script>
+    {{ block.super }}
+    <script src="{% static 'web/js/restore.js' %}"></script>
+    <script src="{% static 'web/js/recycle_bin.js' %}"></script>
 {% endblock extrahead %}
-
 {% block main %}
-<div class="d-flex justify-content-between">
-    <h1>Papierkorb</h1>
+    <div class="d-flex justify-content-between">
+        <h1>Papierkorb</h1>
+        {% if trash_count > 0 %}
+            <form method="post" id="delete-all-form" action="{% url 'empty_trash' %}">
+                {% csrf_token %}
+                <button type="submit"
+                        id="delete-all"
+                        class="btn btn-outline-danger m-2 delete-all">Papierkorb leeren</button>
+            </form>
+        {% endif %}
+    </div>
     {% if trash_count > 0 %}
-    <form method="post" id="delete-all-form" action="{% url 'empty_trash' %}">
-        {% csrf_token %}
-        <button type="submit" id="delete-all" class="btn btn-outline-danger m-2 delete-all">Papierkorb leeren</button>
-    </form>
-    {% endif %}
-</div>
-{% if trash_count > 0 %}
-{% for model_opts, count, deleted_queryset in deleted_objects %}
-    <div class="model-deleted-objects p-2">
-        <h2>{{ model_opts.verbose_name }}: <span class="model-count">{{ count }}</span></h2>
-        {% for obj, info in deleted_queryset %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="card-title my-auto">{{ obj }}</h5>
-                        <div>
-                            {% with change_url_name=model_opts.model_name|add:"_change" %}
-                            <a href="{% url change_url_name obj.pk %}" class="btn btn-outline-primary" target="_blank">Anzeigen</a>
-                            {% endwith %}
-                            <a href="{% url 'restore_object' model_opts.model_name obj.pk %}" class="btn btn-outline-success restore-btn">Wiederherstellen</a>
-                            <a href="{% url 'hard_delete' model_opts.model_name obj.pk %}" class="btn btn-danger delete-btn ms-5">Löschen</a>
+        {% for model_opts, count, deleted_queryset in deleted_objects %}
+            <div class="model-deleted-objects p-2">
+                <h2>
+                    {{ model_opts.verbose_name }}: <span class="model-count">{{ count }}</span>
+                </h2>
+                {% for obj, info in deleted_queryset %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title my-auto">{{ obj }}</h5>
+                                <div>
+                                    {% with change_url_name=model_opts.model_name|add:"_change" %}
+                                        <a href="{% url change_url_name obj.pk %}"
+                                           class="btn btn-outline-primary"
+                                           target="_blank">Anzeigen</a>
+                                    {% endwith %}
+                                    <a href="{% url 'restore_object' model_opts.model_name obj.pk %}"
+                                       class="btn btn-outline-success restore-btn">Wiederherstellen</a>
+                                    <a href="{% url 'hard_delete' model_opts.model_name obj.pk %}"
+                                       class="btn btn-danger delete-btn ms-5">Löschen</a>
+                                </div>
+                            </div>
+                            {% if info %}
+                                {% for header, value in info %}
+                                    <div>
+                                        <strong>{{ header }}:</strong> {{ value }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
-                    {% if info %}
-                    {% for header, value in info %}
-                        <div>
-                            <strong>{{ header }}:</strong> {{ value }}
-                        </div>
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                {% endfor %}
             </div>
         {% endfor %}
-    </div>
-{% endfor %}
-{% else %}
-    <p class="p-2">Der Papierkorb ist leer.</p>
-{% endif %}
+    {% else %}
+        <p class="p-2">Der Papierkorb ist leer.</p>
+    {% endif %}
 {% endblock main %}

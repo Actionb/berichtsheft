@@ -1,87 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nachweis</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nachweis</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+              crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+                crossorigin="anonymous"></script>
+        <style>
         @page {
             /* Disable page margins when printing */
             margin: 0mm;
         }
-    </style>
-</head>
-<body style="max-width: 210mm;" class="mx-auto">
-    <main class="container m-5">
-        <div id="data" class="px-4 py-3 border border-black">
-            <h3 class="fw-semibold">Ausbildungsnachweis</h3>
-            <div class="row py-3 p-3">
-                <div class="col border-end border-black">
-                    <div class="d-flex justify-content-between">
-                        <span>Nummer</span>
-                        <span id="nachweis-nummer">{{ object.nummer }}</span>
+        </style>
+    </head>
+    <body style="max-width: 210mm;" class="mx-auto">
+        <main class="container m-5">
+            <div id="data" class="px-4 py-3 border border-black">
+                <h3 class="fw-semibold">Ausbildungsnachweis</h3>
+                <div class="row py-3 p-3">
+                    <div class="col border-end border-black">
+                        <div class="d-flex justify-content-between">
+                            <span>Nummer</span>
+                            <span id="nachweis-nummer">{{ object.nummer }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Name</span>
+                            <span id="nachweis-name">{{ object.user.last_name }}, {{ object.user.first_name }}</span>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Name</span>
-                        <span id="nachweis-name">{{ object.user.last_name }}, {{ object.user.first_name }}</span>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="d-flex justify-content-between">
-                        <span>Ausbildungsjahr</span>
-                        <span id="nachweis-jahr">{{ object.jahr }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Ausbildungswoche</span>
-                        <span id="nachweis-woche">{{ object.ausbildungswoche }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>vom</span>
-                        <span id="nachweis-datum-start">{{ object.datum_start | date:"d.m.Y" }}</span>
-                        <span>bis</span>
-                        <span id="nachweis-datum-ende">{{ object.datum_ende | date:"d.m.Y" }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="activities" class="border border-top-0 border border-black">
-            <div class="px-4 py-3">
-                <h4 class="fw-semibold">Betriebliche Tätigkeit</h4>
-                <div id="nachweis-betrieblich">
-                    {{ object.betrieb|linebreaks }}
-                </div>
-            </div>
-            <div class="px-4 py-3 border-top border-top border-black">
-                <h4 class="fw-semibold">Berufsschule (Unterrichtsthemen)</h4>
-                <div id="nachweis-schule">
-                    {{ object.schule|linebreaks }}
-                </div>
-            </div>
-        </div>
-        <div id="unterschriften" class="container mt-4 border border-black">
-            <div class="row">
-                <div class="col border-end border-black">
-                    <div class="row">
-                        <span style="height: 75px;"></span>
-                    </div>
-                    <div class="row border-top border-black">
-                        <span class="text-center fw-bold fst-italic">Auszubildender</span>
-                        <span style="font-size: 12px;" class="text-center fw-lighter">Unterschrift und Datum</span>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="row">
-                        <span style="height: 75px;"></span>
-                    </div>
-                    <div class="row border-top border-black">
-                        <span class="text-center fw-bold fst-italic">Ausbildender</span>
-                        <span style="font-size: 12px;" class="text-center fw-lighter">Unterschrift und Datum</span>
+                    <div class="col">
+                        <div class="d-flex justify-content-between">
+                            <span>Ausbildungsjahr</span>
+                            <span id="nachweis-jahr">{{ object.jahr }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Ausbildungswoche</span>
+                            <span id="nachweis-woche">{{ object.ausbildungswoche }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>vom</span>
+                            <span id="nachweis-datum-start">{{ object.datum_start | date:"d.m.Y" }}</span>
+                            <span>bis</span>
+                            <span id="nachweis-datum-ende">{{ object.datum_ende | date:"d.m.Y" }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-</body>
+            <div id="activities" class="border border-top-0 border border-black">
+                <div class="px-4 py-3">
+                    <h4 class="fw-semibold">Betriebliche Tätigkeit</h4>
+                    <div id="nachweis-betrieblich">{{ object.betrieb|linebreaks }}</div>
+                </div>
+                <div class="px-4 py-3 border-top border-top border-black">
+                    <h4 class="fw-semibold">Berufsschule (Unterrichtsthemen)</h4>
+                    <div id="nachweis-schule">{{ object.schule|linebreaks }}</div>
+                </div>
+            </div>
+            <div id="unterschriften" class="container mt-4 border border-black">
+                <div class="row">
+                    <div class="col border-end border-black">
+                        <div class="row">
+                            <span style="height: 75px;"></span>
+                        </div>
+                        <div class="row border-top border-black">
+                            <span class="text-center fw-bold fst-italic">Auszubildender</span>
+                            <span style="font-size: 12px;" class="text-center fw-lighter">Unterschrift und Datum</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="row">
+                            <span style="height: 75px;"></span>
+                        </div>
+                        <div class="row border-top border-black">
+                            <span class="text-center fw-bold fst-italic">Ausbildender</span>
+                            <span style="font-size: 12px;" class="text-center fw-lighter">Unterschrift und Datum</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </body>
 </html>

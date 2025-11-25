@@ -118,7 +118,7 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
     def get_permission_required(self):
         if self.permission_required is None:
             # Require 'view' permission for this model by default:
-            return [perms.get_perm("view", self.model._meta)]
+            return (perms.get_perm("view", self.model._meta),)
         return super().get_permission_required()
 
     def get_context_data(self, **kwargs):

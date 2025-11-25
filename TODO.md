@@ -43,3 +43,4 @@
 - [ ] support other Nachweis intervals besides weekly (daily, monthly, free)
 - [ ] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
+- [ ] try to use word-wrap/word-break to break "Unterschrieben" in the Nachweis list table header

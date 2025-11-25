@@ -112,6 +112,7 @@ class RequireUserMixin(SingleObjectMixin):
 
 
 class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, ListView):
+    template_name = "list.html"
     paginate_by = 10
 
     def get_permission_required(self):

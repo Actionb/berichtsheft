@@ -1,0 +1,24 @@
+{% extends "list.html" %}
+{% block results %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                {% for header in headers %}<th class="sticky-top z-2">{{ header }}</th>{% endfor %}
+                <th class="sticky-top z-2">Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result_object, result_row in result_rows %}
+                <tr>
+                    {% for result in result_row %}<td>{{ result.1 }}</td>{% endfor %}
+                    <td>
+                        <div class="my-2">
+                            <a href="{% url 'abteilung_change' result_object.pk %}"
+                               class="btn btn-sm btn-primary w-100">Bearbeiten</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock results %}

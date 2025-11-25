@@ -264,6 +264,15 @@ class AbteilungEditView(PopupResponseMixin, EditView):
     queryset = _models.Abteilung.global_objects
 
 
+class AbteilungListView(ChangelistView):
+    model = _models.Abteilung
+    title = "Meine Abteilungen"
+    template_name = "abteilung_list.html"
+
+    def get_result_row(self, result):
+        return [("Name", result.name)]
+
+
 def print_preview(request):
     """Preview the print layout for a Nachweis object."""
     form = forms.modelform_factory(_models.Nachweis, fields=forms.ALL_FIELDS)(data=request.GET.dict())

@@ -30,6 +30,7 @@ urlpatterns = [
         name="abteilung_change",
     ),
     path("abteilung/<path:pk>/delete/", views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
+    path("abteilung/", views.AbteilungListView.as_view(), name="abteilung_list"),
     # Autocomplete
     path("abteilung_ac/", views.AbteilungAutocompleteView.as_view(), name="abteilung_ac"),
     # Other

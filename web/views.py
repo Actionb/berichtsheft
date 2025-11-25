@@ -121,10 +121,28 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
             return (perms.get_perm("view", self.model._meta),)
         return super().get_permission_required()
 
+    def get_result_headers(self, result):
+        """Return the (table) headers for a given result."""
+        return [k for k, v in result]
+
+    def get_result_rows(self, object_list):
+        """
+        For each result in object_list, return a 2-tuple of (object, result_row),
+        where result_row are the values to display in the row of a given result.
+        """
+        return [(result, self.get_result_row(result)) for result in object_list]
+
+    def get_result_row(self, result):  # pragma: no cover
+        """Return the values to display in the row for the given result."""
+        raise NotImplementedError
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["add_url"] = f"{self.model._meta.model_name}_add"
         paginator = ctx["paginator"]
         ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
+        ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
+        ctx["headers"] = self.get_result_headers(ctx["result_rows"][0][1])
         return ctx
 
 

@@ -18,9 +18,12 @@ class ListAction:
     class MyListView(ChangelistView):
         actions = [ListAction(url_name="nachweis_change", label="Bearbeiten")]
 
-    The view then passes these actions to the template, which uses the
-    ListAction.render method to render the button/link for each item in the
-    list view's results.
+    The view then passes these actions to the template, which uses the render
+    action template tag to render the button/link for each item in the list
+    view's results:
+
+        {% render_action action request result_object %}
+
     """
 
     url_name: str = ""
@@ -30,7 +33,7 @@ class ListAction:
 
     def __init__(self, url_name: str = "", label: str = "", css: str = "", pk_url_kwarg: str = ""):
         self.url_name = url_name or self.url_name
-        if not self.url_name:
+        if not self.url_name:  # pragma: no cover
             raise TypeError("ListAction requires 'url_name'")
         self.label = label or self.label
         self.css = css or self.css

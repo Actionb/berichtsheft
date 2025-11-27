@@ -9,8 +9,7 @@
 - [x] Zwischen Berufsschulthemen und Unterschriften ein wenig Platz einbauen?
 - [x] Users
 - [ ] Von Druckansicht zurück zu Übersicht oder Änderungsseite wechseln (Links mit JS implementieren "hovern" lassen <- dürfen nicht in HTML auftauchen wegen Druck>)
-- [ ] Add a way to delete an Abteilung object (maybe from the edit popup page?)
-- [ ] add a legend on nachweis list that explains the colors of the rows
+- [x] Add a way to delete an Abteilung object (maybe from the edit popup page?)
 - [x] pagination on nachweis list page
 - [x] show bericht/schule text when hovering over the column
 - [x] User Handling
@@ -29,7 +28,7 @@
 - [x] how to create UserProfiles for users created via `manage.py createsuperuser`
 - [ ] add user messages when saving stuff
 - [x] FIXME: form initials overwrite pre-existing data when editing nachweise!
-- [ ] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
+- [x] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
 - [ ] Nachweis.nummer should be unique
 - [ ] use <int:> converter instead of <path:> for URLs
 - [x] FIXME: Abteilung edit form has SoftDelete fields
@@ -43,5 +42,5 @@
 - [ ] support other Nachweis intervals besides weekly (daily, monthly, free)
 - [ ] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
-- [ ] try to use word-wrap/word-break to break "Unterschrieben" in the Nachweis list table header
 - [ ] export Nachweis objects to PDF without the browser 
+- [ ] explain "list_display" und "list_display_callable" in ChangelistView doc string

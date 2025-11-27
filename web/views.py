@@ -26,7 +26,11 @@ from web import models as _models
 from web.actions import EditAction, NachweisPrintAction
 from web.utils import perms
 from web.utils.date import count_week_numbers
+from web.utils.decorators import add_attrs
 from web.utils.models import collect_deleted_objects
+
+# Decorator for list_display callables
+list_display_callable = add_attrs
 
 
 class AutocompleteView(BaseAutocompleteView):

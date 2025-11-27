@@ -40,31 +40,21 @@ def soup():
 @pytest.mark.django_db
 @pytest.mark.parametrize("template_name", ["nachweis_list.html"])
 class TestNachweisListTemplate:
-    def assert_is_checkmark(self, svg):
-        """Assert that the given SVG is a checkmark."""
-        assert "feather-check-circle" in svg["class"]
-        assert "text-success" in svg["class"]
-
-    def assert_is_x(self, svg):
-        """Assert that the given SVG is an X."""
-        assert "feather-x-circle" in svg["class"]
-        assert "text-danger" in svg["class"]
-
     @pytest.mark.parametrize("field", ["fertig", "unterschrieben"])
     @pytest.mark.parametrize("checked", [True, False])
-    def test_boolean_field_svgs(self, render_template, soup, field, checked, **_):
+    def test_boolean_field_icons(self, render_template, soup, field, checked, **_):
         """
         Assert that the boolean values for the 'fertig' and 'unterschrieben'
-        fields are rendered as svg checkmarks and Xs.
+        fields are rendered as checkmark and x-mark icons.
         """
         context = {"object_list": [NachweisFactory(**{field: checked})]}
         rendered = render_template(context)
-        svg = soup(rendered).find("td", class_=f"td-{field}").find("svg")
-        assert svg
+        icon = soup(rendered).find("td", class_=f"td-{field}").find("i")
+        assert icon
         if checked:
-            self.assert_is_checkmark(svg)
+            assert "bi-check-circle" in icon["class"]
         else:
-            self.assert_is_x(svg)
+            assert "bi-x-circle" in icon["class"]
 
     @pytest.mark.parametrize("unterschrieben", [True, False])
     def test_tr_warning(self, render_template, soup, unterschrieben, **_):

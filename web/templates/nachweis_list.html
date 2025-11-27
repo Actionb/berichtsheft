@@ -50,63 +50,17 @@
                         data-bs-content="{{ obj.schule }}">{{ obj.schule|linebreaksbr|truncatewords:10 }}</td>
                     <td class="td-fertig text-center{% if obj.fertig %} table-success{% else %} table-danger{% endif %}">
                         {% if obj.fertig %}
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="24"
-                                 height="24"
-                                 viewBox="0 0 24 24"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 stroke-width="2"
-                                 stroke-linecap="round"
-                                 stroke-linejoin="round"
-                                 class="text-success feather feather-check-circle">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
+                            <i class="bi bi-check-circle fs-4 text-success"></i>
                         {% else %}
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="24"
-                                 height="24"
-                                 viewBox="0 0 24 24"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 stroke-width="2"
-                                 stroke-linecap="round"
-                                 stroke-linejoin="round"
-                                 class="text-danger feather feather-x-circle">
-                                <circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>
-                            </svg>
+                            <i class="bi bi-x-circle fs-4 text-danger"></i>
                         {% endif %}
                     </td>
                     <td class="td-eingereicht-bei">{{ obj.eingereicht_bei }}</td>
                     <td class="td-unterschrieben text-center{% if obj.unterschrieben %} table-success{% else %} table-danger{% endif %}">
                         {% if obj.unterschrieben %}
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="24"
-                                 height="24"
-                                 viewBox="0 0 24 24"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 stroke-width="2"
-                                 stroke-linecap="round"
-                                 stroke-linejoin="round"
-                                 class="text-success feather feather-check-circle">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
+                            <i class="bi bi-check-circle fs-4 text-success"></i>
                         {% else %}
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="24"
-                                 height="24"
-                                 viewBox="0 0 24 24"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 stroke-width="2"
-                                 stroke-linecap="round"
-                                 stroke-linejoin="round"
-                                 class="text-danger feather feather-x-circle">
-                                <circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>
-                            </svg>
+                            <i class="bi bi-x-circle fs-4 text-danger"></i>
                         {% endif %}
                     </td>
                     <td>

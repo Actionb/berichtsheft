@@ -21,7 +21,9 @@ def dummy_view(*_args, **_kwargs):
 
 
 urlpatterns = [
+    # Test views
     path("test/print_preview", dummy_view, name="print_preview"),
+    # URLs for the views of the 'web' app
     path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
     path("nachweis/add/", _views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
     path(
@@ -218,8 +220,13 @@ class TestChangelistView:
         return zeitraum
 
     @pytest.fixture
-    def view_class(self, model, list_display, zeitraum_callable):
-        attrs = {"model": model, "list_display": list_display, "zeitraum": zeitraum_callable}
+    def print_action(self):
+        """A simple action for the test view."""
+        return _actions.ListAction(url_name="/print/", label="Ausdrucken", css="foo bar")
+
+    @pytest.fixture
+    def view_class(self, model, list_display, zeitraum_callable, print_action):
+        attrs = {"model": model, "list_display": list_display, "zeitraum": zeitraum_callable, "actions": [print_action]}
         return type("DummyView", (_views.ChangelistView,), attrs)
 
     @pytest.mark.parametrize(
@@ -262,6 +269,17 @@ class TestChangelistView:
             '<i class="bi bi-check-circle fs-4 text-success"></i>',  # render True boolean
             '<i class="bi bi-x-circle fs-4 text-danger"></i>',  # render False boolean
         ]
+
+    @pytest.mark.parametrize("user_perms", [[("change", NachweisDummy)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_get_actions(self, get_user_req, view, print_action):
+        """Assert that get_actions returns the expected actions."""
+        actions = view.get_actions(get_user_req)
+        assert len(actions) == 2
+        assert actions[0].url_name == "nachweisdummy_change"
+        assert actions[0].label == "Bearbeiten"
+        assert actions[1].url_name == print_action.url_name
+        assert actions[1].label == print_action.label
 
 
 class TestEditView:

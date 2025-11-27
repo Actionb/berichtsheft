@@ -23,6 +23,7 @@ from mizdb_tomselect.widgets import MIZSelect
 
 from web import forms as _forms
 from web import models as _models
+from web.actions import EditAction, NachweisPrintAction
 from web.utils import perms
 from web.utils.date import count_week_numbers
 from web.utils.models import collect_deleted_objects
@@ -117,6 +118,7 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
     template_name = "list.html"
     paginate_by = 10
     list_display = ()
+    actions = ()
 
     def get_permission_required(self):
         if self.permission_required is None:
@@ -175,6 +177,15 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
             row.append(value)
         return row
 
+    def _get_default_actions(self, request):
+        actions = []
+        if perms.has_change_permission(request.user, self.opts):
+            actions.append(EditAction(url_name=f"{self.opts.model_name}_change"))
+        return actions
+
+    def get_actions(self, request):
+        return [*self._get_default_actions(request), *self.actions]
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
@@ -183,6 +194,7 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
         ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
         ctx["headers"] = self.get_result_headers()
+        ctx["actions"] = self.get_actions(self.request)
         return ctx
 
 
@@ -290,6 +302,7 @@ class NachweisListView(ChangelistView):
     # NOTE: the view's custom template generates the result table without using
     # list_display at all
     list_display = []
+    actions = [NachweisPrintAction()]
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):

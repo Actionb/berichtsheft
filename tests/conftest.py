@@ -177,6 +177,47 @@ def nachweis_permission(nachweis_model, nachweis_actions):
 
 
 ################################################################################
+# REQUESTS
+################################################################################
+
+
+@pytest.fixture
+def req_path():
+    """
+    Default path for the request fixtures.
+
+    Overwrite via test parametrization.
+    """
+    return "/"
+
+
+@pytest.fixture
+def req_data():
+    """
+    Default data for the request fixtures.
+
+    Overwrite via test parametrization.
+    """
+    return {}
+
+
+@pytest.fixture
+def get_user_req(rf, req_path, req_data, user):
+    """Return a GET request with the user attached."""
+    request = rf.get(req_path, data=req_data)
+    request.user = user
+    return request
+
+
+@pytest.fixture
+def post_user_req(rf, req_path, req_data, user):
+    """Return a POST request with the user attached."""
+    request = rf.post(req_path, data=req_data)
+    request.user = user
+    return request
+
+
+################################################################################
 # TEST DATA FIXTURES
 ################################################################################
 

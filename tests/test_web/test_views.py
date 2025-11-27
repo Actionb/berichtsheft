@@ -9,6 +9,9 @@ from django.http import HttpResponse
 from django.urls import path, reverse
 
 from tests.model_factory import AbteilungFactory, NachweisFactory
+from tests.test_web.model_factory import NachweisDummyFactory
+from tests.test_web.models import NachweisDummy
+from web import actions as _actions
 from web import models as _models
 from web import views as _views
 
@@ -27,8 +30,9 @@ urlpatterns = [
         name="nachweis_change",
     ),
     path("nachweis/<path:pk>/delete/", _views.NachweisDeleteView.as_view(), name="nachweis_delete"),
-    path("abteilung/<path:pk>/delete/", _views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
+    path("abteilung/", _views.AbteilungListView.as_view(), name="abteilung_list"),
+    path("abteilung/<path:pk>/delete/", _views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
     path("trash/", _views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
@@ -185,17 +189,43 @@ class TestRequireUserMixin:
 
 class TestChangelistView:
     @pytest.fixture
+    def model(self):
+        return NachweisDummy
+
+    @pytest.fixture
     def view(self, view_class):
         return view_class()
 
     @pytest.fixture
-    def view_class(self):
-        return type("DummyView", (_views.ChangelistView,), {"model": _models.Nachweis})
+    def factory(self):
+        return NachweisDummyFactory
+
+    @pytest.fixture
+    def obj(self, factory):
+        return factory()
+
+    @pytest.fixture
+    def list_display(self):
+        return ["nummer", "zeitraum", "abteilung", "fertig", "unterschrieben"]
+
+    @pytest.fixture
+    def zeitraum_callable(self):
+        """Provide a list_display callable for the view."""
+
+        def zeitraum(*args):
+            return "24.11.2025 - 28.11.2025"
+
+        return zeitraum
+
+    @pytest.fixture
+    def view_class(self, model, list_display, zeitraum_callable):
+        attrs = {"model": model, "list_display": list_display, "zeitraum": zeitraum_callable}
+        return type("DummyView", (_views.ChangelistView,), attrs)
 
     @pytest.mark.parametrize(
         "permission_required, expected",
         [
-            (None, ("web.view_nachweis",)),
+            (None, ("test_web.view_nachweisdummy",)),
             ("foo.bar", ("foo.bar",)),
         ],
     )
@@ -207,21 +237,31 @@ class TestChangelistView:
         view.permission_required = permission_required
         assert view.get_permission_required() == expected
 
-    def test_get_result_rows(self):
-        """Assert that get_result_rows returns the expected results."""
-        assert False
+    def test_get_result_headers(self, view):
+        """
+        Assert that get_result_headers returns the expected table headers for
+        the result table.
+        """
+        assert view.get_result_headers() == ["Nummer", "Zeitraum", "Abteilung", "Fertig geschrieben", "Unterschrieben?"]
 
-    def test_get_result_headers(self):
-        """Assert that get_result_headers returns the expected headers."""
-        assert False
+    @pytest.mark.django_db
+    def test_get_result_rows(self, view, factory):
+        """Assert that get_result_rows returns the expected items."""
+        obj = factory(fertig=True, unterschrieben=False)
+        # Add a control object that should not appear in the results:
+        factory()
 
-    def test_get_context_data_adds_pagination(self):
-        """Assert get_context_data adds context items for the pagination."""
-        assert False
-
-    def test_get_context_data_adds_results(self):
-        """Assert that get_context_data adds context items for the results."""
-        assert False
+        rows = view.get_result_rows(object_list=[obj])
+        assert len(rows) == 1
+        result, row = rows[0]
+        assert result == obj
+        assert row == [
+            obj.nummer,
+            "24.11.2025 - 28.11.2025",  # 'zeitraum' callable
+            str(obj.abteilung),  # related object should be converted to string
+            '<i class="bi bi-check-circle fs-4 text-success"></i>',  # render True boolean
+            '<i class="bi bi-x-circle fs-4 text-danger"></i>',  # render False boolean
+        ]
 
 
 class TestEditView:

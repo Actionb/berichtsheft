@@ -7,9 +7,11 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db import models
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin
@@ -114,6 +116,7 @@ class RequireUserMixin(SingleObjectMixin):
 class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, ListView):
     template_name = "list.html"
     paginate_by = 10
+    list_display = ()
 
     def get_permission_required(self):
         if self.permission_required is None:
@@ -121,9 +124,21 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
             return (perms.get_perm("view", self.model._meta),)
         return super().get_permission_required()
 
-    def get_result_headers(self, result):
-        """Return the (table) headers for a given result."""
-        return [k for k, v in result]
+    def get_result_headers(self):
+        """Return the table headers for the result list."""
+        headers = []
+        for name in self.list_display:
+            if hasattr(self, name) and callable(getattr(self, name)):
+                # A callable list_display item; use the description if available
+                func = getattr(self, name)
+                header = getattr(func, "description", name.replace("_", " ").capitalize())
+            else:
+                header = self.opts.get_field(name).verbose_name
+                if not header[0].isupper():
+                    # Assume that this is a default 'verbose_name'
+                    header = header.replace("_", " ").capitalize()
+            headers.append(header)
+        return headers
 
     def get_result_rows(self, object_list):
         """
@@ -134,15 +149,40 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
 
     def get_result_row(self, result):  # pragma: no cover
         """Return the values to display in the row for the given result."""
-        raise NotImplementedError
+        row = []
+        for name in self.list_display:
+            if hasattr(self, name) and callable(getattr(self, name)):
+                # A callable list_display item; call it with the result
+                value = getattr(self, name)(result)
+            else:
+                # Should be a model field then:
+                field = self.opts.get_field(name)
+                if isinstance(field, models.ForeignKey):
+                    value = getattr(result, field.name)
+                    if value is not None:
+                        value = str(value)
+                else:
+                    value = getattr(result, field.attname)
+                if getattr(field, "flatchoices", None):  # pragma: no cover
+                    # The field has predefined choices; use the human-readable
+                    # part of the choice:
+                    value = dict(field.flatchoices).get(value, "")
+                if isinstance(value, bool):
+                    if value:
+                        value = mark_safe('<i class="bi bi-check-circle fs-4 text-success"></i>')
+                    else:
+                        value = mark_safe('<i class="bi bi-x-circle fs-4 text-danger"></i>')
+            row.append(value)
+        return row
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
         paginator = ctx["paginator"]
         ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
         ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
-        ctx["headers"] = self.get_result_headers(ctx["result_rows"][0][1])
+        ctx["headers"] = self.get_result_headers()
         return ctx
 
 
@@ -247,6 +287,9 @@ class NachweisListView(ChangelistView):
     model = _models.Nachweis
     template_name = "nachweis_list.html"
     title = "Meine Nachweise"
+    # NOTE: the view's custom template generates the result table without using
+    # list_display at all
+    list_display = []
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
@@ -268,9 +311,7 @@ class AbteilungListView(ChangelistView):
     model = _models.Abteilung
     title = "Meine Abteilungen"
     template_name = "abteilung_list.html"
-
-    def get_result_row(self, result):
-        return [("Name", result.name)]
+    list_display = ["name"]
 
 
 def print_preview(request):

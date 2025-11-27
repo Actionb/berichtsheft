@@ -44,3 +44,4 @@
 - [ ] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
 - [ ] try to use word-wrap/word-break to break "Unterschrieben" in the Nachweis list table header
+- [ ] export Nachweis objects to PDF without the browser 

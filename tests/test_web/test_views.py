@@ -208,7 +208,7 @@ class TestChangelistView:
 
     @pytest.fixture
     def list_display(self):
-        return ["nummer", "zeitraum", "abteilung", "fertig", "unterschrieben"]
+        return ["nummer", "zeitraum_item", "abteilung", "fertig", "unterschrieben"]
 
     @pytest.fixture
     def zeitraum_callable(self):
@@ -216,6 +216,8 @@ class TestChangelistView:
 
         def zeitraum(*args):
             return "24.11.2025 - 28.11.2025"
+
+        zeitraum.description = "Zeitraum"
 
         return zeitraum
 
@@ -226,7 +228,12 @@ class TestChangelistView:
 
     @pytest.fixture
     def view_class(self, model, list_display, zeitraum_callable, print_action):
-        attrs = {"model": model, "list_display": list_display, "zeitraum": zeitraum_callable, "actions": [print_action]}
+        attrs = {
+            "model": model,
+            "list_display": list_display,
+            "zeitraum_item": zeitraum_callable,
+            "actions": [print_action],
+        }
         return type("DummyView", (_views.ChangelistView,), attrs)
 
     @pytest.mark.parametrize(

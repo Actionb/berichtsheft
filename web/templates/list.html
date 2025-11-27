@@ -1,9 +1,30 @@
 {% extends "base.html" %}
+{% load actions %}
 {% block main %}
     <h1>
         {% block page_title %}{{ title }}{% endblock %}
     </h1>
     {% block results %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% for header in headers %}<th class="sticky-top z-2">{{ header }}</th>{% endfor %}
+                    <th class="sticky-top z-2" style="width: 6%;">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result_object, result_row in result_rows %}
+                    <tr>
+                        {% for result in result_row %}<td>{{ result }}</td>{% endfor %}
+                        <td>
+                            {% for action in actions %}
+                                <div class="my-2">{% render_action action request result_object %}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% endblock results %}
     {% block sticky-bottom %}
         <div class="d-flex position-sticky start-0 bottom-0 p-3 border rounded bg-light">

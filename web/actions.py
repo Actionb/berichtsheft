@@ -28,7 +28,7 @@ class ListAction:
 
     url_name: str = ""
     label: str = ""
-    css: str = "btn btn-primary"
+    css: str = "btn btn-primary btn-sm w-100"
     pk_url_kwarg: str = "pk"
 
     def __init__(self, url_name: str = "", label: str = "", css: str = "", pk_url_kwarg: str = ""):

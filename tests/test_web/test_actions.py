@@ -46,7 +46,7 @@ class TestChangePermAction:
         action = actions.ChangePermAction(url_name="list_action_test", label="Action Test")
         assert (
             action.render(request=get_user_req, obj=obj)
-            == '<a href="/test/42/action" class="btn btn-primary">Action Test</a>'
+            == f'<a href="/test/42/action" class="{action.css}">Action Test</a>'
         )
 
     def test_render_no_change_permission(self, get_user_req, obj):

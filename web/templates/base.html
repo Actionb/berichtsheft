@@ -63,7 +63,7 @@
         {% endblock alerts %}
         {% block breadcrumbs %}
         {% endblock breadcrumbs %}
-        <main class="{% block mainclass %}container{% endblock mainclass %}">
+        <main class="{% block mainclass %}{{ mainclass|default:"container" }}{% endblock mainclass %}">
             {% block messages %}
                 <div id="messages-container" class="messages my-3">
                     {% for message in messages %}

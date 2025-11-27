@@ -47,6 +47,7 @@ class AbteilungAutocompleteView(AutocompleteView):
 class BaseViewMixin:
     title: str = ""
     submit_button_text = "Weiter"
+    mainclass: str = ""  # the CSS class for the main element
 
     def get_trash_count(self):
         """Return the number of items in the trash can for the current user."""
@@ -59,6 +60,7 @@ class BaseViewMixin:
         context["title"] = self.title
         context["submit_button_text"] = self.submit_button_text
         context["trash_count"] = self.get_trash_count()
+        context["mainclass"] = self.mainclass
         return context
 
 

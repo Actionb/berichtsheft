@@ -10,7 +10,9 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
@@ -303,12 +305,27 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
 
 class NachweisListView(ChangelistView):
     model = _models.Nachweis
-    template_name = "nachweis_list.html"
     title = "Meine Nachweise"
-    # NOTE: the view's custom template generates the result table without using
-    # list_display at all
-    list_display = []
+    list_display = ["jahr", "woche", "zeitraum", "betrieb", "schule", "fertig", "eingereicht_bei", "unterschrieben"]
     actions = [NachweisPrintAction()]
+    mainclass = "container-fluid px-5"
+
+    @list_display_callable()
+    def woche(self, obj):
+        return obj.ausbildungswoche
+
+    @list_display_callable()
+    def zeitraum(self, obj):
+        dates = list(map(lambda d: d.strftime("%d. %B %Y"), [obj.datum_start, obj.datum_ende]))
+        return format_html('<span class="text-nowrap">{}</span> <br> <span class="text-nowrap">{}</span>', *dates)
+
+    @list_display_callable(label="Betriebliche Tätigkeiten")
+    def betrieb(self, obj):
+        return truncatewords(linebreaksbr(obj.betrieb), 30)
+
+    @list_display_callable(label="Berufsschule")
+    def schule(self, obj):
+        return truncatewords(linebreaksbr(obj.schule), 10)
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
@@ -329,7 +346,6 @@ class AbteilungEditView(PopupResponseMixin, EditView):
 class AbteilungListView(ChangelistView):
     model = _models.Abteilung
     title = "Meine Abteilungen"
-    template_name = "abteilung_list.html"
     list_display = ["name"]
 
 

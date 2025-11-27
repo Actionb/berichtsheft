@@ -48,7 +48,7 @@
                         data-bs-trigger="hover focus"
                         data-bs-placement="right"
                         data-bs-content="{{ obj.schule }}">{{ obj.schule|linebreaksbr|truncatewords:10 }}</td>
-                    <td class="td-fertig text-center{% if obj.fertig %} table-success{% else %} table-danger{% endif %}">
+                    <td class="td-fertig text-center">
                         {% if obj.fertig %}
                             <i class="bi bi-check-circle fs-4 text-success"></i>
                         {% else %}
@@ -56,7 +56,7 @@
                         {% endif %}
                     </td>
                     <td class="td-eingereicht-bei">{{ obj.eingereicht_bei }}</td>
-                    <td class="td-unterschrieben text-center{% if obj.unterschrieben %} table-success{% else %} table-danger{% endif %}">
+                    <td class="td-unterschrieben text-center">
                         {% if obj.unterschrieben %}
                             <i class="bi bi-check-circle fs-4 text-success"></i>
                         {% else %}

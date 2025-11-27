@@ -135,9 +135,9 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         headers = []
         for name in self.list_display:
             if hasattr(self, name) and callable(getattr(self, name)):
-                # A callable list_display item; use the description if available
+                # A callable list_display item; use the label attr if available
                 func = getattr(self, name)
-                header = getattr(func, "description", name.replace("_", " ").capitalize())
+                header = getattr(func, "label", name.replace("_", " ").capitalize())
             else:
                 header = self.opts.get_field(name).verbose_name
                 if not header[0].isupper():

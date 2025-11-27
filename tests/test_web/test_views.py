@@ -217,7 +217,7 @@ class TestChangelistView:
         def zeitraum(*args):
             return "24.11.2025 - 28.11.2025"
 
-        zeitraum.description = "Zeitraum"
+        zeitraum.label = "Zeitraum"
 
         return zeitraum
 

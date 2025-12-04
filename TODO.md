@@ -14,7 +14,7 @@
 - [x] calculate Ausbildungswoche from start of employment
 - [x] print.html: take name from user data (user is required to enter their full name)
 - [ ] sign up form does not make it clear why it is invalid
-- [ ] miz-tomselect requires German text
+- [x] miz-tomselect requires German text
 - [ ] FIXME: preview shows wrong "Nummer" - doesnt take nummer from the model object (because preview is generated from the pure form data on a new model instance!)
 - [x] add Nummer field to edit form
 - [x] Sign Up Form: require first name and surname

@@ -44,3 +44,7 @@
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
 - [ ] export Nachweis objects to PDF without the browser 
 - [ ] explain "list_display" und "list_display_callable" in ChangelistView doc string
+- [ ] dashboard: notify user when Nachweise are missing (deduce from Nachweis interval given by user settings?)
+- [ ] set ``related_name`` on user.nachweis_set relation
+- [ ] FIXME: default initial value for `nummer` is wrong because the default ordering was changed
+- [ ] tweak Nachweis model ordering to use `nummer` by default?

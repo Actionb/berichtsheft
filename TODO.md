@@ -6,7 +6,6 @@
 - [x] `border` dunkler und deutlicher machen
 - [x] Zwischen Berufsschulthemen und Unterschriften ein wenig Platz einbauen?
 - [x] Users
-- [ ] Von Druckansicht zurück zu Übersicht oder Änderungsseite wechseln (Links mit JS implementieren "hovern" lassen <- dürfen nicht in HTML auftauchen wegen Druck>)
 - [x] Add a way to delete an Abteilung object (maybe from the edit popup page?)
 - [x] pagination on nachweis list page
 - [x] show bericht/schule text when hovering over the column
@@ -15,7 +14,6 @@
 - [x] print.html: take name from user data (user is required to enter their full name)
 - [ ] sign up form does not make it clear why it is invalid
 - [x] miz-tomselect requires German text
-- [ ] FIXME: preview shows wrong "Nummer" - doesnt take nummer from the model object (because preview is generated from the pure form data on a new model instance!)
 - [x] add Nummer field to edit form
 - [x] Sign Up Form: require first name and surname
 - [x] Allow users to edit their names (and other configs)

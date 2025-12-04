@@ -368,7 +368,7 @@ class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
     permission_required = perms.get_perm("change", _models.Nachweis._meta)
 
 
-class AbteilungEditView(PopupResponseMixin, EditView):
+class AbteilungEditView(RequireUserMixin, SaveUserMixin, PopupResponseMixin, EditView):
     model = _models.Abteilung
     template_name = "base_form.html"
     fields = ["name"]

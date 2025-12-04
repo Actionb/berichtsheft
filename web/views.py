@@ -194,6 +194,24 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
     def get_actions(self, request):
         return [*self._get_default_actions(request), *self.actions]
 
+    def get_column_classes(self):
+        """
+        Provide additional CSS classes to apply to individual columns of the
+        result list.
+
+        Must be a mapping: {<column_name>: css} , where 'column_name' is a
+        column as specified in view.list_display, and 'css' is the additional
+        CSS classes as simple string.
+
+        Example:
+
+            list_display = ["foo", "bar"]
+
+            def get_column_classes(self):
+                return { "foo": "text-center align-middle"}
+        """
+        return {}
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
@@ -203,6 +221,8 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
         ctx["headers"] = self.get_result_headers()
         ctx["actions"] = self.get_actions(self.request)
+        ctx["list_display"] = self.list_display
+        ctx["col_classes"] = self.get_column_classes()
         return ctx
 
 
@@ -309,6 +329,12 @@ class NachweisListView(ChangelistView):
     list_display = ["jahr", "woche", "zeitraum", "betrieb", "schule", "fertig", "eingereicht_bei", "unterschrieben"]
     actions = [NachweisPrintAction()]
     mainclass = "container-fluid px-5"
+
+    def get_column_classes(self):
+        return {
+            "fertig": "text-center align-middle",
+            "unterschrieben": "text-center align-middle",
+        }
 
     @list_display_callable()
     def woche(self, obj):

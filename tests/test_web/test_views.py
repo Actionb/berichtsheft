@@ -33,8 +33,14 @@ urlpatterns = [
     ),
     path("nachweis/<path:pk>/delete/", _views.NachweisDeleteView.as_view(), name="nachweis_delete"),
     path("nachweis/<path:pk>/print/", _views.NachweisPrintView.as_view(), name="nachweis_print"),
-    path("abteilung/", _views.AbteilungListView.as_view(), name="abteilung_list"),
+    path("abteilung/add/", _views.AbteilungEditView.as_view(extra_context={"add": True}), name="abteilung_add"),
+    path(
+        "abteilung/<path:pk>/change/",
+        _views.AbteilungEditView.as_view(extra_context={"add": False}),
+        name="abteilung_change",
+    ),
     path("abteilung/<path:pk>/delete/", _views.AbteilungDeleteView.as_view(), name="abteilung_delete"),
+    path("abteilung/", _views.AbteilungListView.as_view(), name="abteilung_list"),
     path("trash/", _views.PapierkorbView.as_view(), name="trash"),
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
@@ -1055,3 +1061,103 @@ class TestEmptyTrashView:
         response = client.get(empty_url)
         assert response.status_code == 405
         obj.refresh_from_db()
+
+
+class TestAbteilungListView:
+    @pytest.fixture
+    def url(self):
+        return reverse("abteilung_list")
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            ([("view", _models.Abteilung)], 200),
+        ],
+    )
+    def test_view_permission_required(self, client, url, expected_code):
+        """Assert that certain permissions are required to access the list view."""
+        assert client.get(url).status_code == expected_code
+
+    @pytest.mark.django_db
+    def test_only_lists_user_nachweise(self, rf, url, user, superuser):
+        """Assert that only Abteilung objects belonging to the user are listed."""
+        nachweis_1 = NachweisFactory(user=superuser)
+        nachweis_2 = NachweisFactory(user=user)  # belongs to a different user
+        view = _views.NachweisListView()
+        view.request = rf.get(url)
+        view.request.user = superuser
+        queryset = view.get_queryset()
+        assert nachweis_1 in queryset
+        assert nachweis_2 not in queryset
+
+
+class TestAbteilungEditView:
+    @pytest.fixture
+    def obj(self, user):
+        return AbteilungFactory(user=user, name="Test Abteilung")
+
+    @pytest.fixture
+    def add_url(self):
+        def inner():
+            return reverse("abteilung_add")
+
+        return inner
+
+    @pytest.fixture
+    def edit_url(self):
+        def inner(obj):
+            return reverse("abteilung_change", kwargs={"pk": obj.pk})
+
+        return inner
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            ([("add", _models.Abteilung)], 200),
+        ],
+    )
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_add_permission_required(self, client, expected_code, add_url):
+        """Assert that certain permissions are required to access the add view."""
+        assert client.get(add_url()).status_code == expected_code
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize(
+        "user_perms, expected_code",
+        [
+            (None, 403),  # expect 403 if no permissions
+            ([("change", _models.Abteilung)], 200),
+        ],
+    )
+    def test_change_permission_required(self, client, expected_code, obj, edit_url):
+        """Assert that certain permissions are required to access the change view."""
+        assert client.get(edit_url(obj)).status_code == expected_code
+
+    def test_can_not_edit_other_users_nachweise(self, client, superuser, edit_url, obj):
+        """Assert that a user can not edit Nachweise that do not belong to them."""
+        client.force_login(superuser)
+        assert client.get(edit_url(obj)).status_code == 403
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize("user_perms", [[("add", _models.Abteilung)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_can_add(self, client, add_url, user):
+        """Assert that new Abteilung objects can be created."""
+        response = client.post(add_url(), data={"name": "foo"})
+        assert response.status_code == 302
+        assert _models.Abteilung.objects.filter(user=user, name="foo").exists()
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize("user_perms", [[("change", _models.Abteilung)]])
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    def test_can_edit(self, client, edit_url, user, obj):
+        """Assert that Abteilung objects can be edited."""
+        response = client.post(edit_url(obj), data={"name": "foo"})
+        assert response.status_code == 302
+        assert _models.Abteilung.objects.filter(user=user, name="foo").exists()

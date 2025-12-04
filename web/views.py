@@ -372,7 +372,7 @@ class AbteilungEditView(RequireUserMixin, SaveUserMixin, PopupResponseMixin, Edi
     model = _models.Abteilung
     template_name = "base_form.html"
     fields = ["name"]
-    success_url = reverse_lazy("nachweis_list")
+    success_url = reverse_lazy("abteilung_list")
     delete_url_name = "abteilung_delete"
     queryset = _models.Abteilung.global_objects
 

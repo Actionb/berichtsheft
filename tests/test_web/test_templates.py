@@ -1,10 +1,35 @@
+from unittest import mock
+
 import pytest
 from bs4 import BeautifulSoup
 from django import forms
+from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.template.loader import get_template
+from django.urls import path
 
 from tests.model_factory import NachweisFactory
 from web import models as _models
+from web.actions import ListAction
+
+
+def dummy_view(*_args, **_kwargs):
+    return HttpResponse("test")  # pragma: no cover
+
+
+urlpatterns = [
+    path("test/<path:pk>/action", dummy_view, name="test"),
+    path("test/add", dummy_view, name="add_url"),
+    # Templates require these for rendering:
+    path("login/", dummy_view, name="login"),
+    path("logout/", dummy_view, name="logout"),
+    path("password_change/", dummy_view, name="password_change"),
+    path("password_change/done/", dummy_view, name="password_change_done"),
+    path("signup/", dummy_view, name="signup"),
+    path("profile/", dummy_view, name="user_profile"),
+]
+
+pytestmark = pytest.mark.urls(__name__)
 
 
 @pytest.fixture
@@ -38,38 +63,84 @@ def soup():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("template_name", ["nachweis_list.html"])
-class TestNachweisListTemplate:
-    @pytest.mark.parametrize("field", ["fertig", "unterschrieben"])
-    @pytest.mark.parametrize("checked", [True, False])
-    def test_boolean_field_icons(self, render_template, soup, field, checked, **_):
-        """
-        Assert that the boolean values for the 'fertig' and 'unterschrieben'
-        fields are rendered as checkmark and x-mark icons.
-        """
-        context = {"object_list": [NachweisFactory(**{field: checked})]}
-        rendered = render_template(context)
-        icon = soup(rendered).find("td", class_=f"td-{field}").find("i")
-        assert icon
-        if checked:
-            assert "bi-check-circle" in icon["class"]
-        else:
-            assert "bi-x-circle" in icon["class"]
+@pytest.mark.parametrize("template_name", ["list.html"])
+class TestListTemplate:
+    @pytest.fixture
+    def list_display(self):
+        return ["foo", "bar", "baz"]
 
-    @pytest.mark.parametrize("unterschrieben", [True, False])
-    def test_tr_warning(self, render_template, soup, unterschrieben, **_):
+    @pytest.fixture
+    def headers(self):
+        return ["Foo", "Bar", "Baz"]
+
+    @pytest.fixture
+    def result_row(self):
+        return ["Spam", "Eels", "Hovercraft"]
+
+    @pytest.fixture
+    def result_obj(self):
+        return mock.Mock(pk=42)
+
+    @pytest.fixture
+    def col_classes(self):
+        return {"bar": "text-danger"}
+
+    @pytest.fixture
+    def context(self, list_display, headers, result_row, result_obj, col_classes):
+        return {
+            "list_display": list_display,
+            "headers": headers,
+            "result_rows": [(result_obj, result_row)],
+            "col_classes": col_classes,
+        }
+
+    def test_adds_additional_col_classes(self, render_template, context, soup):
+        """Assert that additional CSS classes for <td> elements are inserted."""
+        td = soup(render_template(context)).find("tbody").find("tr").find_all("td")[1]
+        assert "text-danger" in td["class"]
+
+    def test_adds_col_names(self, render_template, context, soup):
         """
-        Assert that a table row is rendered with warning class if the Nachweis
-        is not signed.
+        Assert that the <td> elements for the result items include their
+        respective 'name' from the list_display list.
         """
-        context = {"object_list": [NachweisFactory(**{"unterschrieben": unterschrieben})]}
-        tr = soup(render_template(context)).find("tbody").find("tr")
-        assert tr
-        classes = tr.attrs.get("class", [])
-        if unterschrieben:
-            assert "table-warning" not in classes
-        else:
-            assert "table-warning" in classes
+        td = soup(render_template(context)).find("tbody").find("tr").find("td")
+        assert "td-foo" in td["class"]
+
+    def test_renders_action_buttons(self, render_template, context, soup):
+        """Assert that the expected action buttons are rendered."""
+        action = ListAction(url_name="test", label="Template Test", css="foo")
+        context["actions"] = [action]
+        link = soup(render_template(context)).find("tbody").find("tr").find("a")
+        assert link["href"] == "/test/42/action"
+        assert link["class"] == ["foo"]
+        assert link.contents[0] == "Template Test"
+
+    @pytest.mark.parametrize("has_add_permission", [True, False])
+    def test_add_button(self, render_template, context, soup, has_add_permission):
+        """Assert that an add button is added if has_add_permission is True."""
+        context["has_add_permission"] = has_add_permission
+        context["add_url"] = "add_url"
+        btn = soup(render_template(context)).find("a", class_="btn-success")
+        assert bool(btn) == has_add_permission
+
+    def test_pagination(self, render_template, context, soup, user):
+        """Assert that the pagination is rendered as expected."""
+        # create enough objects for an elided pagination:
+        for _ in range(100):
+            NachweisFactory(user=user)
+
+        paginator = Paginator(object_list=_models.Nachweis.objects.filter(user=user), per_page=5)
+        context["paginator"] = paginator
+        context["page_obj"] = paginator.page(1)
+        context["page_range"] = list(paginator.get_elided_page_range(context["page_obj"].number))
+
+        pagination = soup(render_template(context)).find("ul", class_="pagination")
+        page_items = pagination.find_all("li", class_="page-item")
+        assert page_items[0].find("a").text == "1"
+        assert "disabled" in page_items[0].find("a").attrs["class"]
+        assert page_items[1].find("a").text == "2"
+        assert page_items[4].find("span").text == "…"
 
 
 @pytest.mark.django_db

@@ -282,7 +282,7 @@ class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
         initial = super().get_initial()
         if self.add:
             now = date.today()
-            last = _models.Nachweis.objects.filter(user=self.request.user).last()
+            last = _models.Nachweis.objects.filter(user=self.request.user).order_by("-nummer").first()
             initial.update(
                 {
                     "jahr": now.year,

@@ -561,12 +561,29 @@ class TestNachweisEditView:
         initial_data = add_view.get_initial()
         assert initial_data[field] == expected
 
-    def test_form_initial_nummer(self, rf, user, add_view, obj):
-        """Assert that the initial value of 'nummer' is as expected."""
+    def test_form_initial_nummer(self, rf, user, add_view):
+        """
+        Assert that the initial data for 'nummer' is the nummer + 1 of the last
+        Nachweis object created by the user.
+        """
+        # Create more than one object so that we have a "latest" and a "not
+        # latest" object
+        NachweisFactory(user=user)
+        latest_obj = NachweisFactory(user=user)
         add_view.request = rf.get("/")
         add_view.request.user = user
         initial_data = add_view.get_initial()
-        assert initial_data["nummer"] == obj.nummer + 1
+        assert initial_data["nummer"] == latest_obj.nummer + 1
+
+    def test_form_initial_nummer_first_obj(self, rf, user, add_view):
+        """
+        Assert that the initial value of 'nummer' is 1 if the user has never
+        created any Nachweis objects.
+        """
+        add_view.request = rf.get("/")
+        add_view.request.user = user
+        initial_data = add_view.get_initial()
+        assert initial_data["nummer"] == 1
 
     def test_form_initial_ausbildungswoche(self, rf, user, add_view):
         """Assert that the initial value of 'ausbildungswoche' is as expected."""

@@ -26,7 +26,7 @@
 - [x] FIXME: form initials overwrite pre-existing data when editing nachweise!
 - [x] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
 - [ ] Nachweis.nummer should be unique
-- [ ] use <int:> converter instead of <path:> for URLs
+- [x] use <int:> converter instead of <path:> for URLs
 - [x] FIXME: Abteilung edit form has SoftDelete fields
 - [x] Let `Nachweis.abteilung` be null -> no cascade when deleting Abteilung 
 - [x] Add hard-delete button to trashcan

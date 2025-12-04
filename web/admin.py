@@ -16,6 +16,7 @@ class NachweisAdmin(admin.ModelAdmin):
         "eingereicht_bei",
         "unterschrieben",
     ]
+    exclude = ["deleted_at", "restored_at", "transaction_id"]
     autocomplete_fields = ["abteilung"]
 
 

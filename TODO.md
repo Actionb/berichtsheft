@@ -22,7 +22,7 @@
 - [ ] Make Nachweis.kalenderwoche non editable (`editable=False`); it should be derived from the start date (maybe even remove the field altogether and just compute its value when needed?)
 - [x] sign up form: required fields need to be highlighted/bold
 - [x] how to create UserProfiles for users created via `manage.py createsuperuser`
-- [ ] add user messages when saving stuff
+- [x] add user messages when saving stuff
 - [x] FIXME: form initials overwrite pre-existing data when editing nachweise!
 - [x] NachweisList: Zeitraum: explicitly add <br> after '-' for all Nachweise? 
 - [ ] Nachweis.nummer should be unique

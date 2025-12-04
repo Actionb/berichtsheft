@@ -267,6 +267,14 @@ class EditView(ModelViewMixin, BaseViewMixin, PermissionRequiredMixin, UpdateVie
             context["restore_url"] = self.get_restore_url()
         return context
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            message=f"{self.opts.verbose_name} erfolgreich {'erstellt' if self.add else 'bearbeitet'}.",
+        )
+        return response
+
 
 class NachweisEditView(RequireUserMixin, SaveUserMixin, EditView):
     model = _models.Nachweis

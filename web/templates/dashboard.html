@@ -19,10 +19,6 @@
                     <div class="row">
                         <p>{{ nachweis }}</p>
                     </div>
-                {% empty %}
-                    <div class="row">
-                        <p>Du hast noch keine fehlenden Nachweise!</p>
-                    </div>
                 {% endfor %}
             </div>
             {% endif %}
@@ -30,6 +26,7 @@
                 <h2>Aktueller Nachweis</h2>
                 {% if current_nachweis %}
                     <p>{{ current_nachweis }}</p>
+                    <a href="{% url 'nachweis_change' current_nachweis.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Nachweis bearbeiten</a>
                 {% else %}
                     <p>Du hast für den aktuellen Zeitraum noch keinen Nachweis erstellt!</p>
                     <a href="{% url 'nachweis_add' %}" class="btn btn-outline-success"><i class="bi bi-file-earmark-plus"></i> Nachweis erstellen</a>

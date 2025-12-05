@@ -29,7 +29,7 @@ from web.actions import EditAction, NachweisPrintAction
 from web.utils import perms
 from web.utils.date import count_week_numbers
 from web.utils.decorators import add_attrs
-from web.utils.models import collect_deleted_objects
+from web.utils.models import collect_deleted_objects, get_current_nachweis
 
 # Decorator for list_display callables
 list_display_callable = add_attrs
@@ -408,6 +408,11 @@ def handler403(request, exception=None):
 class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
     title = "Home"
     template_name = "dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["current_nachweis"] = get_current_nachweis(self.request.user)
+        return ctx
 
 
 ################################################################################

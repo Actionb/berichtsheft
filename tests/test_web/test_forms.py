@@ -56,6 +56,7 @@ class TestUserProfileForm:
             "start_date": "2024-01-01",
             "first_name": "Alice",
             "last_name": "Testman",
+            "interval": _models.UserProfile.IntervalType.DAILY,
         }
 
     @pytest.fixture

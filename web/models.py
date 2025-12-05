@@ -13,12 +13,25 @@ class User(AbstractUser):
 
 
 class UserProfile(models.Model):
+    class IntervalType(models.TextChoices):
+        OTHER = "other", "anderes"
+        DAILY = "daily", "täglich"
+        WEEKLY = "weekly", "wöchentlich"
+        MONTHLY = "monthly", "monatlich"
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile", unique=True)
     start_date = models.DateField(
         verbose_name="Startdatum",
         blank=True,
         null=True,
         help_text="Startdatum der Ausbildung. Wird benötigt für die Errechnung von Datumsangaben der Nachweise.",
+    )
+    interval = models.CharField(
+        max_length=10,
+        verbose_name="Nachweis-Interval",
+        help_text="Interval, wie häufig Nachweise erstellt werden sollten",
+        choices=IntervalType,
+        default=IntervalType.OTHER,
     )
 
     class Meta:

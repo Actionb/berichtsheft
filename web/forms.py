@@ -33,7 +33,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = _models.UserProfile
-        fields = ["first_name", "last_name", "start_date"]
+        fields = ["first_name", "last_name", "start_date", "interval"]
         widgets = {"start_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def save(self, commit=True):

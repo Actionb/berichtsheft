@@ -1,29 +1,24 @@
 <ul class="navbar-nav">
     <li class="nav-item active">
-        <a class="nav-link" href=""><i class="bi bi-house"></i> Dashboard</a>
+        <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Dashboard</a>
     </li>
     <li class="nav-item">
-    <a class="nav-link"
-       href="{% url 'nachweis_list' %}"
-       title="Meine Nachweise"><i class="bi bi-file-earmark-text"></i>
-    Nachweise
-</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link"
-       href="{% url 'abteilung_list' %}"
-       title="Meine Abteilungen">
-       <i class="bi bi-diagram-2"></i>
-       Abteilungen
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'trash' %}">
-        <i class="bi bi-trash"></i>
-        Papierkorb
-        {% if trash_count %}<span class="badge text-bg-secondary">{{ trash_count|default:0 }}</span>{% endif %}
-    </a>
-</li>
+        <a class="nav-link"
+           href="{% url 'nachweis_list' %}"
+           title="Meine Nachweise"><i class="bi bi-file-earmark-text"></i> Nachweise </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           href="{% url 'abteilung_list' %}"
+           title="Meine Abteilungen"><i class="bi bi-diagram-2"></i> Abteilungen </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'trash' %}">
+            <i class="bi bi-trash"></i>
+            Papierkorb
+            {% if trash_count %}<span class="badge text-bg-secondary">{{ trash_count|default:0 }}</span>{% endif %}
+        </a>
+    </li>
 </ul>
 <div id="user-account" class="btn-group ms-auto" role="group">
     <button type="button"

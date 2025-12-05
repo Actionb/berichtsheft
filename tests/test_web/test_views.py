@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from unittest import mock
+from urllib.parse import urlparse
 
 import pytest
 from django.contrib.auth import SESSION_KEY
@@ -45,6 +46,7 @@ urlpatterns = [
     path("<str:model_name>/<int:pk>/restore/", _views.restore_object, name="restore_object"),
     path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
     path("trash/empty/", _views.empty_trash, name="empty_trash"),
+    path("", _views.DashboardView.as_view(), name="home"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
     path("logout/", dummy_view, name="logout"),
@@ -1161,3 +1163,24 @@ class TestAbteilungEditView:
         response = client.post(edit_url(obj), data={"name": "foo"})
         assert response.status_code == 302
         assert _models.Abteilung.objects.filter(user=user, name="foo").exists()
+
+
+class TestDashboardView:
+    @pytest.fixture
+    def start_date(self):
+        return date(2025, 12, 5)
+
+    @pytest.fixture(autouse=True)
+    def mock_now(self, start_date):
+        with mock.patch("web.views.date", wraps=date) as m:
+            m.today.return_value = start_date
+            yield m
+
+    def test(self, client, login_user):
+        response = client.get(reverse("home"))
+        assert response.status_code == 200
+
+    def test_requires_authentication(self, client):
+        response = client.get(reverse("home"))
+        assert response.status_code == 302
+        assert urlparse(response.url).path == reverse("login")

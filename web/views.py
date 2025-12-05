@@ -5,7 +5,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.http import HttpResponse, JsonResponse
@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView, View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import ModelFormMixin
 from django.views.generic.list import MultipleObjectMixin
@@ -403,6 +403,11 @@ def handler403(request, exception=None):
         context={"content": message},
         status=403,
     )
+
+
+class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
+    title = "Home"
+    template_name = "dashboard.html"
 
 
 ################################################################################

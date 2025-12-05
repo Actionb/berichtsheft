@@ -52,3 +52,12 @@ def get_current_nachweis(user: _models.User) -> Optional[_models.Nachweis]:
         case _:
             return
     return user_nachweise.filter(datum_start=start, datum_ende=end).first()
+
+
+def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
+    """
+    Look for any gaps in the Nachweis chain and return the dates of missing
+    Nachweis objects.
+    """
+    # TODO: needs to be able to account for holidays, etc.
+    # TODO: this requires a calendar of sorts where users can enter their holidays

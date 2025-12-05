@@ -1,7 +1,17 @@
 from datetime import date
 
 
-def count_week_numbers(start, end):
+def get_week_monday(d: date) -> date:  # pragma: no cover
+    """Return the date object for the Monday in given date's `d` week."""
+    return date.fromisocalendar(d.isocalendar()[0], d.isocalendar()[1], 1)
+
+
+def get_week_friday(d: date) -> date:  # pragma: no cover
+    """Return the date object for the Friday in given date's `d` week."""
+    return date.fromisocalendar(d.isocalendar()[0], d.isocalendar()[1], 5)
+
+
+def count_week_numbers(start: date, end: date) -> int:
     """Count the week numbers from the start date to the end date."""
     if end < start:
         return 0

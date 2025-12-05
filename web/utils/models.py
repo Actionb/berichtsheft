@@ -1,4 +1,11 @@
+import calendar
+from datetime import date
+from typing import Optional
+
 from django.apps import apps
+
+from web import models as _models
+from web.utils.date import get_week_friday, get_week_monday
 
 
 def _get_soft_delete_models(app_label="web"):
@@ -19,3 +26,29 @@ def collect_deleted_objects(user):
         if queryset.exists():
             objects.append(queryset)
     return objects
+
+
+def get_current_nachweis(user: _models.User) -> Optional[_models.Nachweis]:
+    """
+    Return the user's Nachweis object for the current interval.
+
+    If the user has not created a Nachweis for the current interval or if no
+    interval is set, return None.
+    """
+    user_nachweise = _models.Nachweis.objects.filter(user=user)
+    today = date.today()
+    match user.profile.interval:
+        case user.profile.IntervalType.DAILY:
+            start = end = today
+        case user.profile.IntervalType.WEEKLY:
+            start = get_week_monday(today)
+            end = get_week_friday(today)
+            # TODO: use an annotation to filter for Nachweis objects that lie
+            # in the week's range instead?
+            #   annotate(?=).filter(?__range=(start, end))
+        case user.profile.IntervalType.MONTHLY:
+            start = today.replace(day=1)
+            end = today.replace(day=calendar.monthrange(today.year, today.month)[-1])
+        case _:
+            return
+    return user_nachweise.filter(datum_start=start, datum_ende=end).first()

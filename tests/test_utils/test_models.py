@@ -1,8 +1,11 @@
+from datetime import date
 from unittest import mock
 
 import pytest
 
-from web.utils.models import _get_soft_delete_models, collect_deleted_objects
+from tests.model_factory import NachweisFactory
+from web import models as _models
+from web.utils import models as utils
 
 from .models import SoftDeleteTestModel
 
@@ -30,14 +33,88 @@ def not_user_obj(superuser):
 
 def test_get_soft_delete_models():
     """Assert that _get_soft_delete_models returns the expected models."""
-    assert list(_get_soft_delete_models("test_utils")) == [SoftDeleteTestModel]
+    assert list(utils._get_soft_delete_models("test_utils")) == [SoftDeleteTestModel]
 
 
 def test_collect_deleted_objects(user, obj, deleted_obj, not_user_obj):
     """Assert that collect_deleted_objects returns the expected items."""
     with mock.patch("web.utils.models._get_soft_delete_models", new=mock.Mock(return_value=[SoftDeleteTestModel])):
-        objs = collect_deleted_objects(user)
+        objs = utils.collect_deleted_objects(user)
     queryset = objs[0]
     assert deleted_obj in queryset
     assert obj not in queryset
     assert not_user_obj not in queryset
+
+
+class TestGetCurrentNachweis:
+    @pytest.fixture
+    def today(self):
+        """The date that marks 'today' in regard to the Nachweis fetching tests."""
+        return date(2025, 12, 4)
+
+    @pytest.fixture(autouse=True)
+    def mock_today(self, today):
+        """Mock out the built-in date.today function."""
+        # https://stackoverflow.com/a/55187924
+        with mock.patch("web.utils.models.date", wraps=date) as m:
+            m.today.return_value = today
+            yield m
+
+    @pytest.fixture(
+        params=[
+            _models.UserProfile.IntervalType.DAILY,
+            _models.UserProfile.IntervalType.WEEKLY,
+            _models.UserProfile.IntervalType.MONTHLY,
+        ]
+    )
+    def interval(self, request):
+        """The interval between Nachweis objects."""
+        return request.param
+
+    @pytest.fixture
+    def user(self, create_user, interval):
+        user = create_user()
+        user.profile.interval = interval
+        user.profile.save()
+        return user
+
+    @pytest.fixture(autouse=True)
+    def control_obj(self, user):
+        """A control object that should not turn up as a result."""
+        return NachweisFactory(user=user)
+
+    @pytest.fixture
+    def current_obj(self, user, today, interval):
+        """Create and return the 'current' object according to the given interval."""
+        match interval:
+            case _models.UserProfile.IntervalType.DAILY:
+                start = end = today
+            case _models.UserProfile.IntervalType.WEEKLY:
+                start = date(2025, 12, 1)
+                end = date(2025, 12, 5)
+            case _models.UserProfile.IntervalType.MONTHLY:
+                start = date(2025, 12, 1)
+                end = date(2025, 12, 31)
+        return NachweisFactory(user=user, datum_start=start, datum_ende=end)
+
+    def test_current_nachweis(self, user, current_obj):
+        """
+        Assert that get_current_nachweis returns the user's current Nachweis
+        object, according to the user-specified interval.
+        """
+        assert utils.get_current_nachweis(user) == current_obj
+
+    def test_current_nachweis_no_nachweis(self, user):
+        """
+        Assert that get_current_nachweis returns None if the user has not
+        created a Nachweis object within the current interval.
+        """
+        assert utils.get_current_nachweis(user) is None
+
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.OTHER])
+    def test_current_nachweis_no_interval(self, user):
+        """
+        Assert that get_current_nachweis returns None if the user has set a
+        different interval.
+        """
+        assert utils.get_current_nachweis(user) is None

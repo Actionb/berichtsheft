@@ -30,7 +30,7 @@
 - [x] FIXME: Abteilung edit form has SoftDelete fields
 - [x] Let `Nachweis.abteilung` be null -> no cascade when deleting Abteilung 
 - [x] Add hard-delete button to trashcan
-- [ ] Adjust margin/padding on Abteilung change form
+- [x] Adjust margin/padding on Abteilung change form
 - [x] Add 'view object' button to Papierkorb items
 - [ ] Customize 404 view
 - [ ] allow user to delete their account

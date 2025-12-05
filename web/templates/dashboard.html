@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block main %}
+    <h1>Dashboard</h1>
+    <p class="mb-3">
+        Willkommen auf deinem Dashboard,
+        {% if request.user.first_name %}
+            {{ request.user.first_name }}
+        {% else %}
+            {{ request.user.username }}
+        {% endif %}
+        !
+    </p>
+    <div class="d-flex gap-3">
+        <div class="col">
+            {% if missing_nachweise %}
+            <div class="missing-nachweise border rounded mb-3 p-3">
+                <h2>Fehlende Nachweise</h2>
+                {% for nachweis in missing_nachweise %}
+                    <div class="row">
+                        <p>{{ nachweis }}</p>
+                    </div>
+                {% empty %}
+                    <div class="row">
+                        <p>Du hast noch keine fehlenden Nachweise!</p>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="recent-nachweis border rounded mb-3 p-3">
+                <h2>Aktueller Nachweis</h2>
+                {% if current_nachweis %}
+                    <p>{{ current_nachweis }}</p>
+                {% else %}
+                    <p>Du hast für den aktuellen Zeitraum noch keinen Nachweis erstellt!</p>
+                    <a href="{% url 'nachweis_add' %}" class="btn btn-outline-success"><i class="bi bi-file-earmark-plus"></i> Nachweis erstellen</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col">
+            <div class="last-nachweise border rounded mb-3 p-3">
+                <h2>Letzte Nachweise</h2>
+                {% for nachweis in last_nachweise %}
+                    <div class="row">
+                        <p>{{ nachweis }}</p>
+                    </div>
+                {% empty %}
+                    <p>Du hast noch keine Nachweise erstellt!</p>
+                {% endfor %}
+                <a href="{% url 'nachweis_list' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Zur Nachweis-Übersicht</a>
+            </div>
+        </div>
+    </div>
+{% endblock main %}

@@ -1,5 +1,4 @@
-import calendar
-from datetime import date
+from datetime import date, timedelta
 from unittest import mock
 
 import pytest
@@ -147,64 +146,48 @@ class TestGetMissingNachweise:
         return request.param
 
     @pytest.fixture
-    def user(self, create_user, interval):
+    def start_date(self, today):
+        """The start_date of the user's Ausbildung."""
+        # Use the "previous" week's Monday:
+        return date.fromisocalendar(today.year, today.isocalendar()[1] - 1, 1)
+
+    @pytest.fixture
+    def user(self, create_user, interval, start_date):
         user = create_user()
+        user.profile.start_date = start_date
         user.profile.interval = interval
         user.profile.save()
         return user
 
-    @pytest.fixture
-    def missing(self, interval, user, today):
-        """
-        Create Nachweis objects with "gaps".
-
-        Return a list specifying the gaps as 2-tuples (<gap_start>, <gap_end>).
-        """
-        year = today.isocalendar()[0]
-        week = today.isocalendar()[1]
-        missing = []
-        match interval:
-            case _models.UserProfile.IntervalType.DAILY:
-                # Create Nachweise for Monday, Wednesday and Friday of the week
-                # "before" today:
-                week -= 1
-                for weekday in range(1, 6):
-                    d = date.fromisocalendar(year, week, weekday)
-                    if weekday % 2:
-                        missing.append((d, d))
-                    else:
-                        NachweisFactory(user=user, datum_start=d, datum_ende=d)
-            case _models.UserProfile.IntervalType.WEEKLY:
-                # Create Nachweis objects for the last few weeks except for the
-                # week before last:
-                for i, week_ in enumerate(range(week - 3, week)):
-                    start = date.fromisocalendar(year, week_, 1)
-                    end = date.fromisocalendar(year, week_, 5)
-                    if i == 1:
-                        missing.append((start, end))
-                    else:
-                        NachweisFactory(user=user, datum_start=start, datum_ende=end)
-            case _models.UserProfile.IntervalType.MONTHLY:
-                # Create Nachweis objects for the last months except for the
-                # month before last:
-                for i, month in enumerate(range(today.month - 3, today.month)):
-                    last_day = calendar.monthrange(year, month)[-1]
-                    start = date(year, month, 1)
-                    end = date(year, month, last_day)
-                    if i == 1:
-                        missing.append((start, end))
-                    else:
-                        NachweisFactory(user=user, datum_start=start, datum_ende=end)
-        return missing
-
-    def test_get_missing_nachweise(self, user, missing):
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.DAILY])
+    @pytest.mark.parametrize("start_date", [date(2025, 11, 24)])
+    @pytest.mark.parametrize("today", [date(2025, 12, 9)])
+    def test_get_missing_daily(self, user, start_date, today):
         """
         Assert that get_missing_nachweise returns the dates for the missing
-        Nachweis objects.
+        Nachweis objects when using a DAILY schedule.
         """
+        # Calendar for the test time frame, with the gap dates noted:
+        # Mo | Tu | We | Th | Fr
+        # 24   25                  November
+        #       2          4       December
+        #   8   today
+        missing = [
+            date(2025, 11, 24),
+            date(2025, 11, 25),
+            date(2025, 12, 2),
+            date(2025, 12, 4),
+            date(2025, 12, 8),
+        ]
+
+        for day_delta in range((today - start_date).days + 1):
+            d = start_date + timedelta(days=day_delta)
+            if d not in missing:
+                NachweisFactory(user=user, datum_start=d, datum_ende=d)
+        missing = [(d, d) for d in sorted(missing, reverse=True)]
+
         assert utils.get_missing_nachweise(user) == missing
 
-    @pytest.mark.usefixtures("missing")
     @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.OTHER])
     def test_no_interval(self, user):
         """

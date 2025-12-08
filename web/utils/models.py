@@ -1,5 +1,5 @@
 import calendar
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional
 
 from django.apps import apps
@@ -59,5 +59,27 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
     Look for any gaps in the Nachweis chain and return the dates of missing
     Nachweis objects.
     """
+    user_nachweise = _models.Nachweis.objects.filter(user=user)
+    start = user.profile.start_date  # TODO: handle no start date
+    today = date.today()
+    missing = []
+    match user.profile.interval:
+        case user.profile.IntervalType.DAILY:
+            # To determine the gaps in a DAILY schedule, compare the set of
+            # Nachweis dates with a set of all business days since the start of
+            # the user's Ausbildung.
+            # Create a set of all business days since the start of the Ausbildung:
+            # https://www.geeksforgeeks.org/python/python-program-to-get-total-business-days-between-two-dates/
+            bdays = set()
+            for day_delta in range((today - start).days):
+                d = start + timedelta(days=day_delta)
+                if d.isoweekday() < 6:
+                    bdays.add(d)
+            # Subtract all Nachweis dates to get the gaps:
+            missing = bdays.difference(user_nachweise.values_list("datum_start", flat=True))
+            # Return with the most recent gaps first:
+            return [(d, d) for d in sorted(missing, reverse=True)]
+        case _:
+            pass
     # TODO: needs to be able to account for holidays, etc.
     # TODO: this requires a calendar of sorts where users can enter their holidays

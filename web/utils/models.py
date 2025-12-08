@@ -5,7 +5,7 @@ from typing import Optional
 from django.apps import apps
 
 from web import models as _models
-from web.utils.date import get_week_friday, get_week_monday
+from web.utils.date import count_week_numbers, get_week_friday, get_week_monday
 
 
 def _get_soft_delete_models(app_label="web"):
@@ -57,12 +57,11 @@ def get_current_nachweis(user: _models.User) -> Optional[_models.Nachweis]:
 def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
     """
     Look for any gaps in the Nachweis chain and return the dates of missing
-    Nachweis objects.
+    Nachweis objects, with the most recent gap first.
     """
     user_nachweise = _models.Nachweis.objects.filter(user=user)
     start = user.profile.start_date  # TODO: handle no start date
     today = date.today()
-    missing = []
     match user.profile.interval:
         case user.profile.IntervalType.DAILY:
             # To determine the gaps in a DAILY schedule, compare the set of
@@ -77,9 +76,28 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
                     bdays.add(d)
             # Subtract all Nachweis dates to get the gaps:
             missing = bdays.difference(user_nachweise.values_list("datum_start", flat=True))
-            # Return with the most recent gaps first:
             return [(d, d) for d in sorted(missing, reverse=True)]
+        case user.profile.IntervalType.WEEKLY:
+            # To determine the gaps in a WEEKLY schedule, compare a set of
+            # Mondays since the start of the Ausbildung with the Mondays of
+            # Nachweis objects (datum_start).
+            mondays = set()
+            start_monday = get_week_monday(start)
+            for week_delta in range(count_week_numbers(start, today)):
+                mondays.add(start_monday + timedelta(weeks=week_delta))
+            missing = mondays.difference(user_nachweise.order_by("-datum_start").values_list("datum_start", flat=True))
+            return [(d, get_week_friday(d)) for d in sorted(missing, reverse=True)]
+        case user.profile.IntervalType.MONTHLY:
+            firsts = set()
+            month = start.replace(day=1)
+            while month < today:
+                firsts.add(month)
+                month = month.replace(month=month.month + 1)
+            missing = firsts.difference(user_nachweise.order_by("-datum_start").values_list("datum_start", flat=True))
+            return [
+                (d, date(d.year, d.month, calendar.monthrange(d.year, d.month)[1]))
+                for d in sorted(missing, reverse=True)
+            ]
         case _:
-            pass
-    # TODO: needs to be able to account for holidays, etc.
-    # TODO: this requires a calendar of sorts where users can enter their holidays
+            return None
+    # Return with the most recent gaps first:

@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import date, timedelta
 from unittest import mock
 
@@ -186,6 +187,42 @@ class TestGetMissingNachweise:
                 NachweisFactory(user=user, datum_start=d, datum_ende=d)
         missing = [(d, d) for d in sorted(missing, reverse=True)]
 
+        assert utils.get_missing_nachweise(user) == missing
+
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.WEEKLY])
+    @pytest.mark.parametrize("start_date", [date(2025, 11, 24)])
+    @pytest.mark.parametrize("today", [date(2025, 12, 9)])
+    def test_get_missing_weekly(self, user):
+        """
+        Assert that get_missing_nachweise returns the dates for the missing
+        Nachweis objects when using a WEEKLY schedule.
+        """
+        # Calendar for the test time frame, with the gap weeks noted:
+        # Mo | Tu | We | Th | Fr
+        # 24                  28 Nachweis missing
+        #  1                   5 ✅
+        #  8                  12 Nachweis missing
+        # 15                  19 today
+        missing = [
+            (date(2025, 12, 8), date(2025, 12, 12)),
+            (date(2025, 11, 24), date(2025, 11, 28)),
+        ]
+        NachweisFactory(user=user, datum_start=date(2025, 12, 1), datum_ende=date(2025, 12, 5))
+        assert utils.get_missing_nachweise(user) == missing
+
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.MONTHLY])
+    @pytest.mark.parametrize("start_date", [date(2025, 9, 1)])
+    @pytest.mark.parametrize("today", [date(2025, 12, 1)])
+    def test_get_missing_monthly(self, user):
+        """
+        Assert that get_missing_nachweise returns the dates for the missing
+        Nachweis objects when using a MONTHLY schedule.
+        """
+        missing = [
+            (date(2025, 11, 1), date(2025, 11, monthrange(2025, 11)[1])),
+            (date(2025, 9, 1), date(2025, 9, monthrange(2025, 9)[1])),
+        ]
+        NachweisFactory(user=user, datum_start=date(2025, 10, 1), datum_ende=date(2025, 10, monthrange(2025, 11)[1]))
         assert utils.get_missing_nachweise(user) == missing
 
     @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.OTHER])

@@ -62,6 +62,7 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
     user_nachweise = _models.Nachweis.objects.filter(user=user)
     start = user.profile.start_date  # TODO: handle no start date
     today = date.today()
+    nachweis_dates = user_nachweise.values_list("datum_start", flat=True)
     match user.profile.interval:
         case user.profile.IntervalType.DAILY:
             # To determine the gaps in a DAILY schedule, compare the set of
@@ -75,7 +76,7 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
                 if d.isoweekday() < 6:
                     bdays.add(d)
             # Subtract all Nachweis dates to get the gaps:
-            missing = bdays.difference(user_nachweise.values_list("datum_start", flat=True))
+            missing = bdays.difference(nachweis_dates)
             return [(d, d) for d in sorted(missing, reverse=True)]
         case user.profile.IntervalType.WEEKLY:
             # To determine the gaps in a WEEKLY schedule, compare a set of
@@ -85,19 +86,21 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
             start_monday = get_week_monday(start)
             for week_delta in range(count_week_numbers(start, today)):
                 mondays.add(start_monday + timedelta(weeks=week_delta))
-            missing = mondays.difference(user_nachweise.order_by("-datum_start").values_list("datum_start", flat=True))
+            missing = mondays.difference(nachweis_dates)
             return [(d, get_week_friday(d)) for d in sorted(missing, reverse=True)]
         case user.profile.IntervalType.MONTHLY:
+            # To determine the gaps in a MONTHLY schedule, compare a set of
+            # first days of a month since the start of the Ausbildung with the
+            # first days of Nachweis objects.
             firsts = set()
             month = start.replace(day=1)
             while month < today:
                 firsts.add(month)
                 month = month.replace(month=month.month + 1)
-            missing = firsts.difference(user_nachweise.order_by("-datum_start").values_list("datum_start", flat=True))
+            missing = firsts.difference(nachweis_dates)
             return [
                 (d, date(d.year, d.month, calendar.monthrange(d.year, d.month)[1]))
                 for d in sorted(missing, reverse=True)
             ]
         case _:
             return None
-    # Return with the most recent gaps first:

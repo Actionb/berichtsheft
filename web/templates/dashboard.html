@@ -12,16 +12,7 @@
     </p>
     <div class="d-flex gap-3">
         <div class="col">
-            {% if missing_nachweise %}
-            <div class="missing-nachweise border rounded mb-3 p-3">
-                <h2>Fehlende Nachweise</h2>
-                {% for nachweis in missing_nachweise %}
-                    <div class="row">
-                        <p>{{ nachweis }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% block current %}
             <div class="recent-nachweis border rounded mb-3 p-3">
                 <h2>Aktueller Nachweis</h2>
                 {% if current_nachweis %}
@@ -32,8 +23,36 @@
                     <a href="{% url 'nachweis_add' %}" class="btn btn-outline-success"><i class="bi bi-file-earmark-plus"></i> Nachweis erstellen</a>
                 {% endif %}
             </div>
+            {% endblock current %}
+            {% block missing %}
+            {% if missing_nachweise %}
+            <div class="missing-nachweise border rounded mb-3 p-3">
+                <h2>Fehlende Nachweise</h2>
+                <p>Es fehlen Nachweise für die folgenden Abschnitte:</p>
+                <table class="table table-striped table-hover">
+                <thead>
+                    <tr><th>Datum/Zeitraum</th><th class="text-center">Nachweis hinzufügen</th></tr>
+                </thead>
+                <tbody>
+                {% for start, end in missing_nachweise|slice:":5" %}
+                    <tr>
+                        <td>
+                            <span>{{ start }}{% if start != end %} - {{ end }}{% endif %}</span>
+                        </td>
+                        <td class="d-flex justify-content-center">
+                            <a href="{% url 'nachweis_add' %}?datum_start={{ start|date:"Y-m-d" }}&datum_ende={{ end|date:"Y-m-d" }}&nummer=" class="btn btn-outline-success ms-3" title="Nachweis hinzufügen"><i class="bi bi-file-earmark-plus"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                </table>
+                <a href="" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Übersicht: fehlende Nachweise</a>
+            </div>
+            {% endif %}
+            {% endblock missing %}
         </div>
         <div class="col">
+            {% block recent %}
             <div class="last-nachweise border rounded mb-3 p-3">
                 <h2>Letzte Nachweise</h2>
                 {% for nachweis in last_nachweise %}
@@ -45,6 +64,7 @@
                 {% endfor %}
                 <a href="{% url 'nachweis_list' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Zur Nachweis-Übersicht</a>
             </div>
+            {% endblock recent %}
         </div>
     </div>
 {% endblock main %}

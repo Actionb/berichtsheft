@@ -45,3 +45,5 @@
 - [ ] FIXME: default initial value for `nummer` is wrong because the default ordering was changed
 - [ ] tweak Nachweis model ordering to use `nummer` by default?
 - [ ] add user setting for working on weekends -> could be useful for figuring out missing Nachweise
+- [ ] add a utility function/template tag that creates useful initial data for a Nachweis object from a given date
+- [ ] allow users to ignore "Missing Nachweis" warnings per missing Nachweis 

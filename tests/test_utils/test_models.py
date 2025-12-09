@@ -225,10 +225,10 @@ class TestGetMissingNachweise:
         NachweisFactory(user=user, datum_start=date(2025, 10, 1), datum_ende=date(2025, 10, monthrange(2025, 11)[1]))
         assert utils.get_missing_nachweise(user) == missing
 
-    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.OTHER])
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.OTHER, "Foo"])
     def test_no_interval(self, user):
         """
-        Assert that get_missing_nachweise returns None if the user did not set
-        a usable interval.
+        Assert that get_missing_nachweise returns an empty list if the user did
+        not set a usable interval.
         """
-        assert utils.get_missing_nachweise(user) is None
+        assert utils.get_missing_nachweise(user) == []

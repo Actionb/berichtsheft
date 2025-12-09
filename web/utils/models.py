@@ -125,4 +125,4 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
                 for d in sorted(missing, reverse=True)
             ]
         case _:
-            return None
+            return []

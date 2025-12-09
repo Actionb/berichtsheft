@@ -123,7 +123,7 @@ class RequireUserMixin(SingleObjectMixin):
 
 
 class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, ListView):
-    template_name = "list.html"
+    template_name = "changelist.html"
     paginate_by = 10
     list_display = ()
     actions = ()

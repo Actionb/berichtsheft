@@ -63,8 +63,8 @@ def soup():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("template_name", ["list.html"])
-class TestListTemplate:
+@pytest.mark.parametrize("template_name", ["changelist.html"])
+class TestChangelistTemplate:
     @pytest.fixture
     def list_display(self):
         return ["foo", "bar", "baz"]

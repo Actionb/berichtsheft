@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load actions %}
+{% block main %}
+    <h1>
+        {% block page_title %}{{ title }}{% endblock %}
+    </h1>
+    {% block results %}
+        <table class="table table-striped table-hover">
+            <thead>
+                {% block result_table_head %}
+                    <tr>
+                        {% for header in headers %}<th class="sticky-top z-2">{{ header }}</th>{% endfor %}
+                        {% if actions %}
+                            <th class="sticky-top z-2" style="width: 6%;">Aktionen</th>
+                        {% endif %}
+                    </tr>
+                {% endblock result_table_head %}
+            </thead>
+            <tbody>
+                {% block result_table_results %}
+                    {% for result_row in result_rows %}
+                        <tr>
+                            {% for item in result_row %}<td>{{ item }}</td>{% endfor %}
+                            <td>
+                                {% for action in actions %}
+                                    <div class="my-2">{% render_action action request %}</div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endblock result_table_results %}
+            </tbody>
+        </table>
+    {% endblock results %}
+    {% block sticky-bottom %}
+    {% endblock sticky-bottom %}
+{% endblock main %}

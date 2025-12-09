@@ -1,76 +1,61 @@
-{% extends "base.html" %}
+{% extends "list.html" %}
 {% load list actions %}
-{% block main %}
-    <h1>
-        {% block page_title %}{{ title }}{% endblock %}
-    </h1>
-    {% block results %}
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    {% for header in headers %}<th class="sticky-top z-2">{{ header }}</th>{% endfor %}
-                    <th class="sticky-top z-2" style="width: 6%;">Aktionen</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result_object, result_row in result_rows %}
-                    <tr>
-                        {% for result in result_row %}
-                            <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ result }}</td>
-                        {% endfor %}
-                        <td>
-                            {% for action in actions %}
-                                <div class="my-2">{% render_action action request obj=result_object %}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
+{% block result_table_results %}
+    {% for result_object, result_row in result_rows %}
+        <tr>
+            {% for result in result_row %}
+                <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ result }}</td>
+            {% endfor %}
+            <td>
+                {% for action in actions %}
+                    <div class="my-2">{% render_action action request obj=result_object %}</div>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% endblock results %}
-    {% block sticky-bottom %}
-        <div class="d-flex position-sticky start-0 bottom-0 p-3 border rounded bg-primary-subtle">
-            {% if has_add_permission %}
-                <a href="{% url add_url %}" class="btn btn-success">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         width="24"
-                         height="24"
-                         viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="2"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         class="feather feather-plus-square">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                    <span>{{ opts.verbose_name }} hinzufügen</span>
-                </a>
-            {% endif %}
-            <div class="ms-auto pagination-container">
-                <nav aria-label="Search results pages" class="d-flex align-items-center">
-                    <span class="me-3">Seitenauswahl:</span>
-                    <ul class="pagination mb-0">
-                        {% for i in page_range %}
-                            {% if i == page_obj.number %}
-                                {% with is_current=True %}
-                                    <li class="page-item">
-                                        <a class="page-link disabled" href="#">{{ i }}</a>
-                                    </li>
-                                {% endwith %}
-                            {% elif i == "…" %}
+            </td>
+        </tr>
+    {% endfor %}
+{% endblock result_table_results %}
+{% block sticky-bottom %}
+    <div class="d-flex position-sticky start-0 bottom-0 p-3 border rounded bg-primary-subtle">
+        {% if has_add_permission %}
+            <a href="{% url add_url %}" class="btn btn-success">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     class="feather feather-plus-square">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span>{{ opts.verbose_name }} hinzufügen</span>
+            </a>
+        {% endif %}
+        <div class="ms-auto pagination-container">
+            <nav aria-label="Search results pages" class="d-flex align-items-center">
+                <span class="me-3">Seitenauswahl:</span>
+                <ul class="pagination mb-0">
+                    {% for i in page_range %}
+                        {% if i == page_obj.number %}
+                            {% with is_current=True %}
                                 <li class="page-item">
-                                    <span class="page-link disabled">…</span>
+                                    <a class="page-link disabled" href="#">{{ i }}</a>
                                 </li>
-                            {% else %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </nav>
-            </div>
+                            {% endwith %}
+                        {% elif i == "…" %}
+                            <li class="page-item">
+                                <span class="page-link disabled">…</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
         </div>
-    {% endblock sticky-bottom %}
-{% endblock main %}
+    </div>
+{% endblock sticky-bottom %}

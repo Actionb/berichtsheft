@@ -68,6 +68,7 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
             # To determine the gaps in a DAILY schedule, compare the set of
             # Nachweis dates with a set of all business days since the start of
             # the user's Ausbildung.
+
             # Create a set of all business days since the start of the Ausbildung:
             # https://www.geeksforgeeks.org/python/python-program-to-get-total-business-days-between-two-dates/
             bdays = set()
@@ -75,6 +76,7 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
                 d = start + timedelta(days=day_delta)
                 if d.isoweekday() < 6:
                     bdays.add(d)
+
             # Subtract all Nachweis dates to get the gaps:
             missing = bdays.difference(nachweis_dates)
             return [(d, d) for d in sorted(missing, reverse=True)]
@@ -83,21 +85,41 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
             # Mondays since the start of the Ausbildung with the Mondays of
             # Nachweis objects (datum_start).
             mondays = set()
-            start_monday = get_week_monday(start)
-            for week_delta in range(count_week_numbers(start, today)):
+
+            start_monday = get_week_monday(start + timedelta(weeks=1))
+            # Exclude the current week (handled by get_current_nachweis):
+            end_monday = get_week_monday(today - timedelta(weeks=1))
+
+            for week_delta in range(count_week_numbers(start_monday, end_monday)):
                 mondays.add(start_monday + timedelta(weeks=week_delta))
             missing = mondays.difference(nachweis_dates)
+
+            # Check if there is a Nachweis for the very first week
+            # (which may not have started on a Monday):
+            if not nachweis_dates.filter(datum_start=start).exists():
+                missing.add(start)
+
             return [(d, get_week_friday(d)) for d in sorted(missing, reverse=True)]
         case user.profile.IntervalType.MONTHLY:
             # To determine the gaps in a MONTHLY schedule, compare a set of
             # first days of a month since the start of the Ausbildung with the
             # first days of Nachweis objects.
             firsts = set()
-            month = start.replace(day=1)
-            while month < today:
-                firsts.add(month)
-                month = month.replace(month=month.month + 1)
+            month = timedelta(days=31)
+
+            # Start on the month after the first; Nachweis for the first month
+            # must be handled differently since it is not guaranteed that the
+            # Ausbildung began on the 1st exactly.
+            d = (start + month).replace(day=1)
+            while d < today:
+                firsts.add(d)
+                d = (d + month).replace(day=1)
             missing = firsts.difference(nachweis_dates)
+
+            # Check if there is a Nachweis for the very first month:
+            if not nachweis_dates.filter(datum_start=start).exists():
+                missing.add(start)
+
             return [
                 (d, date(d.year, d.month, calendar.monthrange(d.year, d.month)[1]))
                 for d in sorted(missing, reverse=True)

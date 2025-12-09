@@ -191,7 +191,7 @@ class TestGetMissingNachweise:
 
     @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.WEEKLY])
     @pytest.mark.parametrize("start_date", [date(2025, 11, 24)])
-    @pytest.mark.parametrize("today", [date(2025, 12, 9)])
+    @pytest.mark.parametrize("today", [date(2025, 12, 18)])
     def test_get_missing_weekly(self, user):
         """
         Assert that get_missing_nachweise returns the dates for the missing
@@ -200,7 +200,7 @@ class TestGetMissingNachweise:
         # Calendar for the test time frame, with the gap weeks noted:
         # Mo | Tu | We | Th | Fr
         # 24                  28 Nachweis missing
-        #  1                   5 ✅
+        #  1                   5 ✅ - December
         #  8                  12 Nachweis missing
         # 15                  19 today
         missing = [

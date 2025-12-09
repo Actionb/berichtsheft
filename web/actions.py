@@ -1,15 +1,20 @@
+from typing import Any
+
+from django.db.models import Model
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import SafeString
 
 from web.utils import perms
 
 
 class ListAction:
     """
-    A helper object for a changelist view 'action'.
+    A helper object for a list view 'action'.
 
-    Actions are operations the user can do on individual objects of a list view,
-    like 'edit this' or 'delete this'.
+    Actions are operations the user can do on individual results or rows of a
+    list view - like 'edit this' or 'delete this'.
 
     These actions must be registered with the list view using its 'actions'
     attribute. The items in 'actions' must be ListAction instances with an url
@@ -22,14 +27,13 @@ class ListAction:
     action template tag to render the button/link for each item in the list
     view's results:
 
-        {% render_action action request result_object %}
+        {% render_action action request foo=bar %}
 
     """
 
     url_name: str = ""
     label: str = ""
     css: str = "btn btn-primary btn-sm w-100"
-    pk_url_kwarg: str = "pk"
 
     def __init__(self, url_name: str = "", label: str = "", css: str = "", pk_url_kwarg: str = ""):
         self.url_name = url_name or self.url_name
@@ -37,32 +41,49 @@ class ListAction:
             raise TypeError("ListAction requires 'url_name'")
         self.label = label or self.label
         self.css = css or self.css
-        self.pk_url_kwarg = pk_url_kwarg or self.pk_url_kwarg
 
-    def has_permission(self, request, obj):  # pragma: no cover
+    def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:  # pragma: no cover
         """
         Check whether the user has permission to perform the action on the
-        given obj.
+        given result item.
 
         Custom actions should overwrite this.
         """
         return True
 
-    def get_url(self, request, obj):
+    def get_url(self, request: HttpRequest, **kwargs: Any) -> str:
+        """Return the URL for the action on the given result item."""
+        return reverse(self.url_name, kwargs=kwargs)
+
+    def render(self, request: HttpRequest, **kwargs: Any) -> SafeString:
+        """Render the action button."""
+        return format_html('<a href="{}" class="{}">{}</a>', self.get_url(request, **kwargs), self.css, self.label)
+
+
+class ModelAction(ListAction):
+    """A list view action that acts on a model object."""
+
+    pk_url_kwarg: str = "pk"
+
+    def __init__(self, pk_url_kwarg: str = "", **kwargs: Any):
+        super().__init__(**kwargs)
+        self.pk_url_kwarg = pk_url_kwarg or self.pk_url_kwarg
+
+    def get_url(self, request: HttpRequest, obj: Model) -> str:
         """Return the URL for the action on the given object."""
         return reverse(self.url_name, kwargs={self.pk_url_kwarg: obj.pk})
 
-    def render(self, request, obj):
+    def render(self, request: HttpRequest, obj: Model) -> SafeString:
         """Render the action button."""
-        if not self.has_permission(request, obj):
-            return ""
-        return format_html('<a href="{}" class="{}">{}</a>', self.get_url(request, obj), self.css, self.label)
+        if self.has_permission(request, obj=obj):
+            return super().render(request, obj=obj)
+        return ""
 
 
-class ChangePermAction(ListAction):
+class ChangePermAction(ModelAction):
     """An action that checks if the user has 'change' permissions."""
 
-    def has_permission(self, request, obj):
+    def has_permission(self, request: HttpRequest, obj: Model) -> bool:
         return perms.has_change_permission(request.user, obj._meta)
 
 

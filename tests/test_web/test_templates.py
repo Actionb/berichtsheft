@@ -10,7 +10,7 @@ from django.urls import path
 
 from tests.model_factory import NachweisFactory
 from web import models as _models
-from web.actions import ListAction
+from web.actions import ModelAction
 
 
 def dummy_view(*_args, **_kwargs):
@@ -109,7 +109,7 @@ class TestChangelistTemplate:
 
     def test_renders_action_buttons(self, render_template, context, soup):
         """Assert that the expected action buttons are rendered."""
-        action = ListAction(url_name="test", label="Template Test", css="foo")
+        action = ModelAction(url_name="test", label="Template Test", css="foo")
         context["actions"] = [action]
         link = soup(render_template(context)).find("tbody").find("tr").find("a")
         assert link["href"] == "/test/42/action"

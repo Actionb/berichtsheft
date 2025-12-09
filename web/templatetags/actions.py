@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Model
+from django.http import HttpRequest
 from django.template import Library
 from django.utils.safestring import SafeString
 
@@ -10,6 +10,6 @@ register = Library()
 
 
 @register.simple_tag
-def render_action(action: ListAction, request: Any, obj: Model) -> SafeString:
+def render_action(action: ListAction, request: HttpRequest, **kwargs: Any) -> SafeString:
     """Render the given action button."""
-    return action.render(request, obj)
+    return action.render(request, **kwargs)

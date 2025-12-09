@@ -126,6 +126,7 @@ class BaseListView(BaseViewMixin, ListView):
     """Display a list of items in a table."""
 
     template_name = "list.html"
+    paginate_by = 50
     actions = ()
 
     def get_result_headers(self):
@@ -153,6 +154,8 @@ class BaseListView(BaseViewMixin, ListView):
         ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
         ctx["headers"] = self.get_result_headers()
         ctx["actions"] = self.get_actions(self.request)
+        paginator = ctx["paginator"]
+        ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
         return ctx
 
 
@@ -246,8 +249,6 @@ class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, B
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
-        paginator = ctx["paginator"]
-        ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
         ctx["list_display"] = self.list_display
         ctx["col_classes"] = self.get_column_classes()
         return ctx

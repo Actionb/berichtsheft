@@ -23,9 +23,9 @@ from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
 
+from web import actions
 from web import forms as _forms
 from web import models as _models
-from web.actions import EditAction, NachweisPrintAction
 from web.utils import perms
 from web.utils.date import count_week_numbers
 from web.utils.decorators import add_attrs
@@ -122,11 +122,44 @@ class RequireUserMixin(SingleObjectMixin):
         return obj
 
 
-class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, ListView):
+class BaseListView(BaseViewMixin, ListView):
+    """Display a list of items in a table."""
+
+    template_name = "list.html"
+    actions = ()
+
+    def get_result_headers(self):
+        return []
+
+    def get_result_rows(self, object_list):
+        """
+        For each result in object_list, return a 2-tuple of (object, result_row),
+        where result_row are the values to display in the row of a given result.
+        """
+        return [(self.get_result_row(result)) for result in object_list]
+
+    def get_result_row(self, result):
+        """Return the values to display in the row for the given result."""
+        return result
+
+    def _get_default_actions(self, request):
+        return []
+
+    def get_actions(self, request):
+        return [*self._get_default_actions(request), *self.actions]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
+        ctx["headers"] = self.get_result_headers()
+        ctx["actions"] = self.get_actions(self.request)
+        return ctx
+
+
+class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, BaseListView):
     template_name = "changelist.html"
     paginate_by = 10
     list_display = ()
-    actions = ()
 
     def get_permission_required(self):
         if self.permission_required is None:
@@ -157,7 +190,7 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         """
         return [(result, self.get_result_row(result)) for result in object_list]
 
-    def get_result_row(self, result):  # pragma: no cover
+    def get_result_row(self, result):
         """Return the values to display in the row for the given result."""
         row = []
         for name in self.list_display:
@@ -186,13 +219,10 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         return row
 
     def _get_default_actions(self, request):
-        actions = []
+        _actions = []
         if perms.has_change_permission(request.user, self.opts):
-            actions.append(EditAction(url_name=f"{self.opts.model_name}_change"))
-        return actions
-
-    def get_actions(self, request):
-        return [*self._get_default_actions(request), *self.actions]
+            _actions.append(actions.EditAction(url_name=f"{self.opts.model_name}_change"))
+        return _actions
 
     def get_column_classes(self):
         """
@@ -218,9 +248,6 @@ class ChangelistView(BaseViewMixin, PermissionRequiredMixin, FilterUserMixin, Mo
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
         paginator = ctx["paginator"]
         ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
-        ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
-        ctx["headers"] = self.get_result_headers()
-        ctx["actions"] = self.get_actions(self.request)
         ctx["list_display"] = self.list_display
         ctx["col_classes"] = self.get_column_classes()
         return ctx
@@ -335,7 +362,7 @@ class NachweisListView(ChangelistView):
     model = _models.Nachweis
     title = "Meine Nachweise"
     list_display = ["jahr", "woche", "zeitraum", "betrieb", "schule", "fertig", "eingereicht_bei", "unterschrieben"]
-    actions = [NachweisPrintAction()]
+    actions = [actions.NachweisPrintAction()]
     mainclass = "container-fluid px-5"
 
     def get_column_classes(self):

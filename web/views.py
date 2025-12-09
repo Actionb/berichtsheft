@@ -500,7 +500,7 @@ class NachweisDeleteView(DeleteView):
 
 class AbteilungDeleteView(DeleteView):
     model = _models.Abteilung
-    success_url = reverse_lazy("nachweis_list")  # TODO: set to abteilung_list
+    success_url = reverse_lazy("abteilung_list")
 
 
 class HardDeleteView(DeleteView):

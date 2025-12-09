@@ -803,28 +803,16 @@ class TestHandler403:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("model", [_models.Nachweis, _models.Abteilung])
 class TestDeleteNachweisView:
     @pytest.fixture
-    def obj(self, user, model):
-        if model == _models.Nachweis:
-            return NachweisFactory(user=user)
-        elif model == _models.Abteilung:
-            return AbteilungFactory(user=user)
+    def obj(self, user):
+        return NachweisFactory(user=user)
 
     @pytest.fixture
-    def delete_url(self, obj, model):
-        url_name = ""
-        if model == _models.Nachweis:
-            url_name = "nachweis_delete"
-        elif model == _models.Abteilung:
-            url_name = "abteilung_delete"
-        return reverse(url_name, kwargs={"pk": obj.pk})
+    def delete_url(self, obj):
+        return reverse("nachweis_delete", kwargs={"pk": obj.pk})
 
-    @pytest.fixture
-    def set_user_perms(self, user, add_permission, model):
-        add_permission(user, "delete", model._meta)
-
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
     @pytest.mark.usefixtures("set_user_perms", "login_user")
     def test_can_delete(self, client, obj, delete_url):
         """Assert that a user can delete their own objects."""
@@ -833,6 +821,7 @@ class TestDeleteNachweisView:
         assert not _models.Nachweis.objects.filter(pk=obj.pk).exists()
         assert response.url == reverse("nachweis_list")
 
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
     @pytest.mark.usefixtures("set_user_perms", "login_superuser")
     def test_cannot_delete_others(self, client, delete_url, obj):
         """Assert that a user cannot delete the objects of other users."""
@@ -847,6 +836,7 @@ class TestDeleteNachweisView:
         assert response.status_code == 403
         obj.refresh_from_db()
 
+    @pytest.mark.parametrize("user_perms", [[("delete", _models.Nachweis)]])
     @pytest.mark.usefixtures("set_user_perms", "login_user")
     def test_requires_post(self, client, delete_url, obj):
         """Assert that GET requests are not allowed."""

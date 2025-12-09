@@ -98,3 +98,11 @@ class NachweisPrintAction(ChangePermAction):
 
     url_name = "nachweis_print"
     label = "Drucken"
+
+
+class AddMissingAction(ListAction):
+    label = "Hinzufügen"
+    url_name = "nachweis_add"
+
+    def has_permission(self, request: HttpRequest, obj: Model) -> bool:
+        return perms.has_add_permission(request.user, obj._meta)

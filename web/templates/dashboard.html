@@ -46,7 +46,10 @@
                 {% endfor %}
                 </tbody>
                 </table>
-                <a href="" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Übersicht: fehlende Nachweise</a>
+                <div class="d-flex justify-content-between align-items-center px-3">
+                    <span><span class="fw-semibold">{{ missing_nachweise|length }}</span> fehlende Nachweise:</span>
+                    <a href="{% url 'missing' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Übersicht: fehlende Nachweise</a>
+                </div>
             </div>
             {% endif %}
             {% endblock missing %}

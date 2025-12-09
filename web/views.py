@@ -12,6 +12,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
+from django.utils.formats import date_format
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
@@ -436,12 +437,32 @@ def handler403(request, exception=None):
 class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
     title = "Home"
     template_name = "dashboard.html"
+    permission_required = [perms.get_perm("view", _models.Nachweis._meta)]
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["current_nachweis"] = get_current_nachweis(self.request.user)
         ctx["missing_nachweise"] = get_missing_nachweise(self.request.user)
         return ctx
+
+
+class MissingView(LoginRequiredMixin, BaseListView):
+    title = "Fehlende Nachweise"
+    permission_required = [perms.get_perm("view", _models.Nachweis._meta)]
+    actions = [actions.AddMissingAction()]
+
+    def get_result_headers(self):
+        return ["Datum/Zeitraum"]
+
+    def get_queryset(self):
+        return get_missing_nachweise(self.request.user)
+
+    def get_result_row(self, result: tuple[date, date]) -> str:
+        start, end = result
+        if self.request.user.profile.interval == _models.UserProfile.IntervalType.DAILY:
+            return [date_format(start, format="D, d. F Y")]
+        else:
+            return [f"{date_format(start)} - {date_format(end)}"]
 
 
 ################################################################################

@@ -161,6 +161,24 @@ class BaseListView(BaseViewMixin, ListView):
     def get_actions(self, request):
         return [*self._get_default_actions(request), *self.actions]
 
+    def get_column_classes(self):
+        """
+        Provide additional CSS classes to apply to individual columns of the
+        result list.
+
+        Must be a mapping: {<column_name>: css} , where 'column_name' is a
+        column as specified in view.list_display, and 'css' is the additional
+        CSS classes as simple string.
+
+        Example:
+
+            list_display = ["foo", "bar"]
+
+            def get_column_classes(self):
+                return { "foo": "text-center align-middle"}
+        """
+        return {}
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["list_display"] = self.list_display
@@ -169,6 +187,7 @@ class BaseListView(BaseViewMixin, ListView):
         ctx["actions"] = self.get_actions(self.request)
         paginator = ctx["paginator"]
         ctx["page_range"] = list(paginator.get_elided_page_range(ctx["page_obj"].number))
+        ctx["col_classes"] = self.get_column_classes()
         return ctx
 
 
@@ -239,29 +258,10 @@ class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, B
             _actions.append(actions.EditAction(url_name=f"{self.opts.model_name}_change"))
         return _actions
 
-    def get_column_classes(self):
-        """
-        Provide additional CSS classes to apply to individual columns of the
-        result list.
-
-        Must be a mapping: {<column_name>: css} , where 'column_name' is a
-        column as specified in view.list_display, and 'css' is the additional
-        CSS classes as simple string.
-
-        Example:
-
-            list_display = ["foo", "bar"]
-
-            def get_column_classes(self):
-                return { "foo": "text-center align-middle"}
-        """
-        return {}
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
-        ctx["col_classes"] = self.get_column_classes()
         return ctx
 
 

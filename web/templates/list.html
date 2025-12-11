@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load actions %}
+{% load list actions %}
 {% block main %}
     <h1>
         {% block page_title %}{{ title }}{% endblock %}
@@ -21,7 +21,9 @@
                     {% for row in result_rows %}
                         <tr>
                             {% for k,v in row.items %}
-                                {% if k in list_display %}<td>{{ v }}</td>{% endif %}
+                                {% if k in list_display %}
+                                    <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ v }}</td>
+                                {% endif %}
                             {% endfor %}
                             <td>
                                 {% for action in actions %}

@@ -39,12 +39,16 @@ class ListAction:
     label: str = ""
     css: str = "btn btn-primary btn-sm w-100"
 
-    def __init__(self, url_name: str = "", label: str = "", css: str = "", pk_url_kwarg: str = ""):
+    def __init__(self, url_name: str = "", label: str = "", css: str = "", title: str = ""):
         self.url_name = url_name or self.url_name
         if not self.url_name:  # pragma: no cover
             raise TypeError("ListAction requires 'url_name'")
         self.label = label or self.label
         self.css = css or self.css
+        self.title = title or self.title
+
+    def get_title(self, **kwargs):
+        return self.title
 
     def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:  # pragma: no cover
         """
@@ -63,7 +67,13 @@ class ListAction:
         """Render the action button."""
         if not self.has_permission(request, **kwargs):
             return ""
-        return format_html('<a href="{}" class="{}">{}</a>', self.get_url(request, **kwargs), self.css, self.label)
+        return format_html(
+            '<a href="{url}" class="{css}" title="{title}">{label}</a>',
+            url=self.get_url(request, **kwargs),
+            css=self.css,
+            title=self.get_title(**kwargs),
+            label=self.label,
+        )
 
 
 class ModelAction(ListAction):
@@ -92,12 +102,18 @@ class EditAction(ChangePermAction):
 
     label = "Bearbeiten"
 
+    def get_title(self, obj):
+        return f"{obj._meta.verbose_name} bearbeiten"
+
 
 class NachweisPrintAction(ChangePermAction):
     """The action for the print view of Nachweis objects."""
 
     url_name = "nachweis_print"
     label = "Drucken"
+
+    def get_title(self, obj):
+        return f"Druckansicht für diesen {obj._meta.verbose_name} anzeigen"
 
 
 class AddMissingAction(ListAction):
@@ -108,6 +124,9 @@ class AddMissingAction(ListAction):
 
     label = "Hinzufügen"
     url_name = "nachweis_add"
+
+    def get_title(self, **kwargs):
+        return "Fehlenden Nachweis erstellen"
 
     def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:
         return perms.has_add_permission(request.user, _models.Nachweis._meta)

@@ -30,8 +30,10 @@ pytestmark = pytest.mark.urls(__name__)
 class TestListAction:
     def test_render(self, rf):
         """Assert the action link/button is rendered as expected."""
-        action = actions.ListAction(url_name="list_action_test", label="Action Test", css="foo")
-        assert action.render(request=rf.get("/")) == '<a href="/test/list/action" class="foo">Action Test</a>'
+        action = actions.ListAction(url_name="list_action_test", label="Action Test", title="bar", css="foo")
+        assert (
+            action.render(request=rf.get("/")) == '<a href="/test/list/action" class="foo" title="bar">Action Test</a>'
+        )
 
     def test_render_empty_string_if_missing_perms(self, rf):
         """
@@ -46,10 +48,10 @@ class TestListAction:
 class TestModelAction:
     def test_render(self, rf):
         """Assert the action link/button is rendered as expected."""
-        action = actions.ModelAction(url_name="model_action_test", label="Action Test", css="foo")
+        action = actions.ModelAction(url_name="model_action_test", label="Action Test", title="bar", css="foo")
         assert (
             action.render(request=rf.get("/"), obj=mock.Mock(pk=42))
-            == '<a href="/test/42/model" class="foo">Action Test</a>'
+            == '<a href="/test/42/model" class="foo" title="bar">Action Test</a>'
         )
 
 
@@ -69,7 +71,7 @@ class TestChangePermAction:
         action = actions.ChangePermAction(url_name="change_perm_action_test", label="Action Test")
         assert (
             action.render(request=get_user_req, obj=obj)
-            == f'<a href="/test/42/change" class="{action.css}">Action Test</a>'
+            == f'<a href="/test/42/change" class="{action.css}" title="">Action Test</a>'
         )
 
     def test_render_no_change_permission(self, get_user_req, obj):

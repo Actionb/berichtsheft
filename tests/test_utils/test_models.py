@@ -135,17 +135,6 @@ class TestGetMissingNachweise:
             m.today.return_value = today
             yield m
 
-    @pytest.fixture(
-        params=[
-            _models.UserProfile.IntervalType.DAILY,
-            _models.UserProfile.IntervalType.WEEKLY,
-            _models.UserProfile.IntervalType.MONTHLY,
-        ]
-    )
-    def interval(self, request):
-        """The interval between Nachweis objects."""
-        return request.param
-
     @pytest.fixture
     def start_date(self, today):
         """The start_date of the user's Ausbildung."""

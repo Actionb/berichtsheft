@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import date
 
 from django import forms
@@ -128,16 +129,17 @@ class BaseListView(BaseViewMixin, ListView):
     template_name = "list.html"
     paginate_by = 50
     actions = ()
+    list_display = ()
 
     def get_result_headers(self):
-        return []
+        return self.list_display
 
     def get_result_rows(self, object_list):
         """
-        For each result in object_list, return a 2-tuple of (object, result_row),
-        where result_row are the values to display in the row of a given result.
+        For each result, return an OrderedDict where the keys are the items in
+        `list_display` and the values are the values to display for a given row.
         """
-        return [(self.get_result_row(result)) for result in object_list]
+        return [OrderedDict(zip(self.list_display, self.get_result_row(result))) for result in object_list]
 
     def get_result_row(self, result):
         """Return the values to display in the row for the given result."""
@@ -151,6 +153,7 @@ class BaseListView(BaseViewMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["list_display"] = self.list_display
         ctx["result_rows"] = self.get_result_rows(ctx["object_list"])
         ctx["headers"] = self.get_result_headers()
         ctx["actions"] = self.get_actions(self.request)
@@ -162,7 +165,6 @@ class BaseListView(BaseViewMixin, ListView):
 class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, BaseListView):
     template_name = "changelist.html"
     paginate_by = 10
-    list_display = ()
 
     def get_permission_required(self):
         if self.permission_required is None:
@@ -186,12 +188,12 @@ class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, B
             headers.append(header)
         return headers
 
-    def get_result_rows(self, object_list):
-        """
-        For each result in object_list, return a 2-tuple of (object, result_row),
-        where result_row are the values to display in the row of a given result.
-        """
-        return [(result, self.get_result_row(result)) for result in object_list]
+    def get_result_rows(self, object_list) -> list[OrderedDict]:
+        # Add an 'obj' item for the render_action tags to each row:
+        rows = super().get_result_rows(object_list=object_list)
+        for row, obj in zip(rows, object_list):
+            row["obj"] = obj
+        return rows
 
     def get_result_row(self, result):
         """Return the values to display in the row for the given result."""
@@ -249,7 +251,6 @@ class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, B
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
-        ctx["list_display"] = self.list_display
         ctx["col_classes"] = self.get_column_classes()
         return ctx
 
@@ -441,7 +442,7 @@ class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["current_nachweis"] = get_current_nachweis(self.request.user)
-        ctx["missing_nachweise"] = get_missing_nachweise(self.request.user)
+        ctx["missing_nachweise"] = [OrderedDict(start=s, end=e) for s, e in get_missing_nachweise(self.request.user)]
         ctx["action"] = actions.AddMisingDashboardAction()
         return ctx
 
@@ -451,12 +452,17 @@ class MissingView(LoginRequiredMixin, BaseListView):
     template_name = "missing.html"
     permission_required = [perms.get_perm("view", _models.Nachweis._meta)]
     actions = [actions.AddMissingAction()]
-
-    def get_result_headers(self) -> list[str]:
-        return ["Datum/Zeitraum"]
+    list_display = ["Datum/Zeitraum"]
 
     def get_queryset(self) -> list[tuple[date, date]]:
         return get_missing_nachweise(self.request.user)
+
+    def get_result_rows(self, object_list):
+        rows = super().get_result_rows(object_list)
+        for row, (start, end) in zip(rows, object_list):
+            row["start"] = start
+            row["end"] = end
+        return rows
 
     def get_context_data(self, **kwargs) -> dict:
         ctx = super().get_context_data(**kwargs)

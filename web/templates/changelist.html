@@ -1,14 +1,16 @@
 {% extends "list.html" %}
 {% load list actions %}
 {% block result_table_results %}
-    {% for result_object, result_row in result_rows %}
+    {% for row in result_rows %}
         <tr>
-            {% for result in result_row %}
-                <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ result }}</td>
+            {% for k, v in row.items %}
+                {% if k in list_display %}
+                    <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ v }}</td>
+                {% endif %}
             {% endfor %}
             <td>
                 {% for action in actions %}
-                    <div class="my-2">{% render_action action request obj=result_object %}</div>
+                    <div class="my-2">{% render_action action request row %}</div>
                 {% endfor %}
             </td>
         </tr>

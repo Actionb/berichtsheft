@@ -1,8 +1,7 @@
-from datetime import date
+from collections import OrderedDict
 from typing import Any
 from urllib.parse import urlencode
 
-from django.db.models import Model
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
@@ -17,7 +16,7 @@ class ListAction:
     """
     A helper object for a list view 'action'.
 
-    Actions are operations the user can do on individual results or rows of a
+    Actions are operations the user can do on an individual result/row of a
     list view - like 'edit this' or 'delete this'.
 
     These actions must be registered with the list view using its 'actions'
@@ -31,7 +30,7 @@ class ListAction:
     action template tag to render the button/link for each item in the list
     view's results:
 
-        {% render_action action request foo=bar %}
+        {% render_action action request row=result_row %}
 
     """
 
@@ -48,31 +47,31 @@ class ListAction:
         self.css = css or self.css
         self.title = title or self.title
 
-    def get_title(self, **kwargs):
+    def get_title(self, row: OrderedDict) -> str:
         return self.title
 
-    def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:  # pragma: no cover
+    def has_permission(self, request: HttpRequest, row: OrderedDict) -> bool:  # pragma: no cover
         """
         Check whether the user has permission to perform the action on the
-        given result item.
+        given result row.
 
         Custom actions should overwrite this.
         """
         return True
 
-    def get_url(self, request: HttpRequest, **kwargs: Any) -> str:
-        """Return the URL for the action on the given result item."""
+    def get_url(self, request: HttpRequest, row: OrderedDict) -> str:
+        """Return the URL for the action on the given result row."""
         return reverse(self.url_name)
 
-    def render(self, request: HttpRequest, **kwargs: Any) -> SafeString:
-        """Render the action button."""
-        if not self.has_permission(request, **kwargs):
+    def render(self, request: HttpRequest, row: OrderedDict) -> SafeString:
+        """Render the action button for the given result row."""
+        if not self.has_permission(request, row):
             return ""
         return format_html(
             '<a href="{url}" class="{css}" title="{title}">{label}</a>',
-            url=self.get_url(request, **kwargs),
+            url=self.get_url(request, row),
             css=self.css,
-            title=self.get_title(**kwargs),
+            title=self.get_title(row),
             label=self.label,
         )
 
@@ -86,16 +85,16 @@ class ModelAction(ListAction):
         super().__init__(**kwargs)
         self.pk_url_kwarg = pk_url_kwarg or self.pk_url_kwarg
 
-    def get_url(self, request: HttpRequest, obj: Model) -> str:
+    def get_url(self, request: HttpRequest, row: OrderedDict) -> str:
         """Return the URL for the action on the given object."""
-        return reverse(self.url_name, kwargs={self.pk_url_kwarg: obj.pk})
+        return reverse(self.url_name, kwargs={self.pk_url_kwarg: row["obj"].pk})
 
 
 class ChangePermAction(ModelAction):
     """An action that checks if the user has 'change' permissions."""
 
-    def has_permission(self, request: HttpRequest, obj: Model) -> bool:
-        return perms.has_change_permission(request.user, obj._meta)
+    def has_permission(self, request: HttpRequest, row: OrderedDict) -> bool:
+        return perms.has_change_permission(request.user, row["obj"]._meta)
 
 
 class EditAction(ChangePermAction):
@@ -103,8 +102,8 @@ class EditAction(ChangePermAction):
 
     label = "Bearbeiten"
 
-    def get_title(self, obj):
-        return f"{obj._meta.verbose_name} bearbeiten"
+    def get_title(self, row: OrderedDict) -> str:
+        return f"{row['obj']._meta.verbose_name} bearbeiten"
 
 
 class NachweisPrintAction(ChangePermAction):
@@ -113,8 +112,8 @@ class NachweisPrintAction(ChangePermAction):
     url_name = "nachweis_print"
     label = "Drucken"
 
-    def get_title(self, obj):
-        return f"Druckansicht für diesen {obj._meta.verbose_name} anzeigen"
+    def get_title(self, row: OrderedDict) -> str:
+        return f"Druckansicht für diesen {row['obj']._meta.verbose_name} anzeigen"
 
 
 class AddMissingAction(ListAction):
@@ -126,18 +125,18 @@ class AddMissingAction(ListAction):
     label = "Hinzufügen"
     url_name = "nachweis_add"
 
-    def get_title(self, **kwargs):
+    def get_title(self, row: OrderedDict) -> str:
         return "Fehlenden Nachweis erstellen"
 
-    def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:
+    def has_permission(self, request: HttpRequest, row: OrderedDict) -> bool:
         return perms.has_add_permission(request.user, _models.Nachweis._meta)
 
-    def get_initial_data(self, request: HttpRequest, start: date, **kwargs) -> dict:
+    def get_initial_data(self, request: HttpRequest, row: OrderedDict) -> dict:
         """Return initial data for the missing Nachweis."""
-        return model_utils.initial_data_for_date(request.user, start)
+        return model_utils.initial_data_for_date(request.user, row["start"])
 
-    def get_url(self, request: HttpRequest, **kwargs: Any):
-        return f"{super().get_url(request, **kwargs)}?{urlencode(self.get_initial_data(request, **kwargs))}"
+    def get_url(self, request: HttpRequest, row: OrderedDict):
+        return f"{super().get_url(request, row)}?{urlencode(self.get_initial_data(request, row))}"
 
 
 class AddMisingDashboardAction(AddMissingAction):

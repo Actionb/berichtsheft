@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import date, datetime
 from unittest import mock
 from urllib.parse import urlparse
@@ -274,16 +275,15 @@ class TestChangelistView:
         # Add a control object that should not appear in the results:
         factory()
 
-        rows = view.get_result_rows(object_list=[obj])
-        assert len(rows) == 1
-        result, row = rows[0]
-        assert result == obj
-        assert row == [
-            obj.nummer,
-            "24.11.2025 - 28.11.2025",  # 'zeitraum' callable
-            str(obj.abteilung),  # related object should be converted to string
-            '<i class="bi bi-check-circle fs-4 text-success"></i>',  # render True boolean
-            '<i class="bi bi-x-circle fs-4 text-danger"></i>',  # render False boolean
+        assert view.get_result_rows(object_list=[obj]) == [
+            OrderedDict(
+                nummer=obj.nummer,
+                zeitraum_item="24.11.2025 - 28.11.2025",  # 'zeitraum' callable
+                abteilung=str(obj.abteilung),  # related object should be converted to string
+                fertig='<i class="bi bi-check-circle fs-4 text-success"></i>',  # render True boolean
+                unterschrieben='<i class="bi bi-x-circle fs-4 text-danger"></i>',  # render False boolean
+                obj=obj,  # extra row item for render_action tags
+            )
         ]
 
     @pytest.mark.parametrize("user_perms", [[("change", NachweisDummy)]])

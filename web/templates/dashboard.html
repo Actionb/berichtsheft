@@ -35,13 +35,13 @@
                     <tr><th>Datum/Zeitraum</th><th class="text-center">Nachweis hinzufügen</th></tr>
                 </thead>
                 <tbody>
-                {% for start, end in missing_nachweise|slice:":5" %}
+                {% for row in missing_nachweise|slice:":5" %}
                     <tr>
                         <td>
-                            <span>{{ start }}{% if start != end %} - {{ end }}{% endif %}</span>
+                            <span>{{ row.start }}{% if row.start != row.end %} - {{ row.end }}{% endif %}</span>
                         </td>
                         <td class="d-flex justify-content-center">
-                            {% render_action action request start=start end=end %}
+                            {% render_action action request row %}
                         </td>
                     </tr>
                 {% endfor %}

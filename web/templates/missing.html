@@ -1,16 +1,16 @@
 {% extends "list.html" %}
 {% load actions %}
 {% block result_table_results %}
-    {% for start, end in result_rows %}
+    {% for row in result_rows %}
         <tr>
             {% if is_daily %}
-                <td>{{ start|date:"D, d. F Y" }}</td>
+                <td>{{ row.start|date:"D, d. F Y" }}</td>
             {% else %}
-                <td>{{ start }} - {{ end }}</td>
+                <td>{{ row.start }} - {{ row.end }}</td>
             {% endif %}
             <td>
                 {% for action in actions %}
-                    <div class="my-2">{% render_action action request start=start %}</div>
+                    <div class="my-2">{% render_action action request row %}</div>
                 {% endfor %}
             </td>
         </tr>

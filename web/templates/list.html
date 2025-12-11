@@ -18,12 +18,14 @@
             </thead>
             <tbody>
                 {% block result_table_results %}
-                    {% for result_row in result_rows %}
+                    {% for row in result_rows %}
                         <tr>
-                            {% for item in result_row %}<td>{{ item }}</td>{% endfor %}
+                            {% for k,v in row.items %}
+                                {% if k in list_display %}<td>{{ v }}</td>{% endif %}
+                            {% endfor %}
                             <td>
                                 {% for action in actions %}
-                                    <div class="my-2">{% render_action action request row=result_row %}</div>
+                                    <div class="my-2">{% render_action action request row %}</div>
                                 {% endfor %}
                             </td>
                         </tr>

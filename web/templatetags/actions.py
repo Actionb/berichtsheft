@@ -1,4 +1,4 @@
-from typing import Any
+from collections import OrderedDict
 
 from django.http import HttpRequest
 from django.template import Library
@@ -10,6 +10,6 @@ register = Library()
 
 
 @register.simple_tag
-def render_action(action: ListAction, request: HttpRequest, **kwargs: Any) -> SafeString:
-    """Render the given action button."""
-    return action.render(request, **kwargs)
+def render_action(action: ListAction, request: HttpRequest, row: OrderedDict) -> SafeString:
+    """Render the action button for the given row of results."""
+    return action.render(request, row)

@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from unittest import mock
 
 import pytest
@@ -87,10 +88,12 @@ class TestChangelistTemplate:
 
     @pytest.fixture
     def context(self, list_display, headers, result_row, result_obj, col_classes):
+        row = OrderedDict(zip(list_display, result_row))
+        row["obj"] = result_obj
         return {
             "list_display": list_display,
             "headers": headers,
-            "result_rows": [(result_obj, result_row)],
+            "result_rows": [row],
             "col_classes": col_classes,
         }
 

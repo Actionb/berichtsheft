@@ -32,7 +32,8 @@ class TestListAction:
         """Assert the action link/button is rendered as expected."""
         action = actions.ListAction(url_name="list_action_test", label="Action Test", title="bar", css="foo")
         assert (
-            action.render(request=rf.get("/")) == '<a href="/test/list/action" class="foo" title="bar">Action Test</a>'
+            action.render(request=rf.get("/"), row={})
+            == '<a href="/test/list/action" class="foo" title="bar">Action Test</a>'
         )
 
     def test_render_empty_string_if_missing_perms(self, rf):
@@ -42,7 +43,7 @@ class TestListAction:
         """
         action = actions.ListAction(url_name="list_action_test")
         with mock.patch.object(action, "has_permission", new=mock.Mock(return_value=False)):
-            assert action.render(request=rf.get("/")) == ""
+            assert action.render(request=rf.get("/"), row={}) == ""
 
 
 class TestModelAction:
@@ -50,7 +51,7 @@ class TestModelAction:
         """Assert the action link/button is rendered as expected."""
         action = actions.ModelAction(url_name="model_action_test", label="Action Test", title="bar", css="foo")
         assert (
-            action.render(request=rf.get("/"), obj=mock.Mock(pk=42))
+            action.render(request=rf.get("/"), row={"obj": mock.Mock(pk=42)})
             == '<a href="/test/42/model" class="foo" title="bar">Action Test</a>'
         )
 
@@ -70,7 +71,7 @@ class TestChangePermAction:
         """
         action = actions.ChangePermAction(url_name="change_perm_action_test", label="Action Test")
         assert (
-            action.render(request=get_user_req, obj=obj)
+            action.render(request=get_user_req, row={"obj": obj})
             == f'<a href="/test/42/change" class="{action.css}" title="">Action Test</a>'
         )
 
@@ -80,7 +81,7 @@ class TestChangePermAction:
         user does not have change permissions.
         """
         action = actions.ChangePermAction(url_name="change_perm_action_test", label="Action Test")
-        assert action.render(request=get_user_req, obj=obj) == ""
+        assert action.render(request=get_user_req, row={"obj": obj}) == ""
 
 
 @pytest.mark.usefixtures("login_user")
@@ -168,7 +169,7 @@ class TestAddMissingAction:
         objects.
         """
         start, end = dates
-        assert bool(action.render(get_user_req, start=start, end=end)) == has_perms
+        assert bool(action.render(get_user_req, row={"start": start, "end": end})) == has_perms
 
     def test_get_initial_data(self, get_user_req, action, dates, expected):
         """
@@ -176,7 +177,7 @@ class TestAddMissingAction:
         of dates.
         """
         start, end = dates
-        assert action.get_initial_data(request=get_user_req, start=start, end=end) == expected
+        assert action.get_initial_data(request=get_user_req, row={"start": start, "end": end}) == expected
 
     @pytest.mark.parametrize("user_perms", [[("add", _models.Nachweis)]])
     @pytest.mark.usefixtures("user_perms", "set_user_perms")
@@ -186,6 +187,6 @@ class TestAddMissingAction:
         query string.
         """
         start, end = dates
-        soup = BeautifulSoup(action.render(request=get_user_req, start=start, end=end), "html.parser")
+        soup = BeautifulSoup(action.render(request=get_user_req, row={"start": start, "end": end}), "html.parser")
         url = soup.find("a").attrs["href"]
         assert parse_qs(urlparse(url).query) == parse_qs(urlencode(expected))

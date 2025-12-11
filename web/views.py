@@ -12,7 +12,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
-from django.utils.formats import date_format
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
@@ -448,21 +447,20 @@ class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
 
 class MissingView(LoginRequiredMixin, BaseListView):
     title = "Fehlende Nachweise"
+    template_name = "missing.html"
     permission_required = [perms.get_perm("view", _models.Nachweis._meta)]
     actions = [actions.AddMissingAction()]
 
-    def get_result_headers(self):
+    def get_result_headers(self) -> list[str]:
         return ["Datum/Zeitraum"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> list[tuple[date, date]]:
         return get_missing_nachweise(self.request.user)
 
-    def get_result_row(self, result: tuple[date, date]) -> str:
-        start, end = result
-        if self.request.user.profile.interval == _models.UserProfile.IntervalType.DAILY:
-            return [date_format(start, format="D, d. F Y")]
-        else:
-            return [f"{date_format(start)} - {date_format(end)}"]
+    def get_context_data(self, **kwargs) -> dict:
+        ctx = super().get_context_data(**kwargs)
+        ctx["is_daily"] = self.request.user.profile.interval == _models.UserProfile.IntervalType.DAILY
+        return ctx
 
 
 ################################################################################

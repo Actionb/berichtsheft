@@ -13,6 +13,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
+from django.utils.formats import date_format
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
@@ -132,7 +133,16 @@ class BaseListView(BaseViewMixin, ListView):
     list_display = ()
 
     def get_result_headers(self):
-        return self.list_display
+        """Return the table headers for the list."""
+        headers = []
+        for name in self.list_display:
+            if hasattr(self, name) and callable(getattr(self, name)):
+                # A callable list_display item; use the label attr if available
+                func = getattr(self, name)
+                headers.append(getattr(func, "label", name.replace("_", " ").capitalize()))
+            else:
+                headers.append(name)
+        return headers
 
     def get_result_rows(self, object_list):
         """
@@ -449,20 +459,29 @@ class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
 
 class MissingView(LoginRequiredMixin, BaseListView):
     title = "Fehlende Nachweise"
-    template_name = "missing.html"
+    template_name = "list.html"
     permission_required = [perms.get_perm("view", _models.Nachweis._meta)]
     actions = [actions.AddMissingAction()]
-    list_display = ["Datum/Zeitraum"]
+    list_display = ["zeitraum"]
+
+    @list_display_callable(label="Datum/Zeitraum")
+    def zeitraum(self, start, end):
+        if self.request.user.profile.interval == _models.UserProfile.IntervalType.DAILY:
+            return date_format(start, "D, d. F Y")
+        else:
+            return f"{date_format(start)} - {date_format(end)}"
 
     def get_queryset(self) -> list[tuple[date, date]]:
         return get_missing_nachweise(self.request.user)
 
-    def get_result_rows(self, object_list):
+    def get_result_rows(self, object_list: list[tuple[date, date]]) -> list[OrderedDict]:
         rows = super().get_result_rows(object_list)
-        for row, (start, end) in zip(rows, object_list):
+        for row, (start, _) in zip(rows, object_list):
             row["start"] = start
-            row["end"] = end
         return rows
+
+    def get_result_row(self, result: tuple[date, date]) -> list:
+        return [self.zeitraum(*result)]
 
     def get_context_data(self, **kwargs) -> dict:
         ctx = super().get_context_data(**kwargs)

@@ -28,6 +28,15 @@ class TestListAction:
         action = actions.ListAction(url_name="list_action_test", label="Action Test", css="foo")
         assert action.render(request=rf.get("/")) == '<a href="/test/list/action" class="foo">Action Test</a>'
 
+    def test_render_empty_string_if_missing_perms(self, rf):
+        """
+        Assert that render returns an empty string if has_permission returns
+        False.
+        """
+        action = actions.ListAction(url_name="list_action_test")
+        with mock.patch.object(action, "has_permission", new=mock.Mock(return_value=False)):
+            assert action.render(request=rf.get("/")) == ""
+
 
 class TestModelAction:
     def test_render(self, rf):

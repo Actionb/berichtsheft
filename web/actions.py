@@ -57,6 +57,8 @@ class ListAction:
 
     def render(self, request: HttpRequest, **kwargs: Any) -> SafeString:
         """Render the action button."""
+        if not self.has_permission(request, **kwargs):
+            return ""
         return format_html('<a href="{}" class="{}">{}</a>', self.get_url(request, **kwargs), self.css, self.label)
 
 
@@ -72,12 +74,6 @@ class ModelAction(ListAction):
     def get_url(self, request: HttpRequest, obj: Model) -> str:
         """Return the URL for the action on the given object."""
         return reverse(self.url_name, kwargs={self.pk_url_kwarg: obj.pk})
-
-    def render(self, request: HttpRequest, obj: Model) -> SafeString:
-        """Render the action button."""
-        if self.has_permission(request, obj=obj):
-            return super().render(request, obj=obj)
-        return ""
 
 
 class ChangePermAction(ModelAction):

@@ -643,7 +643,7 @@ class SignUpView(BaseViewMixin, CreateView):
         return response
 
 
-class UserProfileView(BaseViewMixin, UpdateView):
+class UserProfileView(LoginRequiredMixin, BaseViewMixin, UpdateView):
     model = _models.UserProfile
     template_name = "auth/auth_form.html"
     success_url = reverse_lazy("user_profile")

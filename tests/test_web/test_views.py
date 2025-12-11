@@ -1178,6 +1178,14 @@ class TestDashboardView:
         assert urlparse(response.url).path == reverse("login")
 
 
+@pytest.mark.parametrize(
+    "interval",
+    [
+        _models.UserProfile.IntervalType.DAILY,
+        _models.UserProfile.IntervalType.WEEKLY,
+        _models.UserProfile.IntervalType.MONTHLY,
+    ],
+)
 class TestMissingView:
     @pytest.fixture
     def start_date(self):
@@ -1189,11 +1197,20 @@ class TestMissingView:
             m.today.return_value = start_date
             yield m
 
-    @pytest.mark.usefixtures("login_user")
+    @pytest.fixture
+    def user(self, create_user, interval, start_date):
+        user = create_user()
+        user.profile.start_date = start_date
+        user.profile.interval = interval
+        user.profile.save()
+        return user
+
+    @pytest.mark.usefixtures("login_user", "interval")
     def test(self, client):
         response = client.get(reverse("missing"))
         assert response.status_code == 200
 
+    @pytest.mark.usefixtures("interval")
     def test_requires_authentication(self, client):
         response = client.get(reverse("missing"))
         assert response.status_code == 302

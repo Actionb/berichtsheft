@@ -47,4 +47,3 @@
 - [ ] add user setting for working on weekends -> could be useful for figuring out missing Nachweise
 - [ ] add a utility function/template tag that creates useful initial data for a Nachweis object from a given date
 - [ ] allow users to ignore "Missing Nachweis" warnings per missing Nachweis
-- [ ] Fehlende Nachweise list.html add missing button: add initial data to link querystring

@@ -1,4 +1,6 @@
+from datetime import date
 from typing import Any
+from urllib.parse import urlencode
 
 from django.db.models import Model
 from django.http import HttpRequest
@@ -6,6 +8,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeString
 
+from web import models as _models
+from web.utils import date as date_utils
 from web.utils import perms
 
 
@@ -97,8 +101,37 @@ class NachweisPrintAction(ChangePermAction):
 
 
 class AddMissingAction(ListAction):
+    """
+    A link that sends the user to the Nachweis add page from the
+    'missing Nachweise' page.
+    """
+
     label = "Hinzufügen"
     url_name = "nachweis_add"
 
-    def has_permission(self, request: HttpRequest, obj: Model) -> bool:
-        return perms.has_add_permission(request.user, obj._meta)
+    def has_permission(self, request: HttpRequest, **kwargs: Any) -> bool:
+        return perms.has_add_permission(request.user, _models.Nachweis._meta)
+
+    def get_initial_data(self, request: HttpRequest, start: date, end: date) -> dict:
+        """Return initial data for the missing Nachweis."""
+        user_start_date = request.user.profile.start_date
+        if not user_start_date:  # pragma: no cover
+            return {}
+        initial = {
+            "datum_start": start,
+            "datum_ende": end,
+            "jahr": start.year,
+            "ausbildungswoche": date_utils.count_week_numbers(user_start_date, start),
+            "kalenderwoche": start.isocalendar()[1],
+        }
+        match request.user.profile.interval:
+            case _models.UserProfile.IntervalType.DAILY:
+                initial["nummer"] = date_utils.count_business_days(user_start_date, start)
+            case _models.UserProfile.IntervalType.WEEKLY:
+                initial["nummer"] = initial["ausbildungswoche"]
+            case _models.UserProfile.IntervalType.MONTHLY:
+                initial["nummer"] = date_utils.count_months(user_start_date, start) + 1
+        return initial
+
+    def get_url(self, request: HttpRequest, **kwargs: Any):
+        return f"{super().get_url(request, **kwargs)}?{urlencode(self.get_initial_data(request, **kwargs))}"

@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from web.utils.date import count_week_numbers
+from web.utils.date import count_months, count_week_numbers
 
 
 @pytest.mark.parametrize(
@@ -19,3 +19,18 @@ from web.utils.date import count_week_numbers
 )
 def test_count_week_numbers(start, end, expected):
     assert count_week_numbers(start, end) == expected
+
+
+@pytest.mark.parametrize(
+    "start, end, expected",
+    [
+        (date(year=2025, month=8, day=1), date(year=2025, month=8, day=1), 0),
+        (date(year=2025, month=8, day=1), date(year=2025, month=7, day=30), 0),
+        (date(year=2025, month=8, day=1), date(year=2025, month=9, day=1), 1),
+        (date(year=2025, month=8, day=31), date(year=2025, month=9, day=1), 1),
+        (date(year=2025, month=8, day=1), date(year=2026, month=1, day=1), 5),
+        (date(year=2025, month=8, day=1), date(year=2027, month=1, day=1), 17),
+    ],
+)
+def test_count_months(start, end, expected):
+    assert count_months(start, end) == expected

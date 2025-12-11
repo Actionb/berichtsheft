@@ -36,10 +36,10 @@
 - [ ] allow user to delete their account
 - [ ] auto-delete account after a time of inactivity (6 months?)
 - [ ] support other Nachweis intervals besides weekly (daily, monthly, free)
-- [ ] add a dashboard / start page
+- [x] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
 - [ ] export Nachweis objects to PDF without the browser 
-- [ ] explain "list_display" und "list_display_callable" in ChangelistView doc string
+- [x] explain "list_display" und "list_display_callable" in ChangelistView doc string
 - [x] dashboard: notify user when Nachweise are missing (deduce from Nachweis interval given by user settings?)
 - [x] set ``related_name`` on user.nachweis_set relation
 - [ ] tweak Nachweis model ordering to use `nummer` by default?

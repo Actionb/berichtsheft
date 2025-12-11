@@ -53,7 +53,7 @@ class ListAction:
 
     def get_url(self, request: HttpRequest, **kwargs: Any) -> str:
         """Return the URL for the action on the given result item."""
-        return reverse(self.url_name, kwargs=kwargs)
+        return reverse(self.url_name)
 
     def render(self, request: HttpRequest, **kwargs: Any) -> SafeString:
         """Render the action button."""

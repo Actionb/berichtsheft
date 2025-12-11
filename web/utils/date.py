@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 
 def get_week_monday(d: date) -> date:  # pragma: no cover
@@ -30,3 +30,18 @@ def count_months(start: date, end: date) -> int:
     start = start.replace(day=1)
     end = end.replace(day=1)
     return (end.year - start.year) * 12 + end.month - start.month
+
+
+def count_business_days(start: date, end: date) -> int:
+    """
+    Count the number of business days between the given start and (inclusive)
+    end date.
+    """
+    if end < start:
+        return 0
+    c = 0
+    for day_delta in range((end - start).days + 1):
+        d = start + timedelta(days=day_delta)
+        if d.isoweekday() < 6:
+            c += 1
+    return c

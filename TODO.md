@@ -12,7 +12,7 @@
 - [x] User Handling
 - [x] calculate Ausbildungswoche from start of employment
 - [x] print.html: take name from user data (user is required to enter their full name)
-- [ ] sign up form does not make it clear why it is invalid
+- [x] sign up form does not make it clear why it is invalid
 - [x] miz-tomselect requires German text
 - [x] add Nummer field to edit form
 - [x] Sign Up Form: require first name and surname

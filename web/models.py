@@ -57,7 +57,9 @@ class Nachweis(SoftDeleteModel):
     # TODO: eingereicht_bei: ForeignKey -> Person?
     eingereicht_bei = models.CharField(verbose_name="Eingereicht bei", max_length=100, blank=True)
     unterschrieben = models.BooleanField(verbose_name="Unterschrieben?", default=False)
-    user = models.ForeignKey("User", on_delete=models.CASCADE, editable=False, verbose_name="Benutzer")
+    user = models.ForeignKey(
+        "User", on_delete=models.CASCADE, editable=False, verbose_name="Benutzer", related_name="nachweise"
+    )
 
     class Meta:
         verbose_name = "Nachweis"

@@ -41,7 +41,7 @@
 - [ ] export Nachweis objects to PDF without the browser 
 - [ ] explain "list_display" und "list_display_callable" in ChangelistView doc string
 - [x] dashboard: notify user when Nachweise are missing (deduce from Nachweis interval given by user settings?)
-- [ ] set ``related_name`` on user.nachweis_set relation
+- [x] set ``related_name`` on user.nachweis_set relation
 - [ ] tweak Nachweis model ordering to use `nummer` by default?
 - [ ] add user setting for working on weekends -> could be useful for figuring out missing Nachweise
 - [x] add a utility function/template tag that creates useful initial data for a Nachweis object from a given date

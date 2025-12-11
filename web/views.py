@@ -442,6 +442,7 @@ class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         ctx["current_nachweis"] = get_current_nachweis(self.request.user)
         ctx["missing_nachweise"] = get_missing_nachweise(self.request.user)
+        ctx["action"] = actions.AddMisingDashboardAction()
         return ctx
 
 

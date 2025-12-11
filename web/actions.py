@@ -6,7 +6,7 @@ from django.db.models import Model
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.safestring import SafeString
+from django.utils.safestring import SafeString, mark_safe
 
 from web import models as _models
 from web.utils import date as date_utils
@@ -36,6 +36,7 @@ class ListAction:
     """
 
     url_name: str = ""
+    title: str = ""
     label: str = ""
     css: str = "btn btn-primary btn-sm w-100"
 
@@ -154,3 +155,10 @@ class AddMissingAction(ListAction):
 
     def get_url(self, request: HttpRequest, **kwargs: Any):
         return f"{super().get_url(request, **kwargs)}?{urlencode(self.get_initial_data(request, **kwargs))}"
+
+
+class AddMisingDashboardAction(AddMissingAction):
+    """The 'add missing Nachweis' action but for the Dashboard."""
+
+    label = mark_safe('<i class="bi bi-file-earmark-plus"></i>')
+    css = "btn btn-outline-success ms-3"

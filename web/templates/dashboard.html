@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load actions %}
 {% block main %}
     <h1>Dashboard</h1>
     <p class="mb-3">
@@ -40,7 +41,7 @@
                             <span>{{ start }}{% if start != end %} - {{ end }}{% endif %}</span>
                         </td>
                         <td class="d-flex justify-content-center">
-                            <a href="{% url 'nachweis_add' %}?datum_start={{ start|date:"Y-m-d" }}&datum_ende={{ end|date:"Y-m-d" }}&nummer=" class="btn btn-outline-success ms-3" title="Nachweis hinzufügen"><i class="bi bi-file-earmark-plus"></i></a>
+                            {% render_action action request start=start end=end %}
                         </td>
                     </tr>
                 {% endfor %}

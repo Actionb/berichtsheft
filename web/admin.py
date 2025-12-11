@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.urls import reverse_lazy
 
 from web import models as _models
+
+admin.site.site_url = reverse_lazy("home")
 
 
 @admin.register(_models.Nachweis)

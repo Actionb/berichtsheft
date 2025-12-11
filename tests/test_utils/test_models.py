@@ -221,3 +221,91 @@ class TestGetMissingNachweise:
         not set a usable interval.
         """
         assert utils.get_missing_nachweise(user) == []
+
+
+class TestGetInitial:
+    @pytest.fixture(
+        params=[
+            _models.UserProfile.IntervalType.DAILY,
+            _models.UserProfile.IntervalType.WEEKLY,
+            _models.UserProfile.IntervalType.MONTHLY,
+        ]
+    )
+    def interval(self, request):
+        """The interval between Nachweis objects."""
+        return request.param
+
+    @pytest.fixture
+    def start_date(self):
+        """The start_date of the user's Ausbildung."""
+        return date(2025, 8, 1)
+
+    @pytest.fixture
+    def user(self, create_user, interval, start_date):
+        user = create_user()
+        # 'nummer' and other values are calculated from the start date:
+        user.profile.start_date = start_date
+        user.profile.interval = interval
+        user.profile.save()
+        return user
+
+    @pytest.fixture
+    def test_date(self, interval):
+        """Return a date to test the initial data for a given interval."""
+        match interval:
+            case _models.UserProfile.IntervalType.DAILY:
+                # The next business day after the start_date 2025-08-01:
+                return date(2025, 8, 4)  # 2nd day
+            case _models.UserProfile.IntervalType.WEEKLY:
+                return date(2025, 8, 4)  # 2nd week
+            case _models.UserProfile.IntervalType.MONTHLY:
+                return date(2025, 9, 1)  # 2nd month
+            case _:  # pragma: no cover
+                raise Exception("Unknown interval.")
+
+    @pytest.fixture
+    def expected(self, interval, test_date):
+        """
+        Return the expected initial data for given start and end dates of a
+        missing Nachweis.
+        """
+        expected = {
+            "nummer": 2,
+            "jahr": test_date.year,
+            "kalenderwoche": test_date.isocalendar()[1],
+        }
+        match interval:
+            case _models.UserProfile.IntervalType.DAILY:
+                expected["datum_start"] = test_date
+                expected["datum_ende"] = test_date
+                expected["ausbildungswoche"] = 2
+            case _models.UserProfile.IntervalType.WEEKLY:
+                expected["datum_start"] = date.fromisocalendar(test_date.year, test_date.isocalendar()[1], day=1)
+                expected["datum_ende"] = date.fromisocalendar(test_date.year, test_date.isocalendar()[1], day=5)
+                expected["ausbildungswoche"] = 2
+            case _models.UserProfile.IntervalType.MONTHLY:
+                expected["datum_start"] = test_date.replace(day=1)
+                expected["datum_ende"] = test_date.replace(day=monthrange(test_date.year, test_date.month)[1])
+                expected["ausbildungswoche"] = 6
+            case _:  # pragma: no cover
+                raise Exception("Unknown interval.")
+
+        return expected
+
+    def test_initial_data_for_date(self, user, test_date, expected):
+        """
+        Assert that initial_data_for_date returns the expected initial data for
+        the given date.
+        """
+        assert utils.initial_data_for_date(user=user, d=test_date) == expected
+
+    @pytest.mark.parametrize("start_date", [None])
+    @pytest.mark.usefixtures("start_date")
+    def test_initial_data_for_date_no_user_start_date(self, user, test_date, expected):
+        """
+        Assert that initial_data_for_date returns the expected initial data
+        for the given date if the user does not have a start date set.
+        """
+        del expected["nummer"]
+        del expected["ausbildungswoche"]
+        assert utils.initial_data_for_date(user=user, d=test_date) == expected

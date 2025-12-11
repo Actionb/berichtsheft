@@ -5,6 +5,7 @@ from typing import Optional
 from django.apps import apps
 
 from web import models as _models
+from web.utils import date as date_utils
 from web.utils.date import count_week_numbers, get_week_friday, get_week_monday
 
 
@@ -126,3 +127,38 @@ def get_missing_nachweise(user: _models.User) -> list[tuple[date, date]]:
             ]
         case _:
             return []
+
+
+def initial_data_for_date(user: _models.User, d: date) -> dict:
+    """Create useful initial data for Nachweis forms for the given date and user."""
+    # Determine the date ranges for the given interval:
+    match user.profile.interval:
+        case _models.UserProfile.IntervalType.DAILY:
+            start = end = d
+        case _models.UserProfile.IntervalType.WEEKLY:
+            start = date.fromisocalendar(d.year, d.isocalendar()[1], day=1)
+            end = date.fromisocalendar(d.year, d.isocalendar()[1], day=5)
+        case _models.UserProfile.IntervalType.MONTHLY:
+            start = d.replace(day=1)
+            end = d.replace(day=calendar.monthrange(d.year, d.month)[1])
+        case _:  # pragma: no cover
+            return {}
+
+    initial = {
+        "jahr": start.year,
+        "kalenderwoche": start.isocalendar()[1],
+        "datum_start": start,
+        "datum_ende": end,
+    }
+    user_start_date = user.profile.start_date
+    if user_start_date:
+        # Derive additional initial data from the user's start date:
+        initial["ausbildungswoche"] = date_utils.count_week_numbers(user_start_date, start)
+        match user.profile.interval:
+            case _models.UserProfile.IntervalType.DAILY:
+                initial["nummer"] = date_utils.count_business_days(user_start_date, start)
+            case _models.UserProfile.IntervalType.WEEKLY:
+                initial["nummer"] = initial["ausbildungswoche"]
+            case _models.UserProfile.IntervalType.MONTHLY:
+                initial["nummer"] = date_utils.count_months(user_start_date, start) + 1
+    return initial

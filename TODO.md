@@ -32,7 +32,7 @@
 - [x] Add hard-delete button to trashcan
 - [x] Adjust margin/padding on Abteilung change form
 - [x] Add 'view object' button to Papierkorb items
-- [ ] Customize 404 view
+- [x] Customize 404 view
 - [ ] allow user to delete their account
 - [ ] auto-delete account after a time of inactivity (6 months?)
 - [ ] support other Nachweis intervals besides weekly (daily, monthly, free)

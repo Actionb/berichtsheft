@@ -455,12 +455,14 @@ def handler403(request, exception=None):
     message = "Sie haben nicht die Berechtigung, dieses Objekt anzusehen."
     if isinstance(exception, PermissionDenied) and exception.args:
         message = exception.args[0]
-    return render(
-        request,
-        template_name="base.html",
-        context={"content": message},
-        status=403,
-    )
+    return render(request, template_name="base.html", context={"content": message}, status=403)
+
+
+def handler404(request, exception, template_name="404.html"):  # pragma: no cover
+    if request.path_info.startswith("/admin"):
+        # Show the admin 404 if requesting an admin page.
+        template_name = "admin/404.html"
+    return render(request, template_name=template_name, status=404)
 
 
 class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):

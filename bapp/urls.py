@@ -24,3 +24,4 @@ urlpatterns = [
 ]
 
 handler403 = "web.views.handler403"
+handler404 = "web.views.handler404"

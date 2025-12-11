@@ -125,7 +125,26 @@ class RequireUserMixin(SingleObjectMixin):
 
 
 class BaseListView(BaseViewMixin, ListView):
-    """Display a list of items in a table."""
+    """
+    Display a list of items in a table.
+
+    The headers of the table are given by the attribute `list_display`. An item
+    in `list_display` can simply be a string (i.e. the header itself), or it can
+    be the name of a view method. If that view method defines a `label`
+    attribute, the table header will be set to that label. To set such an
+    attribute on the method, you can decorate it with `list_display_callable`:
+
+        @list_display_callable(label="Foo")
+        def my_callable(self, row):
+            return "Bar"
+
+    If the view defines any 'list actions' (via the attribute `actions`), these
+    actions will be placed in an additional column with the table header
+    "Aktionen".
+    """
+
+    # NOTE: Callable list_display items have more functionality in ChangelistView,
+    # where they are automatically called with the result object(s).
 
     template_name = "list.html"
     paginate_by = 50

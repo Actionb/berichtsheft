@@ -46,3 +46,4 @@
 - [ ] add user setting for working on weekends -> could be useful for figuring out missing Nachweise
 - [x] add a utility function/template tag that creates useful initial data for a Nachweis object from a given date
 - [ ] allow users to ignore "Missing Nachweis" warnings per missing Nachweis
+- [ ] disable "validated" styles on forms (especially search form)

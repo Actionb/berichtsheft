@@ -202,3 +202,39 @@ class SearchForm(forms.Form):
         if not self.is_valid() or not self.cleaned_data:
             return queryset
         return queryset.filter(self.get_text_search_filters(), **self.get_filters())
+
+
+class NachweisSearchForm(SearchForm):
+    datum_start = RangeFormField(
+        formfield=forms.DateField(widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"), required=False),
+        label="Datum/Zeitraum",
+        required=False,
+    )
+    jahr = forms.IntegerField(label="Jahr", required=False)
+    kalenderwoche = RangeFormField(forms.IntegerField(required=False), label="Kalenderwoche", required=False)
+    ausbildungswoche = RangeFormField(forms.IntegerField(required=False), label="Ausbildungswoche", required=False)
+    fertig = forms.NullBooleanField(
+        label="Fertig",
+        required=False,
+        widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
+    )
+    unterschrieben = forms.NullBooleanField(
+        label="Unterschrieben",
+        required=False,
+        widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
+    )
+    abteilung = forms.ModelChoiceField(queryset=_models.Abteilung.objects, label="Abteilung", required=False)
+    nummer = forms.IntegerField(label="Nachweisnummer", required=False)
+
+    lookups = {
+        "q": "icontains",
+        "datum_start": "range",
+        "kalenderwoche": "range",
+        "ausbildungswoche": "range",
+    }
+
+    text_search_fields = ["betrieb", "schule"]
+
+    def __init__(self, *, user, **kwargs):
+        super().__init__(**kwargs)
+        self.fields["abteilung"].queryset = self.fields["abteilung"].queryset.filter(user=user)

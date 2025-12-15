@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from django import forms
 from django.db.models import Q
 
-from tests.model_factory import AbteilungFactory
+from tests.model_factory import AbteilungFactory, NachweisFactory
 from web import forms as _forms
 from web import models as _models
 
@@ -182,3 +182,96 @@ class TestSearchForm:
         assert form.get_text_search_filters() == Q(text_search_1__icontains="foo") | Q(text_search_2__icontains="foo")
 
 
+class TestNachweisSearchForm:
+    @pytest.fixture
+    def abteilung(self, user):
+        return AbteilungFactory(user=user)
+
+    @pytest.fixture
+    def not_user_abteilung(self, superuser):
+        return AbteilungFactory(user=superuser)
+
+    @pytest.fixture
+    def result(self, user, abteilung):
+        """The object that should come up as a search result."""
+        return NachweisFactory(betrieb="foo bar baz", abteilung=abteilung, user=user)
+
+    @pytest.fixture
+    def not_result(self, user, result):
+        """An object that should NOT be included in the search results."""
+        return NachweisFactory(
+            user=user,
+            fertig=not result.fertig,
+            unterschrieben=not result.unterschrieben,
+        )
+
+    @pytest.mark.usefixtures("not_user_abteilung")
+    def test_abteilung_user_only(self, user, abteilung):
+        """
+        Assert that the choices for the 'abteilung' field are restricted to
+        those of the current user.
+        """
+        form = _forms.NachweisSearchForm(user=user)
+        assert list(form.fields["abteilung"].queryset) == [abteilung]
+
+    @pytest.fixture
+    def form_data(self, test_case, result):
+        match test_case:
+            case "text_search":
+                return {"q": "foo"}
+            case "datum":
+                return {
+                    "datum_start_0": result.datum_start - timedelta(weeks=1),
+                    "datum_start_1": result.datum_start + timedelta(weeks=1),
+                }
+            case "jahr":
+                return {"jahr": result.jahr}
+            case "kalenderwoche":
+                return {"kalenderwoche_0": result.kalenderwoche - 1, "kalenderwoche_1": result.kalenderwoche + 1}
+            case "ausbildungswoche":
+                return {
+                    "ausbildungswoche_0": result.ausbildungswoche - 1,
+                    "ausbildungswoche_1": result.ausbildungswoche + 1,
+                }
+            case "fertig":
+                return {"fertig": result.fertig}
+            case "unterschrieben":
+                return {"unterschrieben": result.unterschrieben}
+            case "abteilung":
+                return {"abteilung": result.abteilung.pk}
+            case "nummer":
+                return {"nummer": result.nummer}
+
+    @pytest.mark.usefixtures("not_result")
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            "text_search",
+            "datum",
+            "jahr",
+            "kalenderwoche",
+            "ausbildungswoche",
+            "fertig",
+            "unterschrieben",
+            "abteilung",
+            "nummer",
+        ],
+    )
+    def test_apply_filters(self, user, form_data, result):
+        """Assert that the form filters the queryset as expected."""
+        form = _forms.NachweisSearchForm(data=form_data, user=user)
+        assert not form.errors
+        assert list(form.apply_filters(_models.Nachweis.objects.all())) == [result]
+
+    @pytest.mark.parametrize("test_case, form_data", [("invalid", {"jahr": "foo"}), ("empty", {})])
+    @pytest.mark.usefixtures("test_case")
+    def test_apply_filters_invalid(self, user, result, not_result, form_data):
+        """
+        Assert that the form does not filter the queryset when the form is
+        invalid or empty.
+        """
+        form = _forms.NachweisSearchForm(data=form_data, user=user)
+        queryset = form.apply_filters(_models.Nachweis.objects.all())
+        assert queryset.count() == 2
+        assert result in queryset
+        assert not_result in queryset

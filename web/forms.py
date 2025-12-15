@@ -6,6 +6,7 @@ from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.db.models import Q
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.query import QuerySet
+from mizdb_tomselect.widgets import MIZSelect
 
 from web import models as _models
 
@@ -223,7 +224,12 @@ class NachweisSearchForm(SearchForm):
         required=False,
         widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
     )
-    abteilung = forms.ModelChoiceField(queryset=_models.Abteilung.objects, label="Abteilung", required=False)
+    abteilung = forms.ModelChoiceField(
+        queryset=_models.Abteilung.objects,
+        label="Abteilung",
+        required=False,
+        widget=MIZSelect(_models.Abteilung, url="abteilung_ac"),
+    )
     nummer = forms.IntegerField(label="Nachweisnummer", required=False)
 
     lookups = {

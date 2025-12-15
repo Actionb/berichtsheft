@@ -3,18 +3,38 @@
 {% block extrahead %}
     {{ block.super }}
     <script src="{% static 'web/js/remove_empty_fields.js' %}"></script>
+    {{ search_form.media }}
 {% endblock extrahead %}
 {% block main %}
     <h1>
         {% block page_title %}{{ title }}{% endblock %}
     </h1>
     {% block searchform %}
-    {% if search_form %}
-        <form method="get" id="search_form" class="search-form">
-            {% bootstrap_form search_form required_css_class="fw-semibold" %}
-            <button type="submit" class="btn btn-primary">Suchen</button>
-        </form>
-    {% endif %}
+        <div class="p-3">
+            {% if search_form %}
+                <form method="get"
+                      id="search_form"
+                      class="search-form"
+                      style="max-width: 500px">
+                    {% bootstrap_field search_form.q required_css_class="fw-semibold" %}
+                    <div class="collapse {% if search_form.data %}show{% endif %}"
+                         id="search_fields">
+                        {% for field in search_form %}
+                            {% if not forloop.first %}
+                                {% bootstrap_field field required_css_class="fw-semibold" %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Suchen</button>
+                    <button type="button"
+                            class="btn btn-secondary {% if not search_form.data %}collapsed{% endif %}"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#search_fields"
+                            aria-expanded="{% if search_form.is_bound %}true{% else %}false{% endif %}"
+                            aria-controls="search_fields">Suchfilter anzeigen</button>
+                </form>
+            {% endif %}
+        </div>
     {% endblock searchform %}
     {% block results %}
         <table class="table table-striped table-hover">

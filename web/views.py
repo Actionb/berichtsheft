@@ -43,6 +43,10 @@ class AutocompleteView(BaseAutocompleteView):
 
 
 class AbteilungAutocompleteView(AutocompleteView):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.queryset = _models.Abteilung.objects.filter(user=request.user)
+
     def create_object(self, data):
         """Create a new object with the given data."""
         return self.model.objects.create(**{self.create_field: data[self.create_field], "user": self.request.user})

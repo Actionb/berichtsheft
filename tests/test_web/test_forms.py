@@ -1,5 +1,10 @@
-import pytest
+from datetime import date
 
+import pytest
+from django import forms
+from django.db.models import Q
+
+from tests.model_factory import AbteilungFactory
 from web import forms as _forms
 from web import models as _models
 
@@ -86,3 +91,94 @@ class TestUserProfileForm:
         user.refresh_from_db()
         assert user.first_name == first_name
         assert user.last_name == last_name
+
+
+class TestSearchForm:
+    @pytest.fixture
+    def form_class(self):
+        class Form(_forms.SearchForm):
+            no_lookup = forms.CharField(required=False)
+            lookup = forms.CharField(required=False)
+            empty = forms.CharField(required=False)
+            range = _forms.RangeFormField(forms.DateField(widget=forms.DateInput, required=False), required=False)
+            queryset = forms.ModelChoiceField(queryset=_models.Abteilung.objects, required=False)
+
+            lookups = {
+                "lookup": "icontains",
+                "range": "range",
+            }
+            text_search_fields = ["text_search_1", "text_search_2"]
+
+        return Form
+
+    @pytest.fixture
+    def abteilung(self):
+        return AbteilungFactory()
+
+    @pytest.fixture
+    def form_data(self, test_case, abteilung):
+        match test_case:
+            case "no_lookup":
+                return {"no_lookup": "foo"}
+            case "lookup":
+                return {"lookup": "bar"}
+            case "empty":
+                return {"empty": ""}
+            case "range":
+                return {"range_0": date(2025, 12, 12), "range_1": date(2025, 12, 13)}
+            case "queryset":
+                return {"queryset": abteilung.pk}
+            case "range_no_start":
+                return {"range_1": date(2025, 12, 13)}
+            case "range_no_end":
+                return {"range_0": date(2025, 12, 12)}
+            case "invalid":
+                return {"range_0": "f"}
+
+    @pytest.fixture
+    def expected(self, test_case, abteilung):
+        match test_case:
+            case "no_lookup":
+                return {"no_lookup": "foo"}
+            case "lookup":
+                return {"lookup__icontains": "bar"}
+            case "empty":
+                return {}
+            case "range":
+                return {"range__range": [date(2025, 12, 12), date(2025, 12, 13)]}
+            case "queryset":
+                return {"queryset": abteilung}
+            case "range_no_start":
+                return {"range__lte": date(2025, 12, 13)}
+            case "range_no_end":
+                return {"range": date(2025, 12, 12)}
+            case "invalid":
+                return {}
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            "no_lookup",
+            "lookup",
+            "empty",
+            "range",
+            "queryset",
+            "range_no_start",
+            "range_no_end",
+            "invalid",
+        ],
+    )
+    def test_get_filters(self, test_case, form_class, form_data, expected):
+        """Assert that get_filters returns the expected queryset filter."""
+        form = form_class(data=form_data)
+        if test_case != "invalid":
+            assert not form.errors
+        assert form.get_filters() == expected
+
+    def test_get_text_search_filters(self, form_class):
+        """Assert that get_text_search_filters returns the expected filter."""
+        form = form_class(data={"q": "foo"})
+        assert form.get_text_search_filters() == Q(text_search_1__icontains="foo") | Q(text_search_2__icontains="foo")
+
+

@@ -87,10 +87,11 @@ class TestChangelistTemplate:
         return {"bar": "text-danger"}
 
     @pytest.fixture
-    def context(self, list_display, headers, result_row, result_obj, col_classes):
+    def context(self, rf, list_display, headers, result_row, result_obj, col_classes):
         row = OrderedDict(zip(list_display, result_row))
         row["obj"] = result_obj
         return {
+            "request": rf.get("/"),
             "list_display": list_display,
             "headers": headers,
             "result_rows": [row],

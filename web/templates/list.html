@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load list actions django_bootstrap5 static %}
+{% load list actions django_bootstrap5 static pagination %}
 {% block extrahead %}
     {{ block.super }}
     <script src="{% static 'web/js/remove_empty_fields.js' %}"></script>
@@ -90,7 +90,7 @@
                                     </li>
                                 {% else %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                        <a class="page-link" href="{% page_url request i %}">{{ i }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}

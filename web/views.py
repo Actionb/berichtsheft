@@ -213,6 +213,7 @@ class BaseListView(BaseViewMixin, ListView):
 class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, BaseListView):
     template_name = "changelist.html"
     paginate_by = 10
+    search_form_class = None
 
     def get_permission_required(self):
         if self.permission_required is None:
@@ -277,10 +278,22 @@ class ChangelistView(PermissionRequiredMixin, FilterUserMixin, ModelViewMixin, B
             _actions.append(actions.EditAction(url_name=f"{self.opts.model_name}_change"))
         return _actions
 
+    def get_search_form(self, request) -> _forms.SearchForm | None:
+        if self.search_form_class:
+            return self.search_form_class(data=request.GET, user=request.user)
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search_form = self.get_search_form(self.request)
+        if search_form and search_form.is_valid():
+            return search_form.apply_filters(qs)
+        return qs
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["has_add_permission"] = perms.has_add_permission(self.request.user, self.opts)
         ctx["add_url"] = f"{self.model._meta.model_name}_add"
+        ctx["search_form"] = self.get_search_form(self.request)
         return ctx
 
 

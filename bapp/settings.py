@@ -136,3 +136,7 @@ AZUBI_PERMISSIONS = {
 }
 
 AUTH_USER_MODEL = "web.User"
+
+BOOTSTRAP5 = {
+    "server_side_validation": False,
+}

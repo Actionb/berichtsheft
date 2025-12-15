@@ -717,6 +717,35 @@ class TestSignUpView:
 
 
 class TestNachweisListView:
+    @pytest.fixture
+    def search_term(self):
+        return "foo"
+
+    @pytest.fixture
+    def abteilung(self, user):
+        return AbteilungFactory(user=user)
+
+    @pytest.fixture
+    def obj(self, user, search_term, abteilung):
+        return NachweisFactory(user=user, betrieb=f"Frobnicate {search_term} lorem", schule="", abteilung=abteilung)
+
+    @pytest.fixture(autouse=True)
+    def other_obj(self, user):
+        """Another Nachweis that should not come up in the search results."""
+        return NachweisFactory(user=user, betrieb="", schule="")
+
+    @pytest.fixture(autouse=True)
+    def not_user_obj(self, superuser):
+        """
+        A Nachweis object of another user that should not appear in the search
+        results.
+        """
+        return NachweisFactory(user=superuser)
+
+    @pytest.fixture
+    def url(self):
+        return reverse("nachweis_list")
+
     @pytest.mark.django_db
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
     @pytest.mark.parametrize(
@@ -726,21 +755,56 @@ class TestNachweisListView:
             ([("view", _models.Nachweis)], 200),
         ],
     )
-    def test_view_permission_required(self, client, expected_code):
+    def test_view_permission_required(self, client, url, expected_code):
         """Assert that certain permissions are required to access the list view."""
-        assert client.get(reverse("nachweis_list")).status_code == expected_code
+        assert client.get(url).status_code == expected_code
 
     @pytest.mark.django_db
-    def test_only_lists_user_nachweise(self, rf, user, superuser):
+    def test_only_lists_user_nachweise(self, rf, url, user, superuser):
         """Assert that only Nachweis objects belonging to the user are listed."""
         nachweis_1 = NachweisFactory(user=superuser)
         nachweis_2 = NachweisFactory(user=user)  # belongs to a different user
         view = _views.NachweisListView()
-        view.request = rf.get(reverse("nachweis_list"))
+        view.request = rf.get(url)
         view.request.user = superuser
         queryset = view.get_queryset()
         assert nachweis_1 in queryset
         assert nachweis_2 not in queryset
+
+    @pytest.fixture
+    def form_data(self, test_case, search_term, abteilung):
+        match test_case:
+            case "text_search":
+                return {"q": search_term}
+            case "abteilung":
+                return {"abteilung": abteilung.pk}
+            case "combined":
+                return {"q": search_term, "abteilung": abteilung.pk}
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize("user_perms", [[("view", _models.Nachweis)]])
+    @pytest.mark.parametrize("test_case", ["text_search", "abteilung", "combined"])
+    def test_search(self, client, url, obj, form_data):
+        """Assert that the search yields the expected results."""
+        response = client.get(url, data=form_data)
+        assert response.status_code == 200
+        assert list(response.context["object_list"]) == [obj]
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
+    @pytest.mark.parametrize("user_perms", [[("view", _models.Nachweis)]])
+    def test_no_search_params(self, client, url, obj, other_obj):
+        """
+        Assert that the view displays the full object list when no search
+        parameters are set.
+        """
+        response = client.get(url, data={})
+        assert response.status_code == 200
+        object_list = response.context["object_list"]
+        assert len(object_list) == 2
+        assert obj in object_list
+        assert other_obj in object_list
 
 
 class TestUserProfileView:

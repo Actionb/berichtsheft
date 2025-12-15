@@ -408,6 +408,7 @@ class NachweisListView(ChangelistView):
     list_display = ["jahr", "woche", "zeitraum", "betrieb", "schule", "fertig", "eingereicht_bei", "unterschrieben"]
     actions = [actions.NachweisPrintAction()]
     mainclass = "container-fluid px-5"
+    search_form_class = _forms.NachweisSearchForm
 
     def get_column_classes(self):
         return {

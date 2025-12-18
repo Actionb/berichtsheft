@@ -194,7 +194,7 @@ class TestNachweisSearchForm:
     @pytest.fixture
     def result(self, user, abteilung):
         """The object that should come up as a search result."""
-        return NachweisFactory(betrieb="foo bar baz", abteilung=abteilung, user=user)
+        return NachweisFactory(betrieb="foo bar baz", abteilung=abteilung, user=user, eingereicht_bei="Bob")
 
     @pytest.fixture
     def not_result(self, user, result):
@@ -241,6 +241,8 @@ class TestNachweisSearchForm:
                 return {"abteilung": result.abteilung.pk}
             case "nummer":
                 return {"nummer": result.nummer}
+            case "eingereicht_bei":
+                return {"eingereicht_bei": result.eingereicht_bei}
 
     @pytest.mark.usefixtures("not_result")
     @pytest.mark.parametrize(
@@ -255,6 +257,7 @@ class TestNachweisSearchForm:
             "unterschrieben",
             "abteilung",
             "nummer",
+            "eingereicht_bei",
         ],
     )
     def test_apply_filters(self, user, form_data, result):

@@ -219,6 +219,7 @@ class NachweisSearchForm(SearchForm):
         required=False,
         widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
     )
+    eingereicht_bei = forms.ChoiceField(label="Eingereicht bei", required=False)
     unterschrieben = forms.NullBooleanField(
         label="Unterschrieben",
         required=False,
@@ -243,4 +244,12 @@ class NachweisSearchForm(SearchForm):
 
     def __init__(self, *, user, **kwargs):
         super().__init__(**kwargs)
+        eingereicht_choices = [("", "---------")]
+        for name in sorted(set(_models.Nachweis.objects.filter(user=user).values_list("eingereicht_bei", flat=True))):
+            if name:
+                eingereicht_choices.append((name, name))
+        self.fields["eingereicht_bei"].choices = eingereicht_choices
         self.fields["abteilung"].queryset = self.fields["abteilung"].queryset.filter(user=user)
+        self.fields["eingereicht_bei"].choices = [
+            (x, x) for x in set(_models.Nachweis.objects.filter(user=user).values_list("eingereicht_bei", flat=True))
+        ]

@@ -17,7 +17,7 @@
                       class="search-form"
                       style="max-width: 500px">
                     {% bootstrap_field search_form.q required_css_class="fw-semibold" %}
-                    <div class="collapse {% if search_form.data %}show{% endif %}"
+                    <div class="collapse {% if search_form.get_filters %}show{% endif %}"
                          id="search_fields">
                         {% for field in search_form %}
                             {% if not forloop.first %}
@@ -27,10 +27,10 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Suchen</button>
                     <button type="button"
-                            class="btn btn-secondary {% if not search_form.data %}collapsed{% endif %}"
+                            class="btn btn-secondary {% if not search_form.get_filters %}collapsed{% endif %}"
                             data-bs-toggle="collapse"
                             data-bs-target="#search_fields"
-                            aria-expanded="{% if search_form.is_bound %}true{% else %}false{% endif %}"
+                            aria-expanded="{% if search_form.get_filters %}true{% else %}false{% endif %}"
                             aria-controls="search_fields">Suchfilter anzeigen</button>
                 </form>
             {% endif %}

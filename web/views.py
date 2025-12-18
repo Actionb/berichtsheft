@@ -437,6 +437,16 @@ class NachweisListView(ChangelistView):
     def schule(self, obj):
         return truncatewords(linebreaksbr(obj.schule), 10)
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.GET.get("unfinished"):
+            qs = qs.filter(fertig=False)
+        if self.request.GET.get("unsubmitted"):
+            qs = qs.filter(eingereicht_bei="")
+        if self.request.GET.get("unsigned"):
+            qs = qs.filter(unterschrieben=False)
+        return qs
+
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
     model = _models.Nachweis

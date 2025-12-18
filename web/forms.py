@@ -211,7 +211,7 @@ class NachweisSearchForm(SearchForm):
         label="Datum/Zeitraum",
         required=False,
     )
-    jahr = forms.IntegerField(label="Jahr", required=False)
+    jahr = forms.ChoiceField(label="Jahr", required=False)
     kalenderwoche = RangeFormField(forms.IntegerField(required=False), label="Kalenderwoche", required=False)
     ausbildungswoche = RangeFormField(forms.IntegerField(required=False), label="Ausbildungswoche", required=False)
     fertig = forms.NullBooleanField(
@@ -250,6 +250,9 @@ class NachweisSearchForm(SearchForm):
                 eingereicht_choices.append((name, name))
         self.fields["eingereicht_bei"].choices = eingereicht_choices
         self.fields["abteilung"].queryset = self.fields["abteilung"].queryset.filter(user=user)
-        self.fields["eingereicht_bei"].choices = [
-            (x, x) for x in set(_models.Nachweis.objects.filter(user=user).values_list("eingereicht_bei", flat=True))
+        self.fields["jahr"].choices = [("", "---------")] + [
+            (jahr, jahr)
+            for jahr in sorted(
+                set(_models.Nachweis.objects.filter(user=user).values_list("datum_start__year", flat=True))
+            )
         ]

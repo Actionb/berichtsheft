@@ -3,6 +3,7 @@
 {% block extrahead %}
     {{ block.super }}
     <script src="{% static 'web/js/remove_empty_fields.js' %}"></script>
+    <script src="{% static 'web/js/search_form.js' %}"></script>
     {{ search_form.media }}
 {% endblock extrahead %}
 {% block main %}
@@ -10,31 +11,86 @@
         {% block page_title %}{{ title }}{% endblock %}
     </h1>
     {% block searchform %}
-        <div class="p-3">
-            {% if search_form %}
-                <form method="get"
-                      id="search_form"
-                      class="search-form"
-                      style="max-width: 500px">
-                    {% bootstrap_field search_form.q required_css_class="fw-semibold" %}
-                    <div class="collapse {% if search_form.get_filters %}show{% endif %}"
-                         id="search_fields">
-                        {% for field in search_form %}
-                            {% if not forloop.first %}
-                                {% bootstrap_field field required_css_class="fw-semibold" %}
-                            {% endif %}
-                        {% endfor %}
+        {% if search_form %}
+            <form method="get" class="search-form">
+                <div class="d-flex justify-content-between">
+                    <div class="d-flex gap-3 align-items-center w-100">
+                        <div class="form-floating">
+                            <input type="text"
+                                   name="q2"
+                                   class="form-control"
+                                   style="min-width: 400px"
+                                   placeholder=""
+                                   id="id_q2"
+                                   value="{{ request.GET.q2|default:'' }}">
+                            <label for="id_q2">🔍 Textsuche</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="date"
+                                   name="datum2"
+                                   class="form-control"
+                                   placeholder="Datum"
+                                   id="id_datum2"
+                                   value="{{ request.GET.datum2|default:'' }}">
+                            <label for="id_datum2">Datum</label>
+                        </div>
                     </div>
+                    <div class="d-flex gap-3 align-items-center w-100 justify-content-end">
+                        <span>Nachweise nach Status filtern:</span>
+                        <div>
+                            <a href="{% if request.GET.unfinished %}{% remove_qs request 'unfinished' %}{% else %}{% add_qs request 'unfinished' 1 %}{% endif %}"
+                               class="btn btn-outline-primary {% if request.GET.unfinished %}active{% endif %}"
+                               title="Nur Nachweise anzeigen, die noch nicht fertig geschrieben sind">nicht fertig</a>
+                        </div>
+                        <div>
+                            <a href="{% if request.GET.unsubmitted %}{% remove_qs request 'unsubmitted' %}{% else %}{% add_qs request 'unsubmitted' 1 %}{% endif %}"
+                               class="btn btn-outline-primary {% if request.GET.unsubmitted %}active{% endif %}"
+                               title="Nur Nachweise anzeigen, die noch nicht eingereicht wurden">nicht eingereicht</a>
+                        </div>
+                        <div>
+                            <a href="{% if request.GET.unsigned %}{% remove_qs request 'unsigned' %}{% else %}{% add_qs request 'unsigned' 1 %}{% endif %}"
+                               class="btn btn-outline-primary {% if request.GET.unsigned %}active{% endif %}"
+                               title="Nur Nachweise anzeigen, die noch nicht unterschrieben wurden">nicht unterschrieben</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="offcanvas offcanvas-start"
+                     tabindex="-1"
+                     id="search-form-offcanvas"
+                     aria-labelledby="offcanvas-label">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvas-label">Suchfilter</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        {% bootstrap_form search_form required_css_class="fw-semibold" %}
+                        <button type="submit" class="btn btn-primary">Suchen</button>
+                    </div>
+                </div>
+                <div class="d-flex mt-3 gap-3">
                     <button type="submit" class="btn btn-primary">Suchen</button>
                     <button type="button"
-                            class="btn btn-secondary {% if not search_form.get_filters %}collapsed{% endif %}"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#search_fields"
+                            class="btn btn-secondary position-relative"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#search-form-offcanvas"
                             aria-expanded="{% if search_form.get_filters %}true{% else %}false{% endif %}"
-                            aria-controls="search_fields">Suchfilter anzeigen</button>
-                </form>
-            {% endif %}
-        </div>
+                            aria-controls="search-form-offcanvas">
+                        Suchfilter anzeigen
+                        {% if search_form.get_filters %}
+                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                <span class="visually-hidden">New alerts</span>
+                            </span>
+                        {% endif %}
+                    </button>
+                    <a href="?"
+                       class="btn btn-outline-secondary"
+                       title="Suchfilter zurücksetzen">Suchfilter zurücksetzen</a>
+                </div>
+            </form>
+        {% endif %}
     {% endblock searchform %}
     {% block results %}
         <table class="table table-striped table-hover">

@@ -206,6 +206,7 @@ class SearchForm(forms.Form):
 
 
 class NachweisSearchForm(SearchForm):
+    nummer = forms.IntegerField(label="Nachweisnummer", required=False)
     datum_start = RangeFormField(
         formfield=forms.DateField(widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"), required=False),
         label="Datum/Zeitraum",
@@ -214,24 +215,13 @@ class NachweisSearchForm(SearchForm):
     jahr = forms.ChoiceField(label="Jahr", required=False)
     kalenderwoche = RangeFormField(forms.IntegerField(required=False), label="Kalenderwoche", required=False)
     ausbildungswoche = RangeFormField(forms.IntegerField(required=False), label="Ausbildungswoche", required=False)
-    fertig = forms.NullBooleanField(
-        label="Fertig",
-        required=False,
-        widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
-    )
     eingereicht_bei = forms.ChoiceField(label="Eingereicht bei", required=False)
-    unterschrieben = forms.NullBooleanField(
-        label="Unterschrieben",
-        required=False,
-        widget=forms.Select(choices=[("", ""), (True, "Ja"), (False, "Nein")]),
-    )
     abteilung = forms.ModelChoiceField(
         queryset=_models.Abteilung.objects,
         label="Abteilung",
         required=False,
         widget=MIZSelect(_models.Abteilung, url="abteilung_ac"),
     )
-    nummer = forms.IntegerField(label="Nachweisnummer", required=False)
 
     lookups = {
         "q": "icontains",

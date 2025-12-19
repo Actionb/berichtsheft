@@ -197,13 +197,9 @@ class TestNachweisSearchForm:
         return NachweisFactory(betrieb="foo bar baz", abteilung=abteilung, user=user, eingereicht_bei="Bob")
 
     @pytest.fixture
-    def not_result(self, user, result):
+    def not_result(self, user):
         """An object that should NOT be included in the search results."""
-        return NachweisFactory(
-            user=user,
-            fertig=not result.fertig,
-            unterschrieben=not result.unterschrieben,
-        )
+        return NachweisFactory(user=user)
 
     @pytest.mark.usefixtures("not_user_abteilung")
     def test_abteilung_user_only(self, user, abteilung):
@@ -233,10 +229,6 @@ class TestNachweisSearchForm:
                     "ausbildungswoche_0": result.ausbildungswoche - 1,
                     "ausbildungswoche_1": result.ausbildungswoche + 1,
                 }
-            case "fertig":
-                return {"fertig": result.fertig}
-            case "unterschrieben":
-                return {"unterschrieben": result.unterschrieben}
             case "abteilung":
                 return {"abteilung": result.abteilung.pk}
             case "nummer":
@@ -253,8 +245,6 @@ class TestNachweisSearchForm:
             "jahr",
             "kalenderwoche",
             "ausbildungswoche",
-            "fertig",
-            "unterschrieben",
             "abteilung",
             "nummer",
             "eingereicht_bei",

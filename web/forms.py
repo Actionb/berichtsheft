@@ -145,6 +145,9 @@ class SearchForm(forms.Form):
     text_search_fields: Iterable = ()
     text_search_lookup: str = "icontains"
 
+    class Media:
+        js = ["web/js/search_form.js", "web/js/remove_empty_fields.js"]
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not hasattr(self, "lookups"):

@@ -2,8 +2,6 @@
 {% load list actions django_bootstrap5 static querystring %}
 {% block extrahead %}
     {{ block.super }}
-    <script src="{% static 'web/js/remove_empty_fields.js' %}"></script>
-    <script src="{% static 'web/js/search_form.js' %}"></script>
     {{ search_form.media }}
 {% endblock extrahead %}
 {% block main %}

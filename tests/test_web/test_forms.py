@@ -192,23 +192,70 @@ class TestNachweisSearchForm:
         return AbteilungFactory(user=superuser)
 
     @pytest.fixture
-    def result(self, user, abteilung):
+    def datum_start(self):
+        return date(2025, 1, 1)
+
+    @pytest.fixture
+    def result(self, user, abteilung, datum_start):
         """The object that should come up as a search result."""
-        return NachweisFactory(betrieb="foo bar baz", abteilung=abteilung, user=user, eingereicht_bei="Bob")
+        return NachweisFactory(
+            betrieb="foo bar baz",
+            abteilung=abteilung,
+            user=user,
+            eingereicht_bei="Bob",
+            datum_start=datum_start,
+        )
 
     @pytest.fixture
     def not_result(self, user):
         """An object that should NOT be included in the search results."""
         return NachweisFactory(user=user)
 
+    @pytest.fixture
+    def empty_choice(self):
+        """Return the 'empty choice' element for select fields."""
+        return ("", "---------")
+
     @pytest.mark.usefixtures("not_user_abteilung")
-    def test_abteilung_user_only(self, user, abteilung):
+    def test_abteilung_queryset(self, user, abteilung):
         """
-        Assert that the choices for the 'abteilung' field are restricted to
-        those of the current user.
+        Assert that the queryset for the 'abteilung' field is restricted to the
+        current user.
         """
         form = _forms.NachweisSearchForm(user=user)
         assert list(form.fields["abteilung"].queryset) == [abteilung]
+
+    @pytest.mark.usefixtures("not_user_abteilung")
+    def test_eingereicht_choices(self, user, empty_choice):
+        """
+        Assert that the choices for the 'eingereicht_bei' field are as expected.
+        """
+        NachweisFactory(user=user, eingereicht_bei="Alice")
+        # create another object with the same value for eingereicht_bei to
+        # assert that duplicate values are not included:
+        NachweisFactory(user=user, eingereicht_bei="Bob")
+        form = _forms.NachweisSearchForm(user=user)
+        assert list(form.fields["eingereicht_bei"].choices) == [
+            empty_choice,
+            ("Alice", "Alice"),
+            ("Bob", "Bob"),
+        ]
+
+    @pytest.mark.usefixtures("not_user_abteilung")
+    def test_jahr_choices(self, user, datum_start, empty_choice):
+        """
+        Assert that the choices for the 'jahr' field are as expected.
+        """
+        NachweisFactory(user=user, datum_start=datum_start - timedelta(days=366))
+        # create another object with the same value for jahr to
+        # assert that we do not show duplicate values:
+        NachweisFactory(user=user, datum_start=datum_start)
+        form = _forms.NachweisSearchForm(user=user)
+        assert list(form.fields["jahr"].choices) == [
+            empty_choice,
+            (datum_start.year - 1, datum_start.year - 1),
+            (datum_start.year, datum_start.year),
+        ]
 
     @pytest.fixture
     def form_data(self, test_case, result):

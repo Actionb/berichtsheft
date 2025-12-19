@@ -238,14 +238,20 @@ class NachweisSearchForm(SearchForm):
     def __init__(self, *, user, **kwargs):
         super().__init__(**kwargs)
         eingereicht_choices = [("", "---------")]
-        for name in sorted(set(_models.Nachweis.objects.filter(user=user).values_list("eingereicht_bei", flat=True))):
+        for name in (
+            _models.Nachweis.objects.filter(user=user)
+            .values_list("eingereicht_bei", flat=True)
+            .order_by("eingereicht_bei")
+            .distinct()
+        ):
             if name:
                 eingereicht_choices.append((name, name))
         self.fields["eingereicht_bei"].choices = eingereicht_choices
         self.fields["abteilung"].queryset = self.fields["abteilung"].queryset.filter(user=user)
         self.fields["jahr"].choices = [("", "---------")] + [
             (jahr, jahr)
-            for jahr in sorted(
-                set(_models.Nachweis.objects.filter(user=user).values_list("datum_start__year", flat=True))
-            )
+            for jahr in _models.Nachweis.objects.filter(user=user)
+            .values_list("datum_start__year", flat=True)
+            .order_by("datum_start__year")
+            .distinct()
         ]

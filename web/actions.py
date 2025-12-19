@@ -20,11 +20,10 @@ class ListAction:
     list view - like 'edit this' or 'delete this'.
 
     These actions must be registered with the list view using its 'actions'
-    attribute. The items in 'actions' must be ListAction instances with an url
-    and a label:
+    attribute. The items in 'actions' must be ListAction instances with a label:
 
-    class MyListView(ChangelistView):
-        actions = [ListAction(url_name="nachweis_change", label="Bearbeiten")]
+        class MyListView(ChangelistView):
+            actions = [ListAction(label="Bearbeiten")]
 
     The view then passes these actions to the template, which uses the render
     action template tag to render the button/link for each item in the list
@@ -39,10 +38,7 @@ class ListAction:
     label: str = ""
     css: str = "btn btn-primary btn-sm w-100"
 
-    def __init__(self, url_name: str = "", label: str = "", css: str = "", title: str = ""):
-        self.url_name = url_name or self.url_name
-        if not self.url_name:  # pragma: no cover
-            raise TypeError("ListAction requires 'url_name'")
+    def __init__(self, label: str = "", css: str = "", title: str = ""):
         self.label = label or self.label
         self.css = css or self.css
         self.title = title or self.title
@@ -58,6 +54,36 @@ class ListAction:
         Custom actions should overwrite this.
         """
         return True
+
+    def render(self, request: HttpRequest, row: OrderedDict) -> SafeString:
+        """Render the action button for the given result row."""
+        if not self.has_permission(request, row):
+            return ""
+        return format_html(
+            '<button type="button" class="{css}" title="{title}">{label}</button>',
+            css=self.css,
+            title=self.get_title(row),
+            label=self.label,
+        )
+
+
+class LinkAction(ListAction):
+    """
+    A list view action that renders a link.
+
+    Instantiate with an url_name and a label:
+
+        class MyListView(ChangelistView):
+            actions = [LinkAction(url_name="nachweis_change", label="Bearbeiten")]
+    """
+
+    url_name: str = ""
+
+    def __init__(self, url_name: str = "", *args, **kwargs):
+        self.url_name = url_name or self.url_name
+        if not self.url_name:  # pragma: no cover
+            raise TypeError("LinkAction requires 'url_name'")
+        super().__init__(*args, **kwargs)
 
     def get_url(self, request: HttpRequest, row: OrderedDict) -> str:
         """Return the URL for the action on the given result row."""
@@ -76,7 +102,7 @@ class ListAction:
         )
 
 
-class ModelAction(ListAction):
+class ModelAction(LinkAction):
     """A list view action that acts on a model object."""
 
     pk_url_kwarg: str = "pk"
@@ -90,14 +116,14 @@ class ModelAction(ListAction):
         return reverse(self.url_name, kwargs={self.pk_url_kwarg: row["obj"].pk})
 
 
-class ChangePermAction(ModelAction):
-    """An action that checks if the user has 'change' permissions."""
+class ChangePermActionMixin:
+    """An action mixin that checks if the user has 'change' permissions."""
 
     def has_permission(self, request: HttpRequest, row: OrderedDict) -> bool:
         return perms.has_change_permission(request.user, row["obj"]._meta)
 
 
-class EditAction(ChangePermAction):
+class EditAction(ChangePermActionMixin, ModelAction):
     """A generic 'edit' action."""
 
     label = "Bearbeiten"
@@ -106,7 +132,7 @@ class EditAction(ChangePermAction):
         return f"{row['obj']._meta.verbose_name} bearbeiten"
 
 
-class NachweisPrintAction(ChangePermAction):
+class NachweisPrintAction(ChangePermActionMixin, ModelAction):
     """The action for the print view of Nachweis objects."""
 
     url_name = "nachweis_print"
@@ -116,7 +142,7 @@ class NachweisPrintAction(ChangePermAction):
         return f"Druckansicht für diesen {row['obj']._meta.verbose_name} anzeigen"
 
 
-class AddMissingAction(ListAction):
+class AddMissingAction(LinkAction):
     """
     A link that sends the user to the Nachweis add page from the
     'missing Nachweise' page.

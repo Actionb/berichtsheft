@@ -234,7 +234,7 @@ class TestChangelistView:
     @pytest.fixture
     def print_action(self):
         """A simple action for the test view."""
-        return _actions.ListAction(url_name="/print/", label="Ausdrucken", css="foo bar")
+        return _actions.ListAction(label="Ausdrucken", css="foo bar")
 
     @pytest.fixture
     def view_class(self, model, list_display, zeitraum_callable, print_action):

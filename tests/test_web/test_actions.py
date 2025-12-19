@@ -30,10 +30,10 @@ pytestmark = pytest.mark.urls(__name__)
 class TestListAction:
     def test_render(self, rf):
         """Assert the action link/button is rendered as expected."""
-        action = actions.ListAction(url_name="list_action_test", label="Action Test", title="bar", css="foo")
+        action = actions.ListAction(label="Action Test", title="bar", css="foo")
         assert (
             action.render(request=rf.get("/"), row={})
-            == '<a href="/test/list/action" class="foo" title="bar">Action Test</a>'
+            == '<button type="button" class="foo" title="bar">Action Test</button>'
         )
 
     def test_render_empty_string_if_missing_perms(self, rf):
@@ -41,7 +41,7 @@ class TestListAction:
         Assert that render returns an empty string if has_permission returns
         False.
         """
-        action = actions.ListAction(url_name="list_action_test")
+        action = actions.ListAction()
         with mock.patch.object(action, "has_permission", new=mock.Mock(return_value=False)):
             assert action.render(request=rf.get("/"), row={}) == ""
 
@@ -62,25 +62,31 @@ class TestChangePermAction:
     def obj(self):
         return NachweisDummyFactory(pk=42)
 
+    @pytest.fixture
+    def action_class(self):
+        return type("PermAction", (actions.ChangePermActionMixin, actions.ModelAction), {})
+
+    @pytest.fixture
+    def action(self, action_class):
+        return action_class(url_name="change_perm_action_test", label="Action Test")
+
     @pytest.mark.parametrize("user_perms", [[("change", NachweisDummy)]])
     @pytest.mark.usefixtures("user_perms", "set_user_perms")
-    def test_render_change_permission(self, get_user_req, obj):
+    def test_render_change_permission(self, action, get_user_req, obj):
         """
         Assert that the action button is rendered normally if the user has
         change permissions.
         """
-        action = actions.ChangePermAction(url_name="change_perm_action_test", label="Action Test")
         assert (
             action.render(request=get_user_req, row={"obj": obj})
             == f'<a href="/test/42/change" class="{action.css}" title="">Action Test</a>'
         )
 
-    def test_render_no_change_permission(self, get_user_req, obj):
+    def test_render_no_change_permission(self, action, get_user_req, obj):
         """
         Assert that the action button is rendered as an empty string if the
         user does not have change permissions.
         """
-        action = actions.ChangePermAction(url_name="change_perm_action_test", label="Action Test")
         assert action.render(request=get_user_req, row={"obj": obj}) == ""
 
 

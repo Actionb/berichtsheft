@@ -170,3 +170,11 @@ class AddMisingDashboardAction(AddMissingAction):
 
     label = mark_safe('<i class="bi bi-file-earmark-plus"></i>')
     css = "btn btn-outline-success ms-3"
+
+
+class FinishNachweisAction(ChangePermActionMixin, ListAction):
+    """The action finish or complete a Nachweis object."""
+
+    label = mark_safe('<i class="bi bi-check-circle"></i>')
+    title = "Nachweis abschließen"
+    css = "btn btn-outline-success btn-sm w-100 finish-btn"

@@ -1,0 +1,72 @@
+{% extends "changelist.html" %}
+{% load static list actions django_bootstrap5 %}
+{% block extrahead %}
+    <script src="{% static 'web/js/finish.js' %}"></script>
+{% endblock extrahead %}
+{% block result_table_results %}
+    {% for row in result_rows %}
+        <tr>
+            {% for k,v in row.items %}
+                {% if k in list_display %}
+                    <td class="td-{% colname list_display forloop.counter0 %}{% colclasses col_classes list_display forloop.counter0 %}">{{ v }}</td>
+                {% endif %}
+            {% endfor %}
+            {% if actions %}
+                <td>
+                    <div class="d-grid gap-2">
+                        {% for action in actions %}
+                            {% render_action action request row %}
+                        {% endfor %}
+                    </div>
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    {% block finish_modal %}
+                <div class="modal fade"
+                 id="finishModal"
+                 tabindex="-1"
+                 aria-labelledby="finishModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="finishModalLabel"></h5>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="row_id" value="{{ row.obj.pk }}">
+                            {% if not row.obj.eingereicht_bei %}
+                                <form method="post" class="mb-3">
+                                    {% csrf_token %}
+                                    <p>Bitte wählen Sie aus, bei wem der Nachweis eingereicht wurde:</p>
+                                    <select class="form-select"
+                                            aria-label="Eingereicht bei"
+                                            name="eingereicht_bei">
+                                        {% for choice in eingereicht_choices %}<option value="{{ choice.0 }}">{{ choice.1 }}</option>{% endfor %}
+                                    </select>
+                                    <hr>
+                                    <p>Oder neuen Wert eingeben:</p>
+                                    <input type="text"
+                                           class="form-control"
+                                           aria-label="Neuer Wert"
+                                           name="eingereicht_bei">
+                                </form>
+                            {% endif %}
+                            <p>Sind Sie sicher, dass Sie diesen Nachweis abschließen möchten?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <button type="button"
+                                    class="btn btn-primary confirm-finish-btn"
+                                    id="confirmFinish"
+                                    data-finish-url="{% url 'finish_nachweis' %}">Bestätigen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    {% endblock finish_modal %}
+{% endblock result_table_results %}

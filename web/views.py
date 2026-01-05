@@ -413,6 +413,7 @@ class NachweisListView(ChangelistView):
     actions = [actions.NachweisPrintAction(), actions.FinishNachweisAction()]
     mainclass = "container-fluid px-5"
     search_form_class = _forms.NachweisSearchForm
+    template_name = "nachweis_list.html"
 
     def get_column_classes(self):
         return {
@@ -446,6 +447,20 @@ class NachweisListView(ChangelistView):
         if self.request.GET.get("unsigned"):
             qs = qs.filter(unterschrieben=False)
         return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        eingereicht_choices = [("", "---------")]
+        for name in (
+            _models.Nachweis.objects.filter(user=self.request.user)
+            .values_list("eingereicht_bei", flat=True)
+            .order_by("eingereicht_bei")
+            .distinct()
+        ):
+            if name:
+                eingereicht_choices.append((name, name))
+        ctx["eingereicht_choices"] = eingereicht_choices
+        return ctx
 
 
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):

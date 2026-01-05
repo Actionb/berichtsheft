@@ -50,3 +50,4 @@
 - [ ] add a "finish this Nachweis" action that sets "fertig" and "unterschrieben" to True
   - [ ] might need a dialog (maybe a modal?) where the user can enter the "eingereicht_bei" 
 - [ ] combine "fertig", "eingereicht_bei", "unterschrieben" into one field "status"
+- [ ] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year

@@ -48,6 +48,7 @@ urlpatterns = [
     path("<str:model_name>/<int:pk>/hard_delete/", _views.HardDeleteView.as_view(), name="hard_delete"),
     path("trash/empty/", _views.empty_trash, name="empty_trash"),
     path("missing/", _views.MissingView.as_view(), name="missing"),
+    path("nachweis/finish/", _views.finish_nachweis_view, name="finish_nachweis"),
     path("", _views.DashboardView.as_view(), name="home"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
@@ -1279,3 +1280,40 @@ class TestMissingView:
         response = client.get(reverse("missing"))
         assert response.status_code == 302
         assert urlparse(response.url).path == reverse("login")
+
+
+class TestFinishNachweisView:
+    @pytest.fixture
+    def obj(self, user):
+        return NachweisFactory(user=user)
+
+    @pytest.fixture
+    def url(self, obj):
+        return reverse("finish_nachweis")
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user")
+    def test_updates_nachweis(self, client, url, obj):
+        """Assert that the finish nachweis view updates the Nachweis object."""
+        response = client.post(url, data={"eingereicht_bei": "Foo Bar", "pk": obj.pk})
+        assert response.status_code == 200
+        obj.refresh_from_db()
+        assert obj.fertig
+        assert obj.unterschrieben
+        assert obj.eingereicht_bei == "Foo Bar"
+
+    def test_requires_authentication(self, client, url):
+        """Assert that authentication is required to use the finish nachweis view."""
+        assert client.post(url).status_code == 403
+
+    @pytest.mark.django_db
+    @pytest.mark.usefixtures("login_user")
+    def test_requires_post(self, client, url, obj):
+        """Assert that the view requires a POST request."""
+        assert client.get(url).status_code == 405
+        assert client.post(url, data={"pk": obj.pk}).status_code == 200
+
+    @pytest.mark.usefixtures("login_user")
+    def test_returns_404_when_object_does_not_exist(self, client, url):
+        """Assert that the view returns a 404 error when the object does not exist."""
+        assert client.post(url, data={"pk": 0}).status_code == 404

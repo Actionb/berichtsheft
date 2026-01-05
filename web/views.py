@@ -9,7 +9,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
@@ -551,6 +551,18 @@ class MissingView(LoginRequiredMixin, BaseListView):
         ctx = super().get_context_data(**kwargs)
         ctx["is_daily"] = self.request.user.profile.interval == _models.UserProfile.IntervalType.DAILY
         return ctx
+
+
+@require_POST
+def finish_nachweis_view(request):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+    nachweis = get_object_or_404(_models.Nachweis, pk=request.POST.get("pk"), user=request.user)
+    if request.POST.get("eingereicht_bei"):
+        nachweis.eingereicht_bei = request.POST["eingereicht_bei"]
+    nachweis.fertig = nachweis.unterschrieben = True
+    nachweis.save()
+    return JsonResponse({"eingereicht_bei": nachweis.eingereicht_bei})
 
 
 ################################################################################

@@ -38,10 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         "X-Requested-With": "XMLHttpRequest",
                         "X-CSRFToken": getCookie("csrftoken")
                     },
-                    body: new URLSearchParams({ eingereicht_bei: eingereichtBei })
+                    body: new URLSearchParams({ eingereicht_bei: eingereichtBei, pk: modalBody.querySelector("input[name='row_id']").value })
                 })
                     .then(response => {
-                        // TODO: take the value for "eingereicht_bei" from the response and insert it into the table
                         if (response.ok) {
                             response.json().then(data => {
                                 // Update the table:

@@ -178,3 +178,14 @@ class FinishNachweisAction(ChangePermActionMixin, ListAction):
     label = mark_safe('<i class="bi bi-check-circle"></i>')
     title = "Nachweis abschließen"
     css = "btn btn-outline-success btn-sm w-100 finish-btn"
+
+    def render(self, request: HttpRequest, row: OrderedDict) -> SafeString:
+        """Render the action button for the given result row."""
+        if not self.has_permission(request, row):
+            return ""
+        return format_html(
+            '<button type="button" class="{css}" title="{title}" data-bs-toggle="modal" data-bs-target="#finishModal">{label}</button>',
+            css=self.css,
+            title=self.get_title(row),
+            label=self.label,
+        )

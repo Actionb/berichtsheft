@@ -29,14 +29,14 @@ function getFinishButton(pk) {
 /*
  * Return the results row for a specific Nachweis object id that is being marked as finished.
  */
-function getFinishRow(pk){
+function getFinishRow(pk) {
     return getFinishButton(pk).closest("tr");
 }
 
 /*
  * Return the URL for the "finish" action endpoint.
  */
-function getFinishUrl(){
+function getFinishUrl() {
     return document.getElementById("confirmFinish").dataset.finishUrl
 }
 
@@ -64,62 +64,48 @@ function confirmFinish(pk, eingereichtBei) {
                         row.querySelector(".td-eingereicht_bei").textContent = data.eingereicht_bei;
                     }
                 });
+            } else {
+                console.log(`Error marking Nachweis ${pk} as finished: ${response.statusText}`);
             }
         });
 
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Fill the modal with the data for the specific row
+    // The modal contains fields for setting the "eingereicht_bei" value
     const modal = document.getElementById("finishModal");
     const modalBody = modal.querySelector(".modal-body");
-    if (modal) {
-        // Pass the row's object id to the modal:
-        modal.addEventListener("show.bs.modal", (event) => {
-            const button = event.relatedTarget;  // the "finish" list action button that triggered the modal
-            if (button) {
-                const pk = button.dataset.objId;
-                const eingereichtBei = getFinishRow(pk).querySelector(".td-eingereicht_bei").textContent;
-                if (eingereichtBei){
-                    // The Nachweis already has a value for "eingereicht_bei" - 
-                    // skip the modal and just update the boolean fields.
-                    event.preventDefault();
-                    confirmFinish(pk, eingereichtBei);
-                } else {
-                    // Prepare the modal by passing in the object's ID.
-                    modalBody.querySelector("input[name='obj_id']").value = pk;
-                }
-            }
-        });
 
-        // Handle the "finish" confirmation.
-        const confirmButton = document.getElementById("confirmFinish")
-        confirmButton.addEventListener("click", () => {
-            const input = modalBody.querySelector("input[name='eingereicht_bei']");
-            const select = modalBody.querySelector("select[name='eingereicht_bei']");
-            if (input && select) {
-                const eingereichtBei = input.value || select.value;
-                const pk = modalBody.querySelector("input[name='obj_id']").value
-                if (pk) {
-                    confirmFinish(pk, eingereichtBei);
-                    bootstrap.Modal.getInstance(modal).hide();
+    // Do not show the modal if the Nachweis already has a value for "eingereicht_bei"
+    modal.addEventListener("show.bs.modal", (event) => {
+        modal.pk = event.relatedTarget.dataset.objId;  // event.relatedTarget is the list action button that was pressed
+        const eingereichtBei = getFinishRow(modal.pk).querySelector(".td-eingereicht_bei").textContent;
+        if (eingereichtBei) {
+            event.preventDefault();
+            confirmFinish(modal.pk, eingereichtBei);
+        }
+    });
 
-                    // Add a success message
-                    const messageContainer = document.querySelector("#messages-container");
-                    if (messageContainer) {
-                        messageContainer.insertAdjacentHTML(
-                            "beforeend",
-                            `<div class="alert alert-dismissible alert-success" role="alert">
-                                Nachweis erfolgreich abgeschlossen.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`
-                        );
-                    }
-                } else {
-                    // TODO: add an error message that the object id is missing
-                    return;
-                }
+    // Handle modal confirmation.
+    document.getElementById("confirmFinish").addEventListener("click", () => {
+        const input = modalBody.querySelector("input[name='eingereicht_bei']");
+        const select = modalBody.querySelector("select[name='eingereicht_bei']");
+        if (modal.pk) {
+            confirmFinish(modal.pk, input.value || select.value);
+            bootstrap.Modal.getInstance(modal).hide();
+
+            // Add a success message
+            const messageContainer = document.querySelector("#messages-container");
+            if (messageContainer) {
+                messageContainer.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="alert alert-dismissible alert-success" role="alert">
+                        Nachweis erfolgreich abgeschlossen.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                );
             }
-        });
-    }
+        }
+    });
+
 })

@@ -1,5 +1,8 @@
 // Mark a Nachweis object as finished/completed.
 
+/*
+ * Return the CSRF token.
+ */
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -16,61 +19,107 @@ function getCookie(name) {
     return cookieValue;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const confirmButtons = document.querySelectorAll(".confirm-finish-btn");
-    confirmButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            // Handle the finish action for the specific row
-            const url = this.dataset.finishUrl;
-            const modalBody = button.closest(".modal-content").querySelector(".modal-body");
-            const form = modalBody.querySelector("form");
-            
-            const input = modalBody.querySelector("input[name='eingereicht_bei']");
-            const select = modalBody.querySelector("select[name='eingereicht_bei']");
-            let eingereichtBei = "";
-            if (input && select) {
-                eingereichtBei = input.value || select.value;
-            }
-            if (url) {
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        "X-CSRFToken": getCookie("csrftoken")
-                    },
-                    body: new URLSearchParams({ eingereicht_bei: eingereichtBei, pk: modalBody.querySelector("input[name='row_id']").value })
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            response.json().then(data => {
-                                // Update the table:
-                                const row = button.closest("tr");
-                                row.querySelector(".td-eingereicht_bei").textContent = data.eingereicht_bei;
-                                row.querySelector(".td-finish").textContent = "Fertiggestellt";
-                                row.querySelector(".td-unterschrieben").textContent = "Ja";
+/*
+ * Return the "finish" list action button for a specific Nachweis object id.
+ */
+function getFinishButton(pk) {
+    return document.querySelector(`button.finish-btn[data-obj-id="${pk}"]`);
+}
 
-                                // Close the modal
-                                const modal = button.closest(".modal");
-                                if (modal) {
-                                    const modalInstance = bootstrap.Modal.getInstance(modal);
-                                    modalInstance.hide();
-                                }
+/*
+ * Return the results row for a specific Nachweis object id that is being marked as finished.
+ */
+function getFinishRow(pk){
+    return getFinishButton(pk).closest("tr");
+}
 
-                                // Add a success message
-                                const messageContainer = document.querySelector("#messages-container");
-                                if (messageContainer) {
-                                    messageContainer.insertAdjacentHTML("beforeend", `<div class="alert alert-dismissible alert-success" role="alert">
-                            Nachweis erfolgreich abgeschlossen.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>`);
-                                }
+/*
+ * Return the URL for the "finish" action endpoint.
+ */
+function getFinishUrl(){
+    return document.getElementById("confirmFinish").dataset.finishUrl
+}
 
-                            });
-                        } else {
-                            // Handle error
-                        }
-                    });
+/*
+ * Send a request to the server to mark the Nachweis with the given id as finished.
+ */
+function confirmFinish(pk, eingereichtBei) {
+    fetch(getFinishUrl(), {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({ pk: pk, eingereicht_bei: eingereichtBei })
+    })
+        .then(response => {
+            if (response.ok) {
+                response.json().then(data => {
+                    // Update the results table:
+                    const row = getFinishRow(pk);
+                    if (row) {
+                        const checkmark = '<i class="bi bi-check-circle fs-4 text-success"></i>';
+                        row.querySelector(".td-fertig").innerHTML = checkmark;
+                        row.querySelector(".td-unterschrieben").innerHTML = checkmark;
+                        row.querySelector(".td-eingereicht_bei").textContent = data.eingereicht_bei;
+                    }
+                });
             }
         });
-    });
+
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Fill the modal with the data for the specific row
+    const modal = document.getElementById("finishModal");
+    const modalBody = modal.querySelector(".modal-body");
+    if (modal) {
+        // Pass the row's object id to the modal:
+        modal.addEventListener("show.bs.modal", (event) => {
+            const button = event.relatedTarget;  // the "finish" list action button that triggered the modal
+            if (button) {
+                const pk = button.dataset.objId;
+                const eingereichtBei = getFinishRow(pk).querySelector(".td-eingereicht_bei").textContent;
+                if (eingereichtBei){
+                    // The Nachweis already has a value for "eingereicht_bei" - 
+                    // skip the modal and just update the boolean fields.
+                    event.preventDefault();
+                    confirmFinish(pk, eingereichtBei);
+                } else {
+                    // Prepare the modal by passing in the object's ID.
+                    modalBody.querySelector("input[name='obj_id']").value = pk;
+                }
+            }
+        });
+
+        // Handle the "finish" confirmation.
+        const confirmButton = document.getElementById("confirmFinish")
+        confirmButton.addEventListener("click", () => {
+            const input = modalBody.querySelector("input[name='eingereicht_bei']");
+            const select = modalBody.querySelector("select[name='eingereicht_bei']");
+            if (input && select) {
+                const eingereichtBei = input.value || select.value;
+                const pk = modalBody.querySelector("input[name='obj_id']").value
+                if (pk) {
+                    confirmFinish(pk, eingereichtBei);
+                    bootstrap.Modal.getInstance(modal).hide();
+
+                    // Add a success message
+                    const messageContainer = document.querySelector("#messages-container");
+                    if (messageContainer) {
+                        messageContainer.insertAdjacentHTML(
+                            "beforeend",
+                            `<div class="alert alert-dismissible alert-success" role="alert">
+                                Nachweis erfolgreich abgeschlossen.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+                        );
+                    }
+                } else {
+                    // TODO: add an error message that the object id is missing
+                    return;
+                }
+            }
+        });
+    }
 })

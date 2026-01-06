@@ -47,7 +47,9 @@
 - [x] add a utility function/template tag that creates useful initial data for a Nachweis object from a given date
 - [ ] allow users to ignore "Missing Nachweis" warnings per missing Nachweis
 - [x] disable "validated" styles on forms (especially search form)
-- [ ] add a "finish this Nachweis" action that sets "fertig" and "unterschrieben" to True
-  - [ ] might need a dialog (maybe a modal?) where the user can enter the "eingereicht_bei" 
+- [x] add a "finish this Nachweis" action that sets "fertig" and "unterschrieben" to True
+  - [x] might need a dialog (maybe a modal?) where the user can enter the "eingereicht_bei"
 - [ ] combine "fertig", "eingereicht_bei", "unterschrieben" into one field "status"
 - [ ] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year
+- [ ] FIXME: Search form field "abteilung" has no choices
+- [ ] FIXME: filter buttons on changelist should not preserve "page" query parameter

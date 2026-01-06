@@ -38,7 +38,6 @@
                                 aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" name="obj_id">
                         <form method="post" class="eingereicht-form mb-3">
                             {% csrf_token %}
                             <p>Bitte wählen Sie aus, bei wem der Nachweis eingereicht wurde:</p>
@@ -48,13 +47,12 @@
                                 {% for choice in eingereicht_choices %}<option value="{{ choice.0 }}">{{ choice.1 }}</option>{% endfor %}
                             </select>
                             <hr>
-                            <p>Oder neuen Wert eingeben:</p>
+                            <p>Oder einen neuen Namen eingeben:</p>
                             <input type="text"
                                    class="form-control"
                                    aria-label="Neuer Wert"
                                    name="eingereicht_bei">
                         </form>
-                        <p>Sind Sie sicher, dass Sie diesen Nachweis abschließen möchten?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>

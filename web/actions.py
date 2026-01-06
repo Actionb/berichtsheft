@@ -184,8 +184,9 @@ class FinishNachweisAction(ChangePermActionMixin, ListAction):
         if not self.has_permission(request, row):
             return ""
         return format_html(
-            '<button type="button" class="{css}" title="{title}" data-bs-toggle="modal" data-bs-target="#finishModal">{label}</button>',
+            '<button type="button" class="{css}" title="{title}" data-bs-toggle="modal" data-bs-target="#finishModal" data-obj-id="{pk}">{label}</button>',
             css=self.css,
             title=self.get_title(row),
             label=self.label,
+            pk=row["obj"].pk,
         )

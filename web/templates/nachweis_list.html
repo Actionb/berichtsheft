@@ -1,9 +1,55 @@
 {% extends "changelist.html" %}
-{% load static list actions django_bootstrap5 %}
+{% load static list actions django_bootstrap5 querystring %}
 {% block extrahead %}
     {{ block.super }}
     <script src="{% static 'web/js/finish.js' %}"></script>
 {% endblock extrahead %}
+{% block quick_search_fields %}
+    <div class="d-flex justify-content-between">
+        <div class="d-flex gap-3 align-items-center w-100">
+            <div class="form-floating">
+                <input type="text"
+                       name="q2"
+                       class="form-control"
+                       style="min-width: 400px"
+                       placeholder=""
+                       id="id_q2"
+                       value="{{ request.GET.q2|default:'' }}">
+                <label for="id_q2">🔍 Textsuche</label>
+            </div>
+            <div class="form-floating">
+                <input type="date"
+                       name="datum2"
+                       class="form-control"
+                       placeholder="Datum"
+                       id="id_datum2"
+                       value="{{ request.GET.datum2|default:'' }}">
+                <label for="id_datum2">Datum</label>
+            </div>
+        </div>
+        <div class="d-flex gap-3 align-items-center w-100 justify-content-end">
+            <span>Nachweise nach Status filtern:</span>
+            <div>
+                <a href="{% nachweis_status request 'unfinished' %}"
+                   class="btn btn-outline-primary {% if request.GET.unfinished %}active{% endif %}"
+                   title="Nur Nachweise anzeigen, die noch nicht fertig geschrieben sind">nicht fertig</a>
+                <input type="hidden" name="unfinished" value="{{ request.GET.unfinished }}" >
+            </div>
+            <div>
+                <a href="{% nachweis_status request 'unsubmitted' %}"
+                   class="btn btn-outline-primary {% if request.GET.unsubmitted %}active{% endif %}"
+                   title="Nur Nachweise anzeigen, die noch nicht eingereicht wurden">nicht eingereicht</a>
+                <input type="hidden" name="unsubmitted" value="{{ request.GET.unsubmitted }}" >
+            </div>
+            <div>
+                <a href="{% nachweis_status request 'unsigned' %}"
+                   class="btn btn-outline-primary {% if request.GET.unsigned %}active{% endif %}"
+                   title="Nur Nachweise anzeigen, die noch nicht unterschrieben wurden">nicht unterschrieben</a>
+                <input type="hidden" name="unsigned" value="{{ request.GET.unsigned }}" >
+            </div>
+        </div>
+    </div>
+{% endblock quick_search_fields %}
 {% block result_table_results %}
     {% for row in result_rows %}
         <tr>

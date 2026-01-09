@@ -11,6 +11,7 @@
     {% block searchform %}
         {% if search_form %}
             <form method="get" class="search-form">
+                {% block quick_search_fields %}
                 <div class="d-flex justify-content-between">
                     <div class="d-flex gap-3 align-items-center w-100">
                         <div class="form-floating">
@@ -23,35 +24,10 @@
                                    value="{{ request.GET.q2|default:'' }}">
                             <label for="id_q2">🔍 Textsuche</label>
                         </div>
-                        <div class="form-floating">
-                            <input type="date"
-                                   name="datum2"
-                                   class="form-control"
-                                   placeholder="Datum"
-                                   id="id_datum2"
-                                   value="{{ request.GET.datum2|default:'' }}">
-                            <label for="id_datum2">Datum</label>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-3 align-items-center w-100 justify-content-end">
-                        <span>Nachweise nach Status filtern:</span>
-                        <div>
-                            <a href="{% if request.GET.unfinished %}{% remove_qs request 'unfinished' %}{% else %}{% add_qs request 'unfinished' 1 %}{% endif %}"
-                               class="btn btn-outline-primary {% if request.GET.unfinished %}active{% endif %}"
-                               title="Nur Nachweise anzeigen, die noch nicht fertig geschrieben sind">nicht fertig</a>
-                        </div>
-                        <div>
-                            <a href="{% if request.GET.unsubmitted %}{% remove_qs request 'unsubmitted' %}{% else %}{% add_qs request 'unsubmitted' 1 %}{% endif %}"
-                               class="btn btn-outline-primary {% if request.GET.unsubmitted %}active{% endif %}"
-                               title="Nur Nachweise anzeigen, die noch nicht eingereicht wurden">nicht eingereicht</a>
-                        </div>
-                        <div>
-                            <a href="{% if request.GET.unsigned %}{% remove_qs request 'unsigned' %}{% else %}{% add_qs request 'unsigned' 1 %}{% endif %}"
-                               class="btn btn-outline-primary {% if request.GET.unsigned %}active{% endif %}"
-                               title="Nur Nachweise anzeigen, die noch nicht unterschrieben wurden">nicht unterschrieben</a>
-                        </div>
                     </div>
                 </div>
+                {% endblock quick_search_fields %}
+                {% block detail_search_fields %}
                 <div class="offcanvas offcanvas-start"
                      tabindex="-1"
                      id="search-form-offcanvas"
@@ -87,6 +63,7 @@
                        class="btn btn-outline-secondary"
                        title="Suchfilter zurücksetzen">Suchfilter zurücksetzen</a>
                 </div>
+                {% endblock detail_search_fields %}
             </form>
         {% endif %}
     {% endblock searchform %}

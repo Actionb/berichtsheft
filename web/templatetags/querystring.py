@@ -29,3 +29,13 @@ def add_qs(request: HttpRequest, name: str, value: Any) -> str:
 def remove_qs(request: HttpRequest, name: str) -> str:
     """Remove a parameter from the query string of the current request."""
     return _get_querystring(request, remove=[name])
+
+
+@register.simple_tag
+def nachweis_status(request: HttpRequest, status: str) -> str:
+    """Toggle a 'status' filter for the Nachweis list."""
+    if status in request.GET:
+        return _get_querystring(request, remove=[status])
+    else:
+        # Remove 'page' parameter when adding a filter
+        return _get_querystring(request, add={status: "1"}, remove=["page"])

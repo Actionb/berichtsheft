@@ -807,6 +807,18 @@ class TestNachweisListView:
         assert obj in object_list
         assert other_obj in object_list
 
+    def test_zeitraum_date_localized(self):
+        """
+        Assert that the dates produced by the 'zeitraum' list callable are
+        localized.
+        """
+        view = _views.NachweisListView()
+        obj = NachweisFactory(datum_start=date(2026, 1, 5), datum_ende=date(2026, 1, 9))
+        assert (
+            view.zeitraum(obj)
+            == '<span class="text-nowrap">05. Januar 2026</span> <br> <span class="text-nowrap">09. Januar 2026</span>'
+        )
+
 
 class TestUserProfileView:
     @pytest.fixture

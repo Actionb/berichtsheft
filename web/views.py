@@ -427,7 +427,7 @@ class NachweisListView(ChangelistView):
 
     @list_display_callable()
     def zeitraum(self, obj):
-        dates = list(map(lambda d: d.strftime("%d. %B %Y"), [obj.datum_start, obj.datum_ende]))
+        dates = list(map(lambda d: date_format(d, "d. F Y"), [obj.datum_start, obj.datum_ende]))
         return format_html('<span class="text-nowrap">{}</span> <br> <span class="text-nowrap">{}</span>', *dates)
 
     @list_display_callable(label="Betriebliche Tätigkeiten")

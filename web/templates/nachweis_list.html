@@ -1,6 +1,7 @@
 {% extends "changelist.html" %}
 {% load static list actions django_bootstrap5 %}
 {% block extrahead %}
+    {{ block.super }}
     <script src="{% static 'web/js/finish.js' %}"></script>
 {% endblock extrahead %}
 {% block result_table_results %}

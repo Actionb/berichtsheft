@@ -51,5 +51,5 @@
   - [x] might need a dialog (maybe a modal?) where the user can enter the "eingereicht_bei"
 - [ ] combine "fertig", "eingereicht_bei", "unterschrieben" into one field "status"
 - [x] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year
-- [ ] FIXME: Search form field "abteilung" has no choices
+- [x] FIXME: Search form field "abteilung" has no choices
 - [ ] FIXME: filter buttons on changelist should not preserve "page" query parameter

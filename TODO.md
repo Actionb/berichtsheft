@@ -35,7 +35,7 @@
 - [x] Customize 404 view
 - [ ] allow user to delete their account
 - [ ] auto-delete account after a time of inactivity (6 months?)
-- [ ] support other Nachweis intervals besides weekly (daily, monthly, free)
+- [x] support other Nachweis intervals besides weekly (daily, monthly, free)
 - [x] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
 - [ ] export Nachweis objects to PDF without the browser 
@@ -50,6 +50,6 @@
 - [x] add a "finish this Nachweis" action that sets "fertig" and "unterschrieben" to True
   - [x] might need a dialog (maybe a modal?) where the user can enter the "eingereicht_bei"
 - [ ] combine "fertig", "eingereicht_bei", "unterschrieben" into one field "status"
-- [ ] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year
+- [x] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year
 - [ ] FIXME: Search form field "abteilung" has no choices
 - [ ] FIXME: filter buttons on changelist should not preserve "page" query parameter

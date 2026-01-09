@@ -136,8 +136,8 @@ def initial_data_for_date(user: _models.User, d: date) -> dict:
         case _models.UserProfile.IntervalType.DAILY:
             start = end = d
         case _models.UserProfile.IntervalType.WEEKLY:
-            start = date.fromisocalendar(d.year, d.isocalendar()[1], day=1)
-            end = date.fromisocalendar(d.year, d.isocalendar()[1], day=5)
+            start = d - timedelta(days=d.isocalendar().weekday - 1)
+            end = start + timedelta(days=4)
         case _models.UserProfile.IntervalType.MONTHLY:
             start = d.replace(day=1)
             end = d.replace(day=calendar.monthrange(d.year, d.month)[1])

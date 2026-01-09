@@ -223,7 +223,7 @@ class TestGetMissingNachweise:
         assert utils.get_missing_nachweise(user) == []
 
 
-class TestGetInitial:
+class TestInitialDataForDate:
     @pytest.fixture(
         params=[
             _models.UserProfile.IntervalType.DAILY,
@@ -309,3 +309,23 @@ class TestGetInitial:
         del expected["nummer"]
         del expected["ausbildungswoche"]
         assert utils.initial_data_for_date(user=user, d=test_date) == expected
+
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.WEEKLY])
+    @pytest.mark.parametrize("datum,expected", [("datum_start", date(2025, 12, 29)), ("datum_ende", date(2026, 1, 2))])
+    def test_initial_data_for_date_new_year(self, user, datum, expected):
+        """
+        Assert that the correct data is calculated if the date lies at the end
+        of the year but belongs to the first week of the next year.
+        """
+        initial = utils.initial_data_for_date(user=user, d=date(2025, 12, 31))
+        assert initial[datum] == expected
+
+    @pytest.mark.parametrize("interval", [_models.UserProfile.IntervalType.WEEKLY])
+    @pytest.mark.parametrize("datum,expected", [("datum_start", date(2024, 1, 1)), ("datum_ende", date(2024, 1, 5))])
+    def test_initial_data_common_year(self, user, datum, expected):
+        """
+        Assert that the correct data is calculated for a common year, where the
+        first of January is a Monday.
+        """
+        initial = utils.initial_data_for_date(user=user, d=date(2024, 1, 1))
+        assert initial[datum] == expected

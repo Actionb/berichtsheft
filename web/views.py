@@ -419,6 +419,8 @@ class NachweisListView(ChangelistView):
         return {
             "fertig": "text-center align-middle",
             "unterschrieben": "text-center align-middle",
+            "betrieb": "text-break",
+            "schule": "text-break",
         }
 
     @list_display_callable()

@@ -6,6 +6,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import models
@@ -491,14 +492,13 @@ class AbteilungListView(ChangelistView):
     list_display = ["name"]
 
 
+@login_required
 def print_preview(request):
     """Preview the print layout for a Nachweis object."""
     form = forms.modelform_factory(_models.Nachweis, fields=forms.ALL_FIELDS)(data=request.GET.dict())
     # Validate the form. Without this step, form.instance will be missing data
     # for some fields.
     form.is_valid()
-    # FIXME: this causes a server crash if the user is not logged in (anymore)
-    # -> Use login_required decorator?
     form.instance.user = request.user
     return render(
         request,

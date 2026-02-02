@@ -675,6 +675,11 @@ class TestPrintPreview:
         """Assert that the print_preview object includes the current user."""
         assert preview_object.user == user
 
+    def test_requires_authentication(self, client, preview_url):
+        response = client.get(preview_url)
+        assert response.status_code == 302
+        assert urlparse(response.url).path == reverse("login")
+
 
 class TestSignUpView:
     @pytest.fixture

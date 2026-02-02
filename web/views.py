@@ -470,6 +470,11 @@ class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
     template_name = "print.html"
     permission_required = perms.get_perm("change", _models.Nachweis._meta)
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["zfill_nummer"] = str(self.object.nummer).zfill(3)
+        return ctx
+
 
 class AbteilungEditView(RequireUserMixin, SaveUserMixin, PopupResponseMixin, EditView):
     model = _models.Abteilung
@@ -495,7 +500,11 @@ def print_preview(request):
     # FIXME: this causes a server crash if the user is not logged in (anymore)
     # -> Use login_required decorator?
     form.instance.user = request.user
-    return render(request, template_name="print.html", context={"object": form.instance})
+    return render(
+        request,
+        template_name="print.html",
+        context={"object": form.instance, "zfill_nummer": str(form.instance.nummer).zfill(3)},
+    )
 
 
 def handler403(request, exception=None):

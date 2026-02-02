@@ -492,6 +492,8 @@ def print_preview(request):
     # Validate the form. Without this step, form.instance will be missing data
     # for some fields.
     form.is_valid()
+    # FIXME: this causes a server crash if the user is not logged in (anymore)
+    # -> Use login_required decorator?
     form.instance.user = request.user
     return render(request, template_name="print.html", context={"object": form.instance})
 

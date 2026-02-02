@@ -23,8 +23,6 @@ def dummy_view(*_args, **_kwargs):
 
 
 urlpatterns = [
-    # Test views
-    path("test/print_preview", dummy_view, name="print_preview"),
     # URLs for the views of the 'web' app
     path("nachweis/", _views.NachweisListView.as_view(), name="nachweis_list"),
     path("nachweis/add/", _views.NachweisEditView.as_view(extra_context={"add": True}), name="nachweis_add"),
@@ -49,6 +47,7 @@ urlpatterns = [
     path("trash/empty/", _views.empty_trash, name="empty_trash"),
     path("missing/", _views.MissingView.as_view(), name="missing"),
     path("nachweis/finish/", _views.finish_nachweis_view, name="finish_nachweis"),
+    path("print_preview", _views.print_preview, name="print_preview"),
     path("", _views.DashboardView.as_view(), name="home"),
     # Templates require these for rendering:
     path("login/", dummy_view, name="login"),
@@ -514,7 +513,7 @@ class TestNachweisEditView:
         """Assert that the context data contains the URL for the print preview."""
         with mock_super_method(add_view.get_context_data, {}):
             context = add_view.get_context_data()
-            assert context["preview_url"] == "/test/print_preview"
+            assert context["preview_url"] == "/print_preview"
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -1300,7 +1299,7 @@ class TestFinishNachweisView:
         return NachweisFactory(user=user)
 
     @pytest.fixture
-    def url(self, obj):
+    def url(self):
         return reverse("finish_nachweis")
 
     @pytest.mark.django_db

@@ -34,7 +34,7 @@
 - [x] Add 'view object' button to Papierkorb items
 - [x] Customize 404 view
 - [ ] allow user to delete their account
-- [ ] auto-delete account after a time of inactivity (6 months?)
+- [ ] auto-delete account after a time of inactivity (6 months? -> might need to keep the Nachweise for longer than that?) 
 - [x] support other Nachweis intervals besides weekly (daily, monthly, free)
 - [x] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
@@ -52,4 +52,4 @@
 - [ ] combine "fertig", "eingereicht_bei", "unterschrieben" into one field "status"
 - [x] FIXME: AddMissingAction appends incorrect year to query string when date is at end of year
 - [x] FIXME: Search form field "abteilung" has no choices
-- [ ] FIXME: filter buttons on changelist should not preserve "page" query parameter
+- [x] FIXME: filter buttons on changelist should not preserve "page" query parameter

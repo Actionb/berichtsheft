@@ -190,3 +190,19 @@ class FinishNachweisAction(ChangePermActionMixin, ListAction):
             label=self.label,
             pk=row["obj"].pk,
         )
+
+
+class DownloadNachweisAction(ListAction):
+    def has_permission(self, request: HttpRequest, row: OrderedDict) -> bool:
+        return perms.has_view_permission(request.user, row["obj"]._meta)
+
+    def render(self, request: HttpRequest, row: OrderedDict) -> SafeString:
+        if not self.has_permission(request, row):
+            return ""
+        url = reverse("nachweis_download", kwargs={"pk": row["obj"].pk})
+        return format_html(
+            '<a href="{url}" class="{css}" title="Nachweis herunterladen">{label}</a>',
+            url=url,
+            css="btn btn-outline-primary btn-sm w-100",
+            label=mark_safe('<i class="bi bi-download"></i>'),
+        )

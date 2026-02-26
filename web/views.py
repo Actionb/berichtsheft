@@ -528,7 +528,12 @@ class DashboardView(LoginRequiredMixin, BaseViewMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["current_nachweis"] = get_current_nachweis(self.request.user)
+        current = get_current_nachweis(self.request.user)
+        recent = _models.Nachweis.objects.filter(user=self.request.user).order_by("-datum_start")
+        if current:
+            recent = recent.exclude(pk=current.pk)
+        ctx["current_nachweis"] = current
+        ctx["last_nachweise"] = recent[:3]
         ctx["missing_nachweise"] = [OrderedDict(start=s, end=e) for s, e in get_missing_nachweise(self.request.user)]
         ctx["action"] = actions.AddMisingDashboardAction()
         return ctx

@@ -58,14 +58,22 @@
         <div class="col">
             {% block recent %}
             <div class="last-nachweise border rounded mb-3 p-3">
-                <h2>Letzte Nachweise</h2>
+                <h2>Vorherige Nachweise</h2>
                 {% for nachweis in last_nachweise %}
-                    <div class="row">
-                        <p>{{ nachweis }}</p>
+                    <div class="row mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if request.user.profile.interval == request.user.profile.IntervalType.DAILY %}
+                                <p>{{ nachweis.datum_start|date:"d. F" }}</p>
+                            {% else %}
+                                <p>{{ nachweis.datum_start|date:"d. F" }} - {{ nachweis.datum_ende|date:"d. F" }}</p>
+                            {% endif %}
+                            <a href="{% url 'nachweis_change' nachweis.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Bearbeiten</a>
+                        </div>
                     </div>
                 {% empty %}
                     <p>Du hast noch keine Nachweise erstellt!</p>
                 {% endfor %}
+                <hr>
                 <a href="{% url 'nachweis_list' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Zur Nachweis-Übersicht</a>
             </div>
             {% endblock recent %}

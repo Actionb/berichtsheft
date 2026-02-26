@@ -17,7 +17,11 @@
             <div class="recent-nachweis border rounded mb-3 p-3">
                 <h2>Aktueller Nachweis</h2>
                 {% if current_nachweis %}
-                    <p>{{ current_nachweis }}</p>
+                    {% if request.user.profile.interval == request.user.profile.IntervalType.DAILY %}
+                        <p>{{ current_nachweis.datum_start|date:"d. F" }}</p>
+                    {% else %}
+                        <p>{{ current_nachweis.datum_start|date:"d. F" }} - {{ current_nachweis.datum_ende|date:"d. F" }}</p>
+                    {% endif %}
                     <a href="{% url 'nachweis_change' current_nachweis.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Nachweis bearbeiten</a>
                 {% else %}
                     <p>Du hast für den aktuellen Zeitraum noch keinen Nachweis erstellt!</p>

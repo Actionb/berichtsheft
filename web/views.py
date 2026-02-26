@@ -472,7 +472,7 @@ class NachweisListView(ChangelistView):
 class NachweisPrintView(BaseViewMixin, PermissionRequiredMixin, DetailView):
     model = _models.Nachweis
     template_name = "print.html"
-    permission_required = perms.get_perm("change", _models.Nachweis._meta)
+    permission_required = perms.get_perm("change", _models.Nachweis._meta)  # TODO: should be 'view' perm?
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

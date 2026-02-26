@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from datetime import date
+from pathlib import Path
 
 from django import forms
 from django.apps import apps
@@ -10,9 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
+from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils.formats import date_format
 from django.utils.html import format_html
@@ -26,6 +28,7 @@ from mizdb_tomselect.views import AutocompleteView as BaseAutocompleteView
 from mizdb_tomselect.views import PopupResponseMixin
 from mizdb_tomselect.widgets import MIZSelect
 
+from print.print import html_to_pdf
 from web import actions
 from web import forms as _forms
 from web import models as _models
@@ -581,6 +584,26 @@ def finish_nachweis_view(request):
     nachweis.fertig = nachweis.unterschrieben = True
     nachweis.save()
     return JsonResponse({"eingereicht_bei": nachweis.eingereicht_bei})
+
+
+def nachweis_download_view(request, pk):
+    # TODO: should this require POST + CSRF or some kind of verification?
+    if not perms.has_view_permission(request.user, _models.Nachweis._meta):
+        return HttpResponseForbidden()
+    nachweis = get_object_or_404(_models.Nachweis, pk=pk, user=request.user)
+
+    # Get the HTML from the rendered print page:
+    context = {"object": nachweis, "zfill_nummer": str(nachweis.nummer).zfill(3)}
+    html = get_template("print.html").render(context, request)
+
+    # Convert the HTML to a PDF and return it as a response:
+    output_dir = Path("C:\\Temp")
+    file_name = f"{nachweis.nummer}.pdf"
+    html_to_pdf(html, output=file_name, output_dir=output_dir)
+    pdf = output_dir / file_name
+    response = FileResponse(open(pdf, "rb"), as_attachment=True, filename=file_name)
+    # pdf.unlink()  # delete the temporary file
+    return response
 
 
 ################################################################################

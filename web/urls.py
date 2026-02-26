@@ -39,5 +39,6 @@ urlpatterns = [
     path("trash/empty/", views.empty_trash, name="empty_trash"),
     path("missing/", views.MissingView.as_view(), name="missing"),
     path("nachweis/finish/", views.finish_nachweis_view, name="finish_nachweis"),
+    path("nachweis/<int:pk>/download/", views.nachweis_download_view, name="nachweis_download"),
     path("", views.DashboardView.as_view(), name="home"),
 ]

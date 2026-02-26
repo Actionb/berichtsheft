@@ -22,6 +22,10 @@ def has_delete_permission(user: AbstractUser, opts: Options) -> bool:
     return user.has_perm(get_perm("delete", opts))
 
 
+def has_view_permission(user: AbstractUser, opts: Options) -> bool:
+    return user.has_perm(get_perm("view", opts))
+
+
 def add_azubi_permissions(user):
     """Give the user default 'Azubi' permissions to use the app."""
     user.groups.add(Group.objects.get(name=settings.AZUBI_GROUP_NAME))

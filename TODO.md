@@ -38,7 +38,7 @@
 - [x] support other Nachweis intervals besides weekly (daily, monthly, free)
 - [x] add a dashboard / start page
 - [ ] let user toggle between minimized (container-sized) or full (container-fluid) sized nachweis list overview
-- [ ] export Nachweis objects to PDF without the browser 
+- [x] export Nachweis objects to PDF without the browser 
 - [x] explain "list_display" und "list_display_callable" in ChangelistView doc string
 - [x] dashboard: notify user when Nachweise are missing (deduce from Nachweis interval given by user settings?)
 - [x] set ``related_name`` on user.nachweis_set relation

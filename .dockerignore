@@ -1,0 +1,9 @@
+# Exclude everything by default:
+*
+# Except for these:
+!bapp/
+!web/
+!manage.py
+!README.md
+!LICENSE
+!requirements.txt

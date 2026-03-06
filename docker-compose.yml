@@ -1,0 +1,28 @@
+name: bapp
+services:
+  bapp:
+    build: .
+    ports:
+      - "8001:8000"
+    container_name: bapp-web
+    networks:
+      - bapp
+    restart: unless-stopped
+    volumes:
+      - .:/bapp
+      - ./.db:/bapp/.db
+    command: python manage.py runserver 0.0.0.0:8000  # TODO: use mod_wsgi
+    # TODO: add healthcheck
+    # TODO: depends on gotenberg?
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: bapp-gotenberg
+    networks:
+      - bapp
+    restart: unless-stopped
+    environment:
+      - CHROMIUM_IGNORE_CERTIFICATE_ERRORS=true  # required to fetch the bootstrap files
+ 
+networks:
+  bapp:

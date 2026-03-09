@@ -8,3 +8,4 @@
 !LICENSE
 !requirements.txt
 !docker-entrypoint.sh
+!.secrets/

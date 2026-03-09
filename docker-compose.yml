@@ -12,8 +12,9 @@ services:
       - .:/bapp
       - ./.db:/bapp/.db
     command: python manage.py runserver 0.0.0.0:8000  # TODO: use mod_wsgi
-    # TODO: add healthcheck
     # TODO: depends on gotenberg?
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/bapp/"]
 
   gotenberg:
     image: gotenberg/gotenberg:8

@@ -11,10 +11,10 @@ services:
     volumes:
       - .:/bapp
       - ./.db:/bapp/.db
-    command: python manage.py runserver 0.0.0.0:8000  # TODO: use mod_wsgi
-    # TODO: depends on gotenberg?
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/bapp/"]
+    entrypoint: ["/bapp/docker-entrypoint.sh"]
+    command: ["/etc/bapp-server/apachectl", "start", "-DFOREGROUND"]
 
   gotenberg:
     image: gotenberg/gotenberg:8

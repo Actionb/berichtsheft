@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "web",
     "django_bootstrap5",
     "mizdb_tomselect",
+    "mod_wsgi.server",
 ]
 
 MIDDLEWARE = [

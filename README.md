@@ -16,7 +16,7 @@ Repository clonen:
 git clone https://github.com/Actionb/berichtsheft
 ```
 
-Dann Docker Container starten:
+Dann im Repository Ordner die Docker Container bauen und starten:
 
 ```sh
 docker compose up -d
@@ -26,6 +26,24 @@ Datenbankmigrationen ausführen:
 
 ```sh
 docker exec -it bapp-web python manage.py migrate
+```
+
+Schreibrechte für Datenbankdatei und Datenbankordner für Apache einrichten:
+
+```sh
+docker exec -i bapp-web chown -R www-data:www-data /bapp/db
+```
+
+Datenbank wiederherstellen (optional):
+
+```sh
+cat backup.json | docker exec -i bapp-web python manage.py loaddata --format=json -
+```
+
+Oder unter Windows:
+
+```sh
+type backup.json | docker exec -i bapp-web python manage.py loaddata --format=json -
 ```
 
 Die Anwendung sollte nun unter [http://127.0.0.1:8001/bapp/](http://127.0.0.1:8001/bapp/) laufen.

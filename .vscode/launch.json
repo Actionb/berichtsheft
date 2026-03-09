@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "manage.py",
             "console": "integratedTerminal",
-            "args": "runserver --noreload"
+            "args": "runserver --noreload 0.0.0.0:8000"
         }
     ]
 }

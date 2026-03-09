@@ -16,6 +16,11 @@ Repository clonen:
 git clone https://github.com/Actionb/berichtsheft
 ```
 
+Root CA Zertifikat kopieren:
+```sh
+mkdir .secrets; cp /pfad/zu/root/ca.crt .secrets/ca_certificates.crt
+```
+
 Dann im Repository Ordner die Docker Container bauen und starten:
 
 ```sh

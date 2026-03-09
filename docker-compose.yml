@@ -1,7 +1,11 @@
 name: bapp
 services:
   bapp:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - cert
     ports:
       - "8001:8000"
     container_name: bapp-web
@@ -29,3 +33,7 @@ networks:
 
 volumes:
   db:
+
+secrets:
+  cert:
+    file: .secrets/ca_certificates.crt

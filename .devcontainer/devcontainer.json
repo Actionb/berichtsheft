@@ -3,5 +3,21 @@
     "dockerComposeFile": ["../docker-compose.yml", "docker-compose.dev.yml"],
     "service": "bapp",
     "workspaceFolder": "/workspace",
-    "shutdownAction": "stopCompose"
+    "shutdownAction": "stopCompose",
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "charliermarsh.ruff",
+                "monosans.djlint",
+                "tamasfe.even-better-toml",
+                "mhutchie.git-graph",
+                "yzhang.markdown-all-in-one",
+                "ms-vscode.live-server",
+                "ms-python.debugpy"
+            ]
+        }
+    }
 }

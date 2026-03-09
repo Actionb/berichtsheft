@@ -2,6 +2,34 @@
 
 Auszubildende haben Nachweise oder Berichte zu führen, in welchen sie beschreiben, was sie in einem Zeitabschnitt gelernt haben. Diese kleine Anwendung soll Auszubildenden dabei helfen, diese Nachweise zu schreiben und zu organisieren.
 
+## Installation
+
+### Installation via Docker
+
+Voraussetzungen:
+- [Docker](https://docs.docker.com/compose/install/)
+- [Git](https://git-scm.com/install/)
+    
+Repository clonen:
+
+```sh
+git clone https://github.com/Actionb/berichtsheft
+```
+
+Dann Docker Container starten:
+
+```sh
+docker compose up -d
+```
+
+Datenbankmigrationen ausführen:
+
+```sh
+docker exec -it bapp-web python manage.py migrate
+```
+
+Die Anwendung sollte nun unter [http://127.0.0.1:8001/bapp/](http://127.0.0.1:8001/bapp/) laufen.
+
 ## Development
 
 ### Installation 

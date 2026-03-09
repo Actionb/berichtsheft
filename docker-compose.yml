@@ -9,8 +9,7 @@ services:
       - bapp
     restart: unless-stopped
     volumes:
-      - .:/bapp
-      - ./.db:/bapp/.db
+      - db:/bapp/db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/bapp/"]
     entrypoint: ["/bapp/docker-entrypoint.sh"]
@@ -27,3 +26,6 @@ services:
  
 networks:
   bapp:
+
+volumes:
+  db:

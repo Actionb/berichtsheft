@@ -412,7 +412,7 @@ class NachweisListView(ChangelistView):
     model = _models.Nachweis
     title = "Meine Nachweise"
     list_display = ["jahr", "woche", "zeitraum", "betrieb", "schule", "fertig", "eingereicht_bei", "unterschrieben"]
-    actions = [actions.NachweisPrintAction(), actions.FinishNachweisAction(), actions.DownloadNachweisAction()]
+    actions = [actions.FinishNachweisAction(), actions.DownloadNachweisAction()]
     mainclass = "container-fluid px-5"
     search_form_class = _forms.NachweisSearchForm
     template_name = "nachweis_list.html"

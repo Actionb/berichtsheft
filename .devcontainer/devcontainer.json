@@ -19,5 +19,6 @@
                 "ms-python.debugpy"
             ]
         }
-    }
+    },
+    "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh"
 }

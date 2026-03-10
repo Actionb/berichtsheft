@@ -15,8 +15,4 @@ RUN uv venv /opt/venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Temporarily mount the requirements:
-# https://docs.docker.com/build/building/best-practices/#add-or-copy
-RUN --mount=type=bind,source=../requirements.txt,target=/tmp/requirements.txt ["uv", "pip", "install", "--native-tls", "-r", "/tmp/requirements.txt"]
-
 WORKDIR /workspace

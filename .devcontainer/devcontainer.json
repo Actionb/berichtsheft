@@ -2,8 +2,9 @@
     "name": "bapp-devcontainer",
     "dockerComposeFile": ["../docker-compose.yml", "docker-compose.dev.yml"],
     "service": "bapp",
-    "workspaceFolder": "/workspace",
+    "workspaceFolder": "/home/vscode/workspace",
     "shutdownAction": "stopCompose",
+    "remoteUser": "vscode",
     
     "customizations": {
         "vscode": {
@@ -19,6 +20,11 @@
                 "ms-python.debugpy"
             ]
         }
+    },
+    
+    "features": {
+        "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
+        "ghcr.io/jsburckhardt/devcontainer-features/ruff:1": {}
     },
     "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh"
 }

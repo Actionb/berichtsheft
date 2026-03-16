@@ -4,6 +4,10 @@ services:
       context: .
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - .:/workspace:cached
+      - .:/home/vscode/workspace:cached
+      - venv:/home/vscode/workspace/.venv
     command: /bin/sh -c "while sleep 1000; do :; done"
-    entrypoint: /workspace/docker-entrypoint.sh
+    entrypoint: /home/vscode/workspace/docker-entrypoint.sh
+
+volumes:
+  venv:

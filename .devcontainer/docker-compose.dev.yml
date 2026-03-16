@@ -6,8 +6,8 @@ services:
     volumes:
       - .:/home/vscode/workspace:cached
       - venv:/home/vscode/workspace/.venv
-    command: /bin/sh -c "while sleep 1000; do :; done"
-    entrypoint: /home/vscode/workspace/docker-entrypoint.sh
+    entrypoint: []
+    command: sleep infinity
 
 volumes:
   venv:

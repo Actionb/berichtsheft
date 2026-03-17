@@ -6,14 +6,14 @@ echo "alias uv='uv --native-tls'" >> ~/.bashrc
 
 # Create virtual environment:
 echo "Creating virtual environment..."
-uv venv --clear ~/venv
-echo 'export VIRTUAL_ENV=/home/vscode/venv' >> ~/.bashrc
+uv venv --clear .venv
+echo 'export VIRTUAL_ENV=/home/vscode/workspace/.venv' >> ~/.bashrc
 echo 'export PATH=$VIRTUAL_ENV/bin:$PATH' >> ~/.bashrc
 
 # Install dependencies:
 echo "Installing dependencies..."
-uv --native-tls pip install -r ./requirements.txt --python ~/venv/bin/python
-uv --native-tls pip install --group dev --python ~/venv/bin/python
+uv --native-tls pip install --no-progress -r ./requirements.txt
+uv --native-tls pip install --no-progress --group dev
 
 # Source bashrc to apply changes:
 echo "Sourcing bashrc"

@@ -8,6 +8,8 @@ services:
         - cert
     image: bapp-web:latest
     container_name: bapp-web
+    ports:
+      - "8080:8000"
     networks:
       - bapp
     restart: unless-stopped

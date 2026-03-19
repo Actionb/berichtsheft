@@ -5,6 +5,8 @@ services:
       dockerfile: .devcontainer/Dockerfile
     image: bapp-dev:latest
     container_name: bapp-dev
+    ports:
+      - "8000:8000"
     volumes:
       - .:/home/vscode/workspace:cached
       - venv:/home/vscode/workspace/.venv

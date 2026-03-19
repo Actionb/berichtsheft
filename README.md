@@ -174,3 +174,24 @@ Tests mit coverage ausführen:
 ```shell
 uv run pytest --cov --cov-branch --cov-report=html
 ```
+
+### Poe the Poet
+
+Poe the Poet ist ein Task-Runner, der das Ausführen von häufig verwendeten oder langen Befehlen erleichtern soll. 
+
+Es stehen folgende Tasks zur Verfügung:
+
+| Task       | Beschreibung                                             |
+| ---------- | -------------------------------------------------------- |
+| server     | Django Development Server starten                        |
+| shell      | Interaktiven Interpreter/Django Shell starten            |
+| test       | pytest mit coverage und HTML report ausführen            |
+| qtest      | pytest ohne coverage ausführen (schneller)               |
+| ruff       | ruff linter und formatter ausführen und Probleme beheben |
+| ruff-check | ruff ausführen aber Probleme nicht direkt beheben        |
+
+Die Tasks können mit dem folgenden Befehl ausgeführt werden (hier Beispiel mit Task `server`):
+
+```sh
+poe server
+```

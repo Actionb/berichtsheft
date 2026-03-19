@@ -75,6 +75,7 @@ omit = [
     "web/migrations/*",
     "bapp/*",
     "manage.py",
+    "tests/*",
 ]
 
 [tool.djlint]

@@ -17,8 +17,13 @@
                 "mhutchie.git-graph",
                 "yzhang.markdown-all-in-one",
                 "ms-vscode.live-server",
-                "ms-python.debugpy"
-            ]
+                "ms-python.debugpy",
+                "batisteo.vscode-django"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/home/vscode/workspace/.venv/bin/python",
+                "python.terminal.activateEnvironment": true
+            }
         }
     },
     

@@ -299,6 +299,8 @@ class TestNachweisSearchForm:
     )
     def test_apply_filters(self, user, form_data, result):
         """Assert that the form filters the queryset as expected."""
+        # FIXME: this tests seems to be flaky:
+        # It occasionally fails for test cases kalenderwoche and text_search
         form = _forms.NachweisSearchForm(data=form_data, user=user)
         assert not form.errors
         assert list(form.apply_filters(_models.Nachweis.objects.all())) == [result]

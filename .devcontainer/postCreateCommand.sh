@@ -1,8 +1,12 @@
 #!/bin/sh
 
-# Always executed uv with --native-tls:
-echo "Updating uv to use --native-tls by default..."
-echo "alias uv='uv --native-tls'" >> ~/.bashrc
+# Set up some bash aliases:
+echo "Setting up bash aliases..."
+cat << EOF >> ~/.bash_aliases
+alias uv='uv --native-tls'
+alias uvr='uv run --native-tls'
+alias gra='git rebase --autosquash'
+EOF
 
 # Create virtual environment:
 echo "Creating virtual environment..."

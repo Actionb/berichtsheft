@@ -25,7 +25,6 @@ COPY --from=build /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /bapp
-# FIXME: this copies everything, ignoring .dockerignore?
 COPY . /bapp
 
 EXPOSE 8001

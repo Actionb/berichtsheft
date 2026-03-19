@@ -6,8 +6,7 @@ services:
       dockerfile: Dockerfile
       secrets:
         - cert
-    ports:
-      - "8000:8000"
+    image: bapp-web:latest
     container_name: bapp-web
     networks:
       - bapp

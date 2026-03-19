@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
+    image: bapp-dev:latest
     container_name: bapp-dev
     volumes:
       - .:/home/vscode/workspace:cached

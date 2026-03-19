@@ -8,4 +8,5 @@
 !LICENSE
 !pyproject.toml
 !docker-entrypoint.sh
+# FIXME: .secrets must NOT be included in the production image!
 !.secrets/

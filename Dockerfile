@@ -12,7 +12,8 @@ ENV VIRTUAL_ENV=/opt/venv
 
 # Temporarily mount the requirements:
 # https://docs.docker.com/build/building/best-practices/#add-or-copy
-RUN --mount=type=bind,source=requirements.txt,target=/tmp/requirements.txt ["uv", "pip", "install", "--native-tls", "-r", "/tmp/requirements.txt"]
+RUN --mount=type=bind,source=pyproject.toml,target=/tmp/pyproject.toml \
+    ["uv", "--native-tls", "pip", "install", "--no-cache-dir", "-r", "/tmp/pyproject.toml"]
 
 FROM python:3.13-slim-trixie AS final
 

@@ -6,7 +6,6 @@
 !manage.py
 !README.md
 !LICENSE
-!requirements.txt
 !pyproject.toml
 !docker-entrypoint.sh
 !.secrets/

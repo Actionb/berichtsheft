@@ -91,20 +91,26 @@ Dann mit `Ctrl+Shift+P` oder `F1` die VS Code Command Palette anzeigen lassen un
 
 #### Datenbank Migrationen ausführen
 
+Im Dev Container:
+
 ```sh
-python manage.py migrate
+uv run manage.py migrate
 ```
 
 #### Admin Superuser erstellen
 
+Im Dev Container:
+
 ```sh
-python manage.py createsuperuser
+uv run manage.py createsuperuser
 ```
 
 #### Development Server starten
 
+Im Dev Container:
+
 ```sh
-python manage.py runserver 0.0.0.0:8000
+uv run manage.py runserver 0.0.0.0:8000
 ```
 
 ### Installation (Windows)
@@ -113,6 +119,7 @@ python manage.py runserver 0.0.0.0:8000
 
 - [Git](https://git-scm.com/install/)
 - [Apache](https://httpd.apache.org/download.cgi)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2)
   
 #### Repository clonen
 
@@ -123,13 +130,7 @@ git clone https://github.com/Actionb/berichtsheft; cd berichtsheft
 #### Virtuelle Umgebung erzeugen
 
 ```sh
-python manage.py -m venv .venv
-```
-
-Umgebung aktivieren (Windows Powershell):
-
-```sh
-& .venv/Scripts/Activate.ps1
+uv venv .venv
 ```
 
 #### Abhängigkeiten installieren
@@ -137,7 +138,7 @@ Umgebung aktivieren (Windows Powershell):
 Die direkten Abhängigkeiten für das Projekt sind in `requirements.txt` festgehalten. Darüber hinaus werden für die Entwicklung weitere Abhängigkeiten benötigt, welche in der Datei `pyproject.toml` festgelegt sind.
 
 ```sh
-pip install -r requirements.txt; pip install --group dev
+uv sync
 ```
 
 #### Datenbank Verzeichnis erzeugen
@@ -151,19 +152,19 @@ mkdir db
 #### Datenbank Migrationen ausführen
 
 ```sh
-python manage.py migrate
+uv run manage.py migrate
 ```
 
 #### Admin Superuser erstellen
 
 ```sh
-python manage.py createsuperuser
+uv run manage.py createsuperuser
 ```
 
 #### Development Server starten
 
 ```sh
-python manage.py runserver
+uv run manage.py runserver
 ```
 
 ### Tests
@@ -171,5 +172,5 @@ python manage.py runserver
 Tests mit coverage ausführen:
 
 ```shell
-pytest --cov --cov-branch --cov-report=html
+uv run pytest --cov --cov-branch --cov-report=html
 ```

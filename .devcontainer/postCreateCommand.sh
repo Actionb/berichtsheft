@@ -12,8 +12,7 @@ echo 'export PATH=$VIRTUAL_ENV/bin:$PATH' >> ~/.bashrc
 
 # Install dependencies:
 echo "Installing dependencies..."
-uv --native-tls pip install --no-progress -r ./requirements.txt
-uv --native-tls pip install --no-progress --group dev
+uv --native-tls sync
 
 # Source bashrc to apply changes:
 echo "Sourcing bashrc"

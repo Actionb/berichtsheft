@@ -7,7 +7,7 @@ import pytest
 from django.contrib.auth import SESSION_KEY
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.urls import path, reverse
 
 from tests.model_factory import AbteilungFactory, NachweisFactory
@@ -47,6 +47,7 @@ urlpatterns = [
     path("trash/empty/", _views.empty_trash, name="empty_trash"),
     path("missing/", _views.MissingView.as_view(), name="missing"),
     path("nachweis/finish/", _views.finish_nachweis_view, name="finish_nachweis"),
+    path("nachweis/<int:pk>/download/", _views.nachweis_download_view, name="nachweis_download"),
     path("print_preview", _views.print_preview, name="print_preview"),
     path("", _views.DashboardView.as_view(), name="home"),
     # Templates require these for rendering:
@@ -1333,3 +1334,26 @@ class TestFinishNachweisView:
     def test_returns_404_when_object_does_not_exist(self, client, url):
         """Assert that the view returns a 404 error when the object does not exist."""
         assert client.post(url, data={"pk": 0}).status_code == 404
+
+
+class TestNachweisDownloadView:
+    @pytest.fixture
+    def obj(self, user):
+        return NachweisFactory(user=user)
+
+    @pytest.fixture
+    def download_url(self, obj):
+        return reverse("nachweis_download", kwargs={"pk": obj.pk})
+
+    @pytest.mark.parametrize("user_perms", [[("view", _models.Nachweis)]])
+    @pytest.mark.usefixtures("set_user_perms", "login_user")
+    def test(self, client, download_url):
+        """Assert that the view returns a FileResponse object."""
+        response = client.get(download_url)
+        assert response.status_code == 200
+        assert isinstance(response, FileResponse)
+
+    @pytest.mark.usefixtures("login_user")
+    def test_download_requires_permission(self, client, download_url):
+        """Assert that only users with 'view' permission can download."""
+        assert client.get(download_url).status_code == 403

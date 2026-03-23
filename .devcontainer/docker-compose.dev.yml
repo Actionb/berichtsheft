@@ -12,6 +12,9 @@ services:
       - venv:/home/vscode/workspace/.venv
     entrypoint: []
     command: sleep infinity
+    healthcheck:
+      disable: true
+
 
 volumes:
   venv:

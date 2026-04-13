@@ -43,7 +43,8 @@ def nachweis_to_pdf(
         messages.error(request, f"PDF Erzeugung fehlgeschlagen: {gotenberg_response.text}")
         return redirect(reverse(redirect_url))
     else:
-        return FileResponse(BytesIO(gotenberg_response.content), as_attachment=True, filename=f"{nachweis.nummer}.pdf")
+        filename = str(nachweis.nummer).zfill(3) + ".pdf"
+        return FileResponse(BytesIO(gotenberg_response.content), as_attachment=True, filename=filename)
 
 
 def _gotenberg_request(

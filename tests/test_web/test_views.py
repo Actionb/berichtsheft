@@ -1337,9 +1337,10 @@ class TestFinishNachweisView:
 
 
 class TestNachweisDownloadView:
+
     @pytest.fixture
     def obj(self, user):
-        return NachweisFactory(user=user)
+        return NachweisFactory(user=user, nummer=42)
 
     @pytest.fixture
     def download_url(self, obj):
@@ -1347,11 +1348,12 @@ class TestNachweisDownloadView:
 
     @pytest.mark.parametrize("user_perms", [[("view", _models.Nachweis)]])
     @pytest.mark.usefixtures("set_user_perms", "login_user")
-    def test(self, client, download_url):
+    def test(self, client, download_url, obj):
         """Assert that the view returns a FileResponse object."""
         response = client.get(download_url)
         assert response.status_code == 200
         assert isinstance(response, FileResponse)
+        assert response.filename == str(obj.nummer).zfill(3) + ".pdf"
 
     @pytest.mark.usefixtures("login_user")
     def test_download_requires_permission(self, client, download_url):

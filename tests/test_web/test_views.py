@@ -7,7 +7,8 @@ import pytest
 from django.contrib.auth import SESSION_KEY
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
-from django.http import FileResponse, HttpResponse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import FileResponse, Http404, HttpResponse
 from django.urls import path, reverse
 
 from tests.model_factory import AbteilungFactory, NachweisFactory
@@ -1337,7 +1338,6 @@ class TestFinishNachweisView:
 
 
 class TestNachweisDownloadView:
-
     @pytest.fixture
     def obj(self, user):
         return NachweisFactory(user=user, nummer=42)
@@ -1359,3 +1359,54 @@ class TestNachweisDownloadView:
     def test_download_requires_permission(self, client, download_url):
         """Assert that only users with 'view' permission can download."""
         assert client.get(download_url).status_code == 403
+
+
+class TestServeSignatureView:
+    @pytest.fixture
+    def signature(self):
+        """Return the signature image's bytes."""
+        return b"foo"
+
+    @pytest.fixture
+    def signature_image_file(self, signature):
+        """Create an file-like object to be stored on the profile."""
+        return SimpleUploadedFile("signatur.png", signature, content_type="image/png")
+
+    @pytest.fixture
+    def add_signature(self, user, signature_image_file):
+        """Add the signature image to the user's profile."""
+        user.profile.signature = signature_image_file
+
+    @pytest.mark.usefixtures("add_signature")
+    def test(self, rf, user, signature):
+        """
+        Assert that serve_signature returns a response with the user's
+        signature image file.
+        """
+        request = rf.get("")
+        request.user = user
+        response = _views.serve_signature(request, user.pk)
+        assert response.status_code == 200
+        assert response.headers["Content-Type"] == "image/png"
+        assert response.content == signature
+
+    @pytest.mark.usefixtures("add_signature")
+    def test_403(self, rf, user):
+        """
+        Assert that serve_signature returns a 403 response if the `user_id`
+        parameter does not match the user's ID.
+        """
+        request = rf.get("")
+        request.user = user
+        response = _views.serve_signature(request, "-1")
+        assert response.status_code == 403
+
+    def test_no_signature(self, rf, user):
+        """
+        Assert that serve_signature returns a 404 response if the user has not
+        uploaded a signature image.
+        """
+        request = rf.get("")
+        request.user = user
+        with pytest.raises(Http404):
+            _views.serve_signature(request, user.pk)

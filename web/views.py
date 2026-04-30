@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import linebreaksbr, truncatewords
 from django.urls import reverse, reverse_lazy
@@ -787,3 +787,23 @@ class UserProfileView(LoginRequiredMixin, BaseViewMixin, UpdateView):
         initial["first_name"] = self.request.user.first_name
         initial["last_name"] = self.request.user.last_name
         return initial
+
+
+@login_required
+def serve_signature(request, user_id):
+    """
+    Serve the signature image file of the request's user.
+
+    Returns a 403 response when the `user_id` extracted from the request URL
+    does not match the request's user ID.
+    Returns a 404 response if the user has not uploaded a signature.
+    """
+    if request.user.pk != user_id:
+        return HttpResponseForbidden()
+
+    signature = request.user.profile.signature
+    if not signature:
+        raise Http404("Keine Signatur hochgeladen.")
+
+    with signature.open("rb") as f:
+        return HttpResponse(f.read(), content_type="image/png")

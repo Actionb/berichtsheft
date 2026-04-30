@@ -4,9 +4,9 @@ from django.db import models
 from django_softdelete.models import SoftDeleteModel
 
 
-def user_directory_path(instance, filename):  # pragma: no cover
+def user_directory_path(instance, _filename):  # pragma: no cover
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return "user_{0}/{1}".format(instance.user.id, filename)
+    return "user_{0}/{1}".format(instance.user.id, "signatur.png")
 
 
 class User(AbstractUser):

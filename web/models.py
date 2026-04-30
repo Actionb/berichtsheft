@@ -55,6 +55,21 @@ class UserProfile(models.Model):
         verbose_name = "Benutzerprofil"
         verbose_name_plural = "Benutzerprofile"
 
+    @property
+    def signature_b64(self):  # pragma: no cover
+        """
+        Transform the signature into a Base64 string.
+
+        When embedded directly into the HTML, the image does not have to be
+        loaded from the storage URL.
+        """
+        if self.signature:
+            from web.utils.models import image_to_b64
+
+            return image_to_b64(self.signature)
+        else:
+            return ""
+
 
 class Nachweis(SoftDeleteModel):
     """Die verschiedenen Nachweise der Benutzer."""

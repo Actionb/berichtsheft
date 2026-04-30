@@ -65,7 +65,21 @@
                 <div class="row">
                     <div class="col border-end border-black">
                         <div class="row">
-                            <span style="height: 75px;"></span>
+                            {% if user.profile.apply_signature and user.profile.signature %}
+                                <img style="object-fit: contain;
+                                            margin-top: 10px"
+                                     height="40px"
+                                     width="auto"
+                                     src="data:image/png;base64,{{ user.profile.signature_b64 }}"
+                                     alt="Unterschrift"
+                                     class="mx-auto">
+                                <span style="height: 25px; font-size: 12px;" class="text-center">
+                                    {% if user.profile.signature_place %}{{ user.profile.signature_place }},{% endif %}
+                                    {% now "D, d.m.Y" %}
+                                </span>
+                            {% else %}
+                                <span style="height: 75px;"></span>
+                            {% endif %}
                         </div>
                         <div class="row border-top border-black">
                             <span class="text-center fw-bold fst-italic">Auszubildender</span>

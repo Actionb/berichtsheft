@@ -1,8 +1,10 @@
+import base64
 import calendar
 from datetime import date, timedelta
 from typing import Optional
 
 from django.apps import apps
+from django.db.models.fields.files import ImageFieldFile
 
 from web import models as _models
 from web.utils import date as date_utils
@@ -162,3 +164,9 @@ def initial_data_for_date(user: _models.User, d: date) -> dict:
             case _models.UserProfile.IntervalType.MONTHLY:
                 initial["nummer"] = date_utils.count_months(user_start_date, start) + 1
     return initial
+
+
+def image_to_b64(image_field_file: ImageFieldFile) -> str:  # pragma: no cover
+    """Transform the image of the given ImageField file into a Base64 string."""
+    with image_field_file.open("rb") as f:
+        return base64.b64encode(f.read()).decode("utf-8")

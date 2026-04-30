@@ -4,6 +4,11 @@ from django.db import models
 from django_softdelete.models import SoftDeleteModel
 
 
+def user_directory_path(instance, filename):  # pragma: no cover
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return "user_{0}/{1}".format(instance.user.id, filename)
+
+
 class User(AbstractUser):
     """
     User model for the application.
@@ -32,6 +37,18 @@ class UserProfile(models.Model):
         help_text="Interval, wie häufig Nachweise erstellt werden sollten",
         choices=IntervalType,
         default=IntervalType.OTHER,
+    )
+    apply_signature = models.BooleanField(
+        verbose_name="Automatisch Signatur einfügen",
+        default=False,
+        help_text="Ob die Signatur automatisch eingefügt werden soll (Vorschau/Download).",
+    )
+    signature = models.ImageField(verbose_name="Signatur", upload_to=user_directory_path, blank=True, null=True)
+    signature_place = models.CharField(
+        verbose_name="Ort (Unterschrift)",
+        blank=True,
+        help_text="Der bei der Unterschrift einzufügende Ort.",
+        max_length=100,
     )
 
     class Meta:

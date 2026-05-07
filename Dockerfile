@@ -29,5 +29,3 @@ COPY . /bapp
 
 RUN ["mkdir", "/bapp/media"]
 RUN ["chown", "-R", "www-data:www-data", "/bapp/media"]
-
-EXPOSE 8001

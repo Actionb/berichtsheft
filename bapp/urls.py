@@ -25,7 +25,7 @@ from web import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("bapp/", include("web.urls")),
-    path(f"{settings.MEDIA_URL}user_<int:user_id>/signatur.png", views.serve_signature, name="serve_signature"),
+    path(f"{settings.MEDIA_URL[1:]}user_<int:user_id>/signatur.png", views.serve_signature, name="serve_signature"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler403 = "web.views.handler403"

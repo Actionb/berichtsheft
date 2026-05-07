@@ -3,8 +3,12 @@ FROM python:3.13-slim-trixie AS build
 RUN ["apt", "update"]
 RUN ["apt", "install", "-y", "apache2-dev", "ca-certificates"]
 
-# Include the CA certificates in the build stage to ensure that pip can do its job:
-RUN --mount=type=secret,id=cert,target=/usr/local/share/ca-certificates/ca_certificates.crt update-ca-certificates
+# Include any provided CA certificate:
+ARG CA_CERT
+RUN if [ -n "$CA_CERT" ]; then \
+        echo "$CA_CERT" | base64 -d > /usr/local/share/ca-certificates/extra-ca.crt && \
+        update-ca-certificates; \
+    fi
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN uv venv /opt/venv

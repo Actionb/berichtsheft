@@ -13,12 +13,20 @@ Voraussetzungen:
 Repository clonen:
 
 ```sh
-git clone https://github.com/Actionb/berichtsheft
+git clone https://github.com/Actionb/berichtsheft && cd berichtsheft
 ```
 
-Root CA Zertifikat kopieren:
+Falls für HTTPS-Anfragen ein eigenes CA Zertifikat benötigt wird:
+
+Linux:
 ```sh
-mkdir .secrets; cp /pfad/zu/root/ca.crt .secrets/ca_certificates.crt
+echo "CA_CERT=$(cat /pfad/zur/ca.crt | base64 -w 0)" >> .env
+```
+
+Windows (PowerShell):
+```PowerShell
+$env:EXTRA_CA_B64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\pfad\zur\ca.crt")) -replace '\r?\n', ''
+$env:EXTRA_CA_B64 | Out-File -FilePath ".env" -Encoding UTF8 -Append
 ```
 
 Dann im Repository Ordner die Docker Container bauen und starten:
@@ -74,9 +82,17 @@ git clone https://github.com/Actionb/berichtsheft; cd berichtsheft
 
 #### CA Zertifikat bereitstellen:
 
-Root CA Zertifikat kopieren:
+Falls für HTTPS-Anfragen ein eigenes CA Zertifikat benötigt wird:
+
+Linux:
 ```sh
-mkdir .secrets; cp /pfad/zu/root/ca.crt .secrets/ca_certificates.crt
+echo "CA_CERT=$(cat /pfad/zur/ca.crt | base64 -w 0)" >> .env
+```
+
+Windows (PowerShell):
+```PowerShell
+$env:EXTRA_CA_B64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\pfad\zur\ca.crt")) -replace '\r?\n', ''
+$env:EXTRA_CA_B64 | Out-File -FilePath ".env" -Encoding UTF8 -Append
 ```
 
 #### Dev Container bauen

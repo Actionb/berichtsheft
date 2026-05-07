@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      secrets:
-        - cert
+      args:
+        CA_CERT: ${CA_CERT:-}
     image: bapp-web:latest
     container_name: bapp-web
     ports:
@@ -34,7 +34,3 @@ networks:
 
 volumes:
   db:
-
-secrets:
-  cert:
-    file: .secrets/ca_certificates.crt

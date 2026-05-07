@@ -6,8 +6,12 @@ RUN apt update && apt upgrade -y && apt install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Include the CA certificates:
-RUN --mount=type=secret,id=cert,target=/usr/local/share/ca-certificates/ca_certificates.crt update-ca-certificates
+# Include any provided CA certificate:
+ARG CA_CERT
+RUN if [ -n "$CA_CERT" ]; then \
+        echo "$CA_CERT" | base64 -d > /usr/local/share/ca-certificates/extra-ca.crt && \
+        update-ca-certificates; \
+    fi
 
 # Set the required permissions on the directory created by the named volume for 
 # the virtual environment:

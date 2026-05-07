@@ -107,3 +107,11 @@ shell = "uv run ruff check --fix .; uv run ruff format"
 [tool.poe.tasks.ruff-check]
 help = "Run ruff check"
 shell = "uv run ruff check ."
+
+[tool.poe.tasks.dump]
+help = "Dump the database to a JSON file"
+cmd = "uv run manage.py dumpdata --indent 2  -e sessions -e contenttypes"
+
+[tool.poe.tasks.load]
+help = "Load a fixture from standard input into the database"
+cmd = "uv run manage.py loaddata --format=json -"

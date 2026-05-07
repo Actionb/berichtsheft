@@ -189,6 +189,8 @@ Es stehen folgende Tasks zur Verfügung:
 | qtest      | pytest ohne coverage ausführen (schneller)               |
 | ruff       | ruff linter und formatter ausführen und Probleme beheben |
 | ruff-check | ruff ausführen aber Probleme nicht direkt beheben        |
+| dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`    |
+| load       | Datenbankdaten einlesen: `poe load < db_dump.json`       |
 
 Die Tasks können mit dem folgenden Befehl ausgeführt werden (hier Beispiel mit Task `server`):
 

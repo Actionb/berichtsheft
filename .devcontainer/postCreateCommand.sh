@@ -3,8 +3,8 @@
 # Set up some bash aliases:
 echo "Setting up bash aliases..."
 cat << EOF >> ~/.bash_aliases
-alias uv='uv --native-tls'
-alias uvr='uv run --native-tls'
+alias uv='uv --system-certs'
+alias uvr='uv run --system-certs'
 alias gra='git rebase --autosquash'
 EOF
 
@@ -16,7 +16,7 @@ echo 'export PATH=$VIRTUAL_ENV/bin:$PATH' >> ~/.bashrc
 
 # Install dependencies:
 echo "Installing dependencies..."
-uv --native-tls sync
+uv --system-certs sync
 
 # Source bashrc to apply changes:
 echo "Sourcing bashrc"

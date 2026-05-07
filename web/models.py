@@ -61,7 +61,8 @@ class UserProfile(models.Model):
         Transform the signature into a Base64 string.
 
         When embedded directly into the HTML, the image does not have to be
-        loaded from the storage URL.
+        loaded from the storage URL (this is useful when passing the HTML to 
+        the Gotenberg container for PDF conversion.)
         """
         if self.signature:
             from web.utils.models import image_to_b64

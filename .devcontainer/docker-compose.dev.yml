@@ -7,6 +7,8 @@ services:
     container_name: bapp-dev
     ports:
       - "8000:8000"
+    networks:
+      - bapp
     volumes:
       - .:/home/vscode/workspace:cached
       - venv:/home/vscode/workspace/.venv
@@ -15,6 +17,17 @@ services:
     healthcheck:
       disable: true
 
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: bapp-gotenberg
+    networks:
+      - bapp
+    restart: unless-stopped
+    environment:
+      - CHROMIUM_IGNORE_CERTIFICATE_ERRORS=true  # required to fetch the bootstrap files
+
+networks:
+  bapp:
 
 volumes:
   venv:

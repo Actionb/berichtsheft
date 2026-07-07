@@ -13,7 +13,7 @@ Voraussetzungen:
 Repository clonen:
 
 ```sh
-git clone https://github.com/Actionb/berichtsheft && cd berichtsheft
+git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
 ```
 
 Falls für HTTPS-Anfragen ein eigenes CA Zertifikat benötigt wird:
@@ -77,7 +77,7 @@ Installation mittels [VS Code Dev Container](https://code.visualstudio.com/docs/
 #### Repository clonen
 
 ```sh
-git clone https://github.com/Actionb/berichtsheft; cd berichtsheft
+git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
 ```
 
 #### CA Zertifikat bereitstellen:
@@ -140,7 +140,7 @@ uv run manage.py runserver 0.0.0.0:8000
 #### Repository clonen
 
 ```sh
-git clone https://github.com/Actionb/berichtsheft; cd berichtsheft
+git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
 ```
 
 #### Virtuelle Umgebung erzeugen

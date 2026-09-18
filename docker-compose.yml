@@ -7,7 +7,7 @@ services:
       args:
         CA_CERT: ${CA_CERT:-}
     image: bapp-web:latest
-    container_name: bapp-web
+    container_name: "bapp-web"
     ports:
       - "8080:8000"
     networks:

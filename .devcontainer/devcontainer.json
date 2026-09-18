@@ -1,7 +1,7 @@
 {
     "name": "bapp-devcontainer",
     "dockerComposeFile": ["../docker-compose.yml", "docker-compose.dev.yml"],
-    "service": "bapp",
+    "service": "bapp-dev",
     "workspaceFolder": "/home/vscode/workspace",
     "shutdownAction": "stopCompose",
     "remoteUser": "vscode",

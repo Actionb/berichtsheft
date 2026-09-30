@@ -61,7 +61,7 @@ class UserProfile(models.Model):
         Transform the signature into a Base64 string.
 
         When embedded directly into the HTML, the image does not have to be
-        loaded from the storage URL (this is useful when passing the HTML to 
+        loaded from the storage URL (this is useful when passing the HTML to
         the Gotenberg container for PDF conversion.)
         """
         if self.signature:
@@ -97,7 +97,7 @@ class Nachweis(SoftDeleteModel):
     class Meta:
         verbose_name = "Nachweis"
         verbose_name_plural = "Nachweise"
-        ordering = ["-ausbildungswoche"]
+        ordering = ["-ausbildungswoche"]  # TODO: order by -datum_start?
 
     def __str__(self):
         return f"Nachweis #{self.nummer}"

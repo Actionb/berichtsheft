@@ -65,7 +65,7 @@
                 <div class="row">
                     <div class="col border-end border-black">
                         <div class="row">
-                            {% if user.profile.apply_signature and user.profile.signature %}
+                            {% if user.profile.apply_signature and user.profile.signature and user.profile.signature_b64  %}
                                 <img style="object-fit: contain;
                                             margin-top: 10px"
                                      height="40px"

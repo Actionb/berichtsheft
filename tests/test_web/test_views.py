@@ -1,3 +1,6 @@
+import os
+import shutil
+import tempfile
 from collections import OrderedDict
 from datetime import date, datetime
 from unittest import mock
@@ -828,6 +831,16 @@ class TestNachweisListView:
 
 class TestUserProfileView:
     @pytest.fixture
+    def temp_media_root(self, settings):
+        temp_dir = tempfile.mkdtemp()
+        settings.MEDIA_ROOT = temp_dir
+
+        yield temp_dir
+
+        # Delete after tests:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+    @pytest.fixture
     def user(self, create_user):
         return create_user(first_name="Alice", last_name="Testman", add_profile=True)
 
@@ -851,6 +864,32 @@ class TestUserProfileView:
         view.request = rf.get("/")
         view.request.user = user
         assert view.get_object() == user.profile
+
+    @pytest.mark.usefixtures("login_user", "temp_media_root")
+    def test_get_object_signature_cleanup_when_missing(self, rf, user):
+        """
+        Assert that get_object resets the signature field if the image file is
+        missing.
+        """
+        # Add a signature:
+        signature = SimpleUploadedFile("signature.png", b"signature")
+        user.profile.signature = signature
+        user.profile.save()
+
+        # Delete the signature file:
+        file_path = user.profile.signature.path
+        if os.path.exists(file_path):
+            os.unlink(user.profile.signature.file.name)
+
+        # Call get_object:
+        view = _views.UserProfileView()
+        view.request = rf.get("/")
+        view.request.user = user
+        profile = view.get_object()
+
+        user.refresh_from_db()
+        assert not profile.signature
+        assert not user.profile.signature
 
     def test_get_initial(self, rf, user):
         """Assert that get_initial includes the user's first and last name."""

@@ -780,7 +780,14 @@ class UserProfileView(LoginRequiredMixin, BaseViewMixin, UpdateView):
     submit_button_text = "Aktualisieren"
 
     def get_object(self, queryset=None):
-        return _models.UserProfile.objects.get_or_create(user=self.request.user)[0]
+        profile = _models.UserProfile.objects.get_or_create(user=self.request.user)[0]
+        if profile.signature:
+            try:
+                profile.signature.open("rb")  # TODO: more efficient way to check if exists?
+            except FileNotFoundError:
+                # signature file does not exist - it may have been deleted server-side
+                profile.signature.delete(save=True)
+        return profile
 
     def get_initial(self):
         initial = super().get_initial()
@@ -802,8 +809,8 @@ def serve_signature(request, user_id):
         return HttpResponseForbidden()
 
     signature = request.user.profile.signature
-    if not signature:
+    try:
+        with signature.open("rb") as f:
+            return HttpResponse(f.read(), content_type="image/png")
+    except FileNotFoundError:
         raise Http404("Keine Signatur hochgeladen.")
-
-    with signature.open("rb") as f:
-        return HttpResponse(f.read(), content_type="image/png")

@@ -803,7 +803,8 @@ def serve_signature(request, user_id):
 
     Returns a 403 response when the `user_id` extracted from the request URL
     does not match the request's user ID.
-    Returns a 404 response if the user has not uploaded a signature.
+    Returns a 404 response if the user has not uploaded a signature or if the
+    signature file no longer exists.
     """
     if request.user.pk != user_id:
         return HttpResponseForbidden()
@@ -812,5 +813,5 @@ def serve_signature(request, user_id):
     try:
         with signature.open("rb") as f:
             return HttpResponse(f.read(), content_type="image/png")
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         raise Http404("Keine Signatur hochgeladen.")

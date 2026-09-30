@@ -206,6 +206,7 @@ class TestNachweisSearchForm:
             eingereicht_bei="Bob",
             datum_start=datum_start,
             kalenderwoche=99,
+            ausbildungswoche=42,
         )
 
     @pytest.fixture

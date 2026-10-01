@@ -66,6 +66,44 @@ urlpatterns = [
 pytestmark = pytest.mark.urls(__name__)
 
 
+@pytest.fixture
+def temp_media_root(settings):
+    temp_dir = tempfile.mkdtemp()
+    settings.MEDIA_ROOT = temp_dir
+
+    yield temp_dir
+
+    # Delete after tests:
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@pytest.fixture
+def signature():
+    """Return the signature image's bytes."""
+    return b"foo"
+
+
+@pytest.fixture
+def signature_image_file(signature):
+    """Create an file-like object to be stored on the profile."""
+    return SimpleUploadedFile("signatur.png", signature, content_type="image/png")
+
+
+@pytest.fixture
+def add_signature(user, signature_image_file, temp_media_root):
+    """Add the signature image to the user's profile."""
+    user.profile.signature = signature_image_file
+    user.save()
+
+
+@pytest.fixture
+def delete_signature_file(user):
+    """Delete the signature image file belonging to the user."""
+    file_path = user.profile.signature.path
+    if os.path.exists(file_path):
+        os.unlink(user.profile.signature.file.name)
+
+
 class TestAutocompleteView:
     @pytest.mark.django_db
     @pytest.mark.usefixtures("login_user", "user_perms", "set_user_perms")
@@ -831,16 +869,6 @@ class TestNachweisListView:
 
 class TestUserProfileView:
     @pytest.fixture
-    def temp_media_root(self, settings):
-        temp_dir = tempfile.mkdtemp()
-        settings.MEDIA_ROOT = temp_dir
-
-        yield temp_dir
-
-        # Delete after tests:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-
-    @pytest.fixture
     def user(self, create_user):
         return create_user(first_name="Alice", last_name="Testman", add_profile=True)
 
@@ -865,23 +893,12 @@ class TestUserProfileView:
         view.request.user = user
         assert view.get_object() == user.profile
 
-    @pytest.mark.usefixtures("login_user", "temp_media_root")
+    @pytest.mark.usefixtures("login_user", "temp_media_root", "add_signature", "delete_signature_file")
     def test_get_object_signature_cleanup_when_missing(self, rf, user):
         """
         Assert that get_object resets the signature field if the image file is
         missing.
         """
-        # Add a signature:
-        signature = SimpleUploadedFile("signature.png", b"signature")
-        user.profile.signature = signature
-        user.profile.save()
-
-        # Delete the signature file:
-        file_path = user.profile.signature.path
-        if os.path.exists(file_path):
-            os.unlink(user.profile.signature.file.name)
-
-        # Call get_object:
         view = _views.UserProfileView()
         view.request = rf.get("/")
         view.request.user = user
@@ -1401,21 +1418,6 @@ class TestNachweisDownloadView:
 
 
 class TestServeSignatureView:
-    @pytest.fixture
-    def signature(self):
-        """Return the signature image's bytes."""
-        return b"foo"
-
-    @pytest.fixture
-    def signature_image_file(self, signature):
-        """Create an file-like object to be stored on the profile."""
-        return SimpleUploadedFile("signatur.png", signature, content_type="image/png")
-
-    @pytest.fixture
-    def add_signature(self, user, signature_image_file):
-        """Add the signature image to the user's profile."""
-        user.profile.signature = signature_image_file
-
     @pytest.mark.usefixtures("add_signature")
     def test(self, rf, user, signature):
         """

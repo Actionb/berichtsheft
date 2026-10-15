@@ -47,7 +47,17 @@ Schreibrechte für Datenbankdatei und Datenbankordner für Apache einrichten:
 docker exec -i bapp-web chown -R www-data:www-data /bapp/db
 ```
 
-Datenbank wiederherstellen (optional):
+Die Anwendung sollte nun unter [http://127.0.0.1:8001/bapp/](http://127.0.0.1:8001/bapp/) laufen.
+
+### Backup & Wiederherstelung
+
+Datenbank-Dump erzeugen:
+
+```sh
+docker exec -t bapp-web python manage.py dumpdata --indent 2  -e sessions -e contenttypes > backup.json
+```
+
+Datenbank wiederherstellen:
 
 ```sh
 cat backup.json | docker exec -i bapp-web python manage.py loaddata --format=json -
@@ -58,8 +68,6 @@ Oder unter Windows:
 ```sh
 type backup.json | docker exec -i bapp-web python manage.py loaddata --format=json -
 ```
-
-Die Anwendung sollte nun unter [http://127.0.0.1:8001/bapp/](http://127.0.0.1:8001/bapp/) laufen.
 
 ## Development
 

@@ -49,7 +49,7 @@ docker exec -i bapp-web chown -R www-data:www-data /bapp/db
 
 Die Anwendung sollte nun unter [http://127.0.0.1:8080/bapp/](http://127.0.0.1:8080/bapp/) laufen.
 
-### Backup & Wiederherstelung
+### Backup & Wiederherstellung
 
 Datenbank-Dump erzeugen:
 

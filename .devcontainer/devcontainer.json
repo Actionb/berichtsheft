@@ -31,5 +31,8 @@
         "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
         "ghcr.io/jsburckhardt/devcontainer-features/ruff:1": {}
     },
-    "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh"
+    "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh",
+    "containerEnv": {
+        "UV_SYSTEM_CERTS": "true"
+    }
 }

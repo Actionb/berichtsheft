@@ -54,7 +54,7 @@ Die Anwendung sollte nun unter [http://127.0.0.1:8080/bapp/](http://127.0.0.1:80
 Datenbank-Dump erzeugen:
 
 ```sh
-docker exec -t bapp-web python manage.py dumpdata --indent 2  -e sessions -e contenttypes > backup.json
+docker exec -i bapp-web python manage.py dumpdata --indent 2  -e sessions -e contenttypes > backup.json
 ```
 
 Datenbank wiederherstellen:

@@ -215,6 +215,7 @@ Es stehen folgende Tasks zur Verfügung:
 | ruff-check | ruff ausführen aber Probleme nicht direkt beheben        |
 | dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`    |
 | load       | Datenbankdaten einlesen: `poe load < db_dump.json`       |
+| release    | Einen neuen Release erstellen: `poe release patch`       |
 
 Die Tasks können mit dem folgenden Befehl ausgeführt werden (hier Beispiel mit Task `server`):
 

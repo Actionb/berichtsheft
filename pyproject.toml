@@ -115,3 +115,22 @@ cmd = "uv run manage.py dumpdata --indent 2  -e sessions -e contenttypes"
 [tool.poe.tasks.load]
 help = "Load a fixture from standard input into the database"
 cmd = "uv run manage.py loaddata --format=json -"
+
+[tool.poe.tasks.release]
+help = "Create a new release version."
+shell = """
+set -e
+git diff --quiet && git diff --cached --quiet || { echo "Error: Working tree is not clean"; exit 1; }
+uv version --bump=${update_type} --no-sync
+version=$(uv version --short)
+git add pyproject.toml uv.lock
+git commit -m "Release v$version"
+git tag -a "v$version" -m "Release v$version"
+git push --follow-tags
+"""
+
+[[tool.poe.tasks.release.args]]
+name = "update_type"
+positional = true
+choices= ["patch", "minor", "major", "stable", "alpha", "beta", "rc", "post", "dev"]
+required = true

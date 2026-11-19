@@ -83,7 +83,6 @@ omit = [
 max_line_length=200
 ignore="H021,H030,H031"
 
-
 [tool.poe.tasks.server]
 help = "Run the Django development server"
 cmd = "uv run manage.py runserver 0.0.0.0:8000"
@@ -132,5 +131,6 @@ git push --follow-tags
 [[tool.poe.tasks.release.args]]
 name = "update_type"
 positional = true
-choices= ["patch", "minor", "major", "stable", "alpha", "beta", "rc", "post", "dev"]
+# See https://docs.astral.sh/uv/reference/cli/#uv-version for choices:
+choices = ["patch", "minor", "major", "stable", "alpha", "beta", "rc", "post", "dev"]
 required = true

@@ -205,17 +205,17 @@ uv run pytest --cov --cov-branch --cov-report=html
 
 Es stehen folgende Tasks zur Verfügung:
 
-| Task       | Beschreibung                                             |
-| ---------- | -------------------------------------------------------- |
-| server     | Django Development Server starten                        |
-| shell      | Interaktiven Interpreter/Django Shell starten            |
-| test       | pytest mit coverage und HTML report ausführen            |
-| qtest      | pytest ohne coverage ausführen (schneller)               |
-| ruff       | ruff linter und formatter ausführen und Probleme beheben |
-| ruff-check | ruff ausführen aber Probleme nicht direkt beheben        |
-| dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`    |
-| load       | Datenbankdaten einlesen: `poe load < db_dump.json`       |
-| release    | Einen neuen Release erstellen: `poe release patch`       |
+| Task       | Beschreibung                                                     |
+| ---------- | ---------------------------------------------------------------- |
+| server     | Django Development Server starten                                |
+| shell      | Interaktiven Interpreter/Django Shell starten                    |
+| test       | pytest mit coverage und HTML report ausführen                    |
+| qtest      | pytest ohne coverage ausführen (schneller)                       |
+| ruff       | ruff linter und formatter ausführen und Probleme beheben         |
+| ruff-check | ruff ausführen aber Probleme nicht direkt beheben                |
+| dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`            |
+| load       | Datenbankdaten einlesen: `poe load < db_dump.json`               |
+| release    | Einen neuen Release erstellen: `poe release patch|minor|major`   |
 
 Die Tasks können mit dem folgenden Befehl ausgeführt werden (hier Beispiel mit Task `server`):
 

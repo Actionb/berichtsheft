@@ -21,8 +21,8 @@ RUN --mount=type=bind,source=pyproject.toml,target=/tmp/pyproject.toml \
 
 FROM python:3.13-slim-trixie AS final
 
-LABEL org.opencontainers.image.source="https://github.com/Actionb/MIZDB"
-LABEL org.opencontainers.image.documentation="https://actionb.github.io/MIZDB/"
+LABEL org.opencontainers.image.source="https://github.com/Actionb/berichtsheft"
+LABEL org.opencontainers.image.documentation="https://github.com/Actionb/berichtsheft"
 
 RUN ["apt", "update"]
 RUN ["apt", "upgrade", "-y"]

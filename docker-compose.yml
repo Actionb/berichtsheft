@@ -1,7 +1,7 @@
 name: bapp
 services:
   bapp:
-    image: ghcr.io/actionb/berichtsheft:workflow
+    image: ghcr.io/actionb/berichtsheft:latest
     container_name: "bapp-web"
     ports:
       - "8080:8000"

@@ -20,52 +20,101 @@
         </a>
     </li>
 </ul>
-<div id="user-account" class="btn-group ms-auto" role="group">
-    <button type="button"
-            class="btn btn-outline-primary p-2 dropdown-toggle"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            title="Benutzerkonto">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="24"
-             height="24"
-             viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="1.5"
-             stroke-linecap="round"
-             stroke-linejoin="round"
-             class="feather feather-user">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span class="nav-text">{{ user.get_username }}</span>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-end">
-        <li>
-            <span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span>
-        </li>
-        <li>
-            <hr class="dropdown-divider">
-        </li>
-        <li>
-            <a class="dropdown-item" href="{% url 'user_profile' %}">Benutzerprofil</a>
-        </li>
-        {% if user.is_staff %}
+<ul class="navbar-nav ms-auto gap-2">
+    <li class="nav-item dropdown">
+        <button class="btn btn-outline-primary border-0 px-0 px-lg-2 py-2 dropdown-toggle d-flex align-items-center"
+                id="bd-theme"
+                type="button"
+                aria-expanded="true"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-label="Toggle theme (light)"
+                title="Farbmodus wählen">
+            <i class="bi bi-sun-fill theme-icon-active"></i>
+            <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="bd-theme-text"
+            data-bs-popper="static">
             <li>
-                <a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a>
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center active"
+                        data-bs-theme-value="light"
+                        aria-pressed="true">
+                    <i class="bi bi-sun-fill theme-icon"></i>
+                    Light
+                    <i class="bi bi-check2 d-none"></i>
+                </button>
             </li>
-        {% endif %}
-        {% if user.has_usable_password %}
             <li>
-                <a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a>
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center"
+                        data-bs-theme-value="dark"
+                        aria-pressed="false">
+                    <i class="bi bi-moon-stars-fill theme-icon"></i>
+                    Dark
+                    <i class="bi bi-check2 d-none"></i>
+                </button>
             </li>
-        {% endif %}
-        <li>
-            <form id="logout-form" method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button class="dropdown-item" type="submit">Abmelden</button>
-            </form>
-        </li>
-    </ul>
-</div>
+            <li>
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center"
+                        data-bs-theme-value="auto"
+                        aria-pressed="false">
+                    <i class="bi bi-circle-half theme-icon"></i>
+                    Auto
+                    <i class="bi bi-check2 d-none"></i>
+                </button>
+            </li>
+        </ul>
+    </li>
+    <li id="user-account" class="btn-group" role="group">
+        <button type="button"
+                class="btn btn-outline-primary p-2 dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                title="Benutzerkonto">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24"
+                 height="24"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.5"
+                 stroke-linecap="round"
+                 stroke-linejoin="round"
+                 class="feather feather-user">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="nav-text">{{ user.get_username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <span class="dropdown-item-text">Willkommen, <strong>{% firstof user.get_short_name user.get_username %}</strong></span>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'user_profile' %}">Benutzerprofil</a>
+            </li>
+            {% if user.is_staff %}
+                <li>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}">Admin Seite</a>
+                </li>
+            {% endif %}
+            {% if user.has_usable_password %}
+                <li>
+                    <a class="dropdown-item" href="{% url 'password_change' %}">Passwort ändern</a>
+                </li>
+            {% endif %}
+            <li>
+                <form id="logout-form" method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="dropdown-item" type="submit">Abmelden</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+</ul>

@@ -148,8 +148,8 @@ def reload_user(django_user_model):
     return inner
 
 
-@pytest.fixture(params=[_models.Nachweis])
-def nachweis_model(request):
+@pytest.fixture(params=[_models.Nachweis, _models.Abteilung])
+def nachweis_models(request):
     """The set of models required to manage work reports (Nachweise)."""
     return request.param
 
@@ -161,7 +161,7 @@ def nachweis_actions(request):
 
 
 @pytest.fixture
-def nachweis_permission(nachweis_model, nachweis_actions):
+def nachweis_permission(nachweis_models, nachweis_actions):
     """
     The set of permissions that a user requires to effectively manage work
     reports (Nachweise).
@@ -172,7 +172,7 @@ def nachweis_permission(nachweis_model, nachweis_actions):
         def test_permissions(nachweis_permission, user):
             assert user.has_perm(nachweis_permission)
     """
-    opts = nachweis_model._meta
+    opts = nachweis_models._meta
     return f"{opts.app_label}.{get_permission_codename(nachweis_actions, opts)}"
 
 

@@ -136,6 +136,7 @@ AZUBI_GROUP_NAME = "Azubi"
 # perform on that model.
 AZUBI_PERMISSIONS = {
     "Nachweis": ["add", "change", "delete", "view"],
+    "Abteilung": ["add", "change", "delete", "view"],
 }
 
 AUTH_USER_MODEL = "web.User"

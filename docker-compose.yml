@@ -1,12 +1,7 @@
 name: bapp
 services:
   bapp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        CA_CERT: ${CA_CERT:-}
-    image: bapp-web:latest
+    image: ghcr.io/actionb/berichtsheft:latest
     container_name: "bapp-web"
     ports:
       - "8080:8000"

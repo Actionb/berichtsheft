@@ -1,6 +1,6 @@
 [project]
 name = "bApp"
-version = "0.1.0"
+version = "0.1.1"
 readme = "README.md"
 authors = [
     {name = "Philip Becker", email = "yummytea1@gmail.com"},
@@ -83,7 +83,6 @@ omit = [
 max_line_length=200
 ignore="H021,H030,H031"
 
-
 [tool.poe.tasks.server]
 help = "Run the Django development server"
 cmd = "uv run manage.py runserver 0.0.0.0:8000"
@@ -115,3 +114,23 @@ cmd = "uv run manage.py dumpdata --indent 2  -e sessions -e contenttypes"
 [tool.poe.tasks.load]
 help = "Load a fixture from standard input into the database"
 cmd = "uv run manage.py loaddata --format=json -"
+
+[tool.poe.tasks.release]
+help = "Create a new release version."
+shell = """
+set -e
+git diff --quiet && git diff --cached --quiet || { echo "Error: Working tree is not clean"; exit 1; }
+uv version --bump=${update_type} --no-sync
+version=$(uv version --short)
+git add pyproject.toml uv.lock
+git commit -m "Release v$version"
+git tag -a "v$version" -m "Release v$version"
+git push --follow-tags
+"""
+
+[[tool.poe.tasks.release.args]]
+name = "update_type"
+positional = true
+# See https://docs.astral.sh/uv/reference/cli/#uv-version for choices:
+choices = ["patch", "minor", "major", "stable", "alpha", "beta", "rc", "post", "dev"]
+required = true

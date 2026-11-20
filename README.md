@@ -2,6 +2,19 @@
 
 Auszubildende haben Nachweise oder Berichte zu führen, in welchen sie beschreiben, was sie in einem Zeitabschnitt gelernt haben. Diese kleine Anwendung soll Auszubildenden dabei helfen, diese Nachweise zu schreiben und zu organisieren.
 
+## Inhalt
+
+<!-- TOC -->
+- [Installation](#Installation)
+    - [Docker](#installation-via-docker)
+    - [Backup & Wiederherstellung](#backup--wiederherstellung)
+- [Development](#development)
+    - [Dev-Container](#dev-container-bauen)
+    - [Windows](#installation-windows)
+    - [Tests](#tests)
+    - [Poe the Poet](#poe-the-poet)
+<!-- TOC -->
+
 ## Installation
 
 ### Installation via Docker
@@ -13,23 +26,10 @@ Voraussetzungen:
 Repository clonen:
 
 ```sh
-git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
+git clone https://github.com/Actionb/berichtsheft.git && cd berichtsheft
 ```
 
-Falls für HTTPS-Anfragen ein eigenes CA Zertifikat benötigt wird:
-
-Linux:
-```sh
-echo "CA_CERT=$(cat /pfad/zur/ca.crt | base64 -w 0)" >> .env
-```
-
-Windows (PowerShell):
-```PowerShell
-$env:EXTRA_CA_B64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\pfad\zur\ca.crt")) -replace '\r?\n', ''
-$env:EXTRA_CA_B64 | Out-File -FilePath ".env" -Encoding UTF8 -Append
-```
-
-Dann im Repository Ordner die Docker Container bauen und starten:
+Dann im Repository Ordner die Docker Container starten:
 
 ```sh
 docker compose up -d
@@ -85,7 +85,7 @@ Installation mittels [VS Code Dev Container](https://code.visualstudio.com/docs/
 #### Repository clonen
 
 ```sh
-git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
+git clone https://github.com/Actionb/berichtsheft.git && cd berichtsheft
 ```
 
 #### CA Zertifikat bereitstellen:
@@ -148,7 +148,7 @@ uv run manage.py runserver 0.0.0.0:8000
 #### Repository clonen
 
 ```sh
-git clone https://gitlab.kreis-unna.int/philip.becker/berichtsheft.git && cd berichtsheft
+git clone https://github.com/Actionb/berichtsheft.git && cd berichtsheft
 ```
 
 #### Virtuelle Umgebung erzeugen
@@ -201,20 +201,21 @@ uv run pytest --cov --cov-branch --cov-report=html
 
 ### Poe the Poet
 
-Poe the Poet ist ein Task-Runner, der das Ausführen von häufig verwendeten oder langen Befehlen erleichtern soll. 
+[Poe the Poet](https://poethepoet.natn.io/index.html) ist ein Task-Runner, der das Ausführen von häufig verwendeten oder langen Befehlen erleichtern soll. 
 
 Es stehen folgende Tasks zur Verfügung:
 
-| Task       | Beschreibung                                             |
-| ---------- | -------------------------------------------------------- |
-| server     | Django Development Server starten                        |
-| shell      | Interaktiven Interpreter/Django Shell starten            |
-| test       | pytest mit coverage und HTML report ausführen            |
-| qtest      | pytest ohne coverage ausführen (schneller)               |
-| ruff       | ruff linter und formatter ausführen und Probleme beheben |
-| ruff-check | ruff ausführen aber Probleme nicht direkt beheben        |
-| dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`    |
-| load       | Datenbankdaten einlesen: `poe load < db_dump.json`       |
+| Task       | Beschreibung                                                     |
+| ---------- | ---------------------------------------------------------------- |
+| server     | Django Development Server starten                                |
+| shell      | Interaktiven Interpreter/Django Shell starten                    |
+| test       | pytest mit coverage und HTML report ausführen                    |
+| qtest      | pytest ohne coverage ausführen (schneller)                       |
+| ruff       | ruff linter und formatter ausführen und Probleme beheben         |
+| ruff-check | ruff ausführen aber Probleme nicht direkt beheben                |
+| dump       | Datenbankdaten exportieren: `poe dump > db_dump.json`            |
+| load       | Datenbankdaten einlesen: `poe load < db_dump.json`               |
+| release    | Einen neuen Release erstellen: `poe release patch|minor|major`   |
 
 Die Tasks können mit dem folgenden Befehl ausgeführt werden (hier Beispiel mit Task `server`):
 
